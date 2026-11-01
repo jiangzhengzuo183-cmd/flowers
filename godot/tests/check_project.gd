@@ -60,6 +60,8 @@ func _run() -> void:
 	maze_scene.set_soft_palette(false)
 	check(generated.wall_material.albedo_color == original_wall_color, "必须能返回原始灰盒配色")
 	var camera: Node3D = maze_scene.get_node("%CameraRig")
+	var viewing_direction: Vector3 = (camera.camera.global_position - camera.to_global(camera.center)).normalized().abs()
+	check(viewing_direction.is_equal_approx(Vector3.ONE.normalized()), "等距初始视角的三个世界轴必须均匀缩短")
 	var wheel := InputEventMouseButton.new()
 	wheel.pressed = true
 	wheel.button_index = MOUSE_BUTTON_WHEEL_UP
@@ -69,9 +71,14 @@ func _run() -> void:
 	drag.button_mask = MOUSE_BUTTON_MASK_LEFT
 	drag.relative = Vector2(50, 10)
 	camera.handle_input(drag)
-	check(not is_equal_approx(camera.yaw, 0.7), "拖动必须能旋转")
+	check(not is_equal_approx(camera.yaw, PI / 4.0), "拖动必须能旋转")
+	var release := InputEventMouseButton.new()
+	release.button_index = MOUSE_BUTTON_LEFT
+	release.pressed = false
+	camera.handle_input(release)
+	check(is_zero_approx(fposmod(camera.yaw - PI / 4.0, PI / 2.0)), "松开鼠标后必须回到对称等距方向")
 	camera.reset_view()
-	check(is_equal_approx(camera.zoom, 1) and is_equal_approx(camera.yaw, 0.7), "镜头必须能重置")
+	check(is_equal_approx(camera.zoom, 1) and is_equal_approx(camera.yaw, PI / 4.0), "镜头必须能重置")
 	for i in range(3):
 		game.show_scene("story")
 		await process_frame

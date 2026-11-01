@@ -112,7 +112,7 @@ far = 500.0
 [node name="Legend" type="Label" parent="."]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "● 橙色入口    ● 粉色出口    ● 青色检查点     /     左键旋转 · 滚轮缩放 · 右键平移"
+text = "● 橙色入口    ● 粉色出口    ● 青色检查点     /     左键旋转，松开对齐 · 滚轮缩放 · 右键平移"
 
 [node name="Status" type="Label" parent="."]
 unique_name_in_owner = true
