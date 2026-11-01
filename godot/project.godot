@@ -1,0 +1,27 @@
+; Open this file with Godot 4.7.2 or newer Godot 4.x.
+config_version=5
+
+[application]
+config/name="献给阿尔吉侬的花束"
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/icon="res://assets/icon.svg"
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=900
+window/size/window_width_override=1280
+window/size/window_height_override=900
+window/size/min_width=720
+window/size/min_height=600
+window/stretch/mode="canvas_items"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.953, 0.941, 0.91, 1)
+textures/default_filters/use_nearest_mipmap_filter=false
+
+[debug]
+file_logging/enable_file_logging=false
+file_logging/enable_file_logging.pc=false

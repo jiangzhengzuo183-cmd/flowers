@@ -10,3 +10,7 @@ dist/
 .verification/
 .DS_Store
 Thumbs.db
+godot/.godot/
+godot/exports/*
+!godot/exports/.gdignore
+godot/export_credentials.cfg

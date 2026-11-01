@@ -1,0 +1,101 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/story/story_scene.gd" id="1_story"]
+[ext_resource type="Texture2D" path="res://assets/notebook.svg" id="2_art"]
+
+[node name="StoryScene" type="HBoxContainer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/separation = 48
+script = ExtResource("1_story")
+
+[node name="Introduction" type="VBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.9
+alignment = 1
+theme_override_constants/separation = 24
+
+[node name="Chapter" type="Label" parent="Introduction"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.57, 0.42, 1)
+theme_override_font_sizes/font_size = 13
+text = "PROLOGUE / 序章"
+
+[node name="Heading" type="Label" parent="Introduction"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 42
+text = "每一条路，\n都通向一次相遇。"
+autowrap_mode = 3
+
+[node name="Description" type="Label" parent="Introduction"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.56, 0.44, 1)
+theme_override_font_sizes/font_size = 17
+text = "翻开笔记，走进迷宫。\n在故事与探索之间，\n留下属于你的进步报告。"
+autowrap_mode = 3
+
+[node name="Note" type="Label" parent="Introduction"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "01 / 实验开始之前"
+
+[node name="StoryContent" type="VBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.1
+alignment = 1
+
+[node name="Notebook" type="TextureRect" parent="StoryContent"]
+custom_minimum_size = Vector2(0, 260)
+layout_mode = 2
+texture = ExtResource("2_art")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DialoguePanel" type="PanelContainer" parent="StoryContent"]
+layout_mode = 2
+
+[node name="Dialogue" type="VBoxContainer" parent="StoryContent/DialoguePanel"]
+layout_mode = 2
+
+[node name="Header" type="HBoxContainer" parent="StoryContent/DialoguePanel/Dialogue"]
+layout_mode = 2
+
+[node name="Speaker" type="Label" parent="StoryContent/DialoguePanel/Dialogue/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "旁白"
+
+[node name="Progress" type="Label" parent="StoryContent/DialoguePanel/Dialogue/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+
+[node name="DialogueText" type="Label" parent="StoryContent/DialoguePanel/Dialogue"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 125)
+layout_mode = 2
+theme_override_constants/line_spacing = 8
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="Actions" type="HBoxContainer" parent="StoryContent/DialoguePanel/Dialogue"]
+layout_mode = 2
+
+[node name="RestartButton" type="Button" parent="StoryContent/DialoguePanel/Dialogue/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "重新阅读"
+
+[node name="Spacer" type="Control" parent="StoryContent/DialoguePanel/Dialogue/Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NextButton" type="Button" parent="StoryContent/DialoguePanel/Dialogue/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "继续阅读 ↗"
