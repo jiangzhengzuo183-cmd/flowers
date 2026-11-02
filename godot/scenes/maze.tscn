@@ -149,3 +149,8 @@ text = "全图查看"
 unique_name_in_owner = true
 layout_mode = 2
 text = "回到入口"
+
+[node name="TopView" type="Button" parent="WalkControls"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "俯视全貌"

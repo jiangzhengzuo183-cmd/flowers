@@ -28,6 +28,7 @@ func _ready() -> void:
 	%ResetCamera.pressed.connect(_reset_camera)
 	%WalkButton.pressed.connect(func(): set_walk_mode(not walk_mode))
 	%RestartWalk.pressed.connect(reset_walk)
+	%TopView.pressed.connect(show_top_view)
 	%PaletteButton.toggled.connect(set_soft_palette)
 	%RouteA.text = "路线 A · %d 步" % int(maze.routes.A.moveCount)
 	%RouteB.text = "路线 B · %d 步" % int(maze.routes.B.moveCount)
@@ -54,8 +55,15 @@ func reset_walk() -> void:
 	%FollowRig.reset_view()
 	get_viewport().gui_release_focus()
 
+func show_top_view() -> void:
+	set_walk_mode(false)
+	%CameraRig.show_top_view()
+	%Legend.text = "俯视全貌 · 鼠标拖动平移 · 滚轮自由缩放 · 点击“亲自走迷宫”返回行走"
+
 func set_walk_mode(enabled: bool) -> void:
 	walk_mode = enabled
+	if enabled:
+		%FollowRig.reset_view()
 	%Player.controls_enabled = enabled
 	%Player.visible = enabled
 	%FollowRig.enabled = enabled
@@ -64,7 +72,7 @@ func set_walk_mode(enabled: bool) -> void:
 	%GeneratedMaze.set_walk_cutaway(enabled)
 	%WalkButton.text = "全图查看" if enabled else "亲自走迷宫"
 	%RestartWalk.visible = enabled
-	%Legend.text = "WASD / 方向键移动 · 鼠标拖动观察 · 滚轮缩放 · 点击迷宫区域后操作" if enabled else "左键旋转，松开对齐 · 滚轮缩放 · 右键平移"
+	%Legend.text = "WASD / 方向键移动 · 拖动观察 · 滚轮可拉远看全图 · 俯视全貌可一键查看" if enabled else "左键旋转，松开对齐 · 滚轮缩放 · 右键平移"
 	%Status.text = "绿色临时人物可步行；行走模式采用矮墙显示，原地图与墙体碰撞保持不变。" if enabled else "全图查看模式；点击“亲自走迷宫”进入步行体验。"
 	get_viewport().gui_release_focus()
 

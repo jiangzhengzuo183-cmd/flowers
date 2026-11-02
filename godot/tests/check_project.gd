@@ -106,6 +106,23 @@ func _run() -> void:
 	check(is_zero_approx(fposmod(camera.yaw - PI / 4.0, PI / 2.0)), "松开鼠标后必须回到对称等距方向")
 	camera.reset_view()
 	check(is_equal_approx(camera.zoom, 1) and is_equal_approx(camera.yaw, PI / 4.0), "镜头必须能重置")
+	maze_scene.show_top_view()
+	await process_frame
+	check(camera.top_down and not maze_scene.walk_mode, "俯视全貌必须停止步行并切换正交镜头")
+	var bounds: Rect2 = camera.camera.get_viewport().get_visible_rect()
+	for corner: Vector3 in [Vector3.ZERO, Vector3(45.6, 0, 0), Vector3(0, 0, 45.6), Vector3(45.6, 0, 45.6)]:
+		check(bounds.has_point(camera.camera.unproject_position(corner)), "俯视全貌必须包含地图四角")
+	maze_scene.set_walk_mode(true)
+	var follow: Node3D = maze_scene.get_node("%FollowRig")
+	var zoom_out := InputEventMouseButton.new()
+	zoom_out.button_index = MOUSE_BUTTON_WHEEL_DOWN
+	zoom_out.pressed = true
+	for tick in range(40):
+		follow.handle_input(zoom_out)
+	check(is_equal_approx(follow.distance, 150.0), "跟随镜头应能拉远至地图尺度")
+	maze_scene.show_top_view()
+	maze_scene.set_walk_mode(true)
+	check(is_equal_approx(follow.distance, 6.0), "重置必须恢复适合步行的距离")
 	for i in range(3):
 		game.show_scene("story")
 		await process_frame
