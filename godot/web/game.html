@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f0e8">
+  <title>$GODOT_PROJECT_NAME</title>
+  $GODOT_HEAD_INCLUDE
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #f3f0e8; color: #303b32; }
+    body { font-family: 'Microsoft YaHei', 'Noto Sans SC', sans-serif; }
+    #canvas { display: block; width: 100%; height: 100%; outline: none; }
+    #status { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 32px; background: #f3f0e8; text-align: center; }
+    .loading-card { width: min(440px, 100%); }
+    .flower { width: 64px; height: 64px; margin-bottom: 28px; }
+    .eyebrow { font-size: 10px; letter-spacing: 3px; color: #899276; margin: 0 0 20px; }
+    h1 { font-size: clamp(21px, 4.5vw, 29px); font-weight: 400; letter-spacing: 3px; margin: 0 0 30px; }
+    #status-label { min-height: 22px; color: #7a866b; font-size: 13px; line-height: 1.8; margin-bottom: 22px; }
+    progress { appearance: none; width: 100%; height: 4px; overflow: hidden; border: none; border-radius: 4px; background: #dfe2d5; color: #83966c; }
+    progress::-webkit-progress-bar { background: #dfe2d5; }
+    progress::-webkit-progress-value { background: #83966c; }
+    progress::-moz-progress-bar { background: #83966c; }
+    #status-percent { font-size: 11px; color: #969e8b; min-height: 20px; margin-top: 12px; }
+    .caption { color: #a1a693; font-size: 11px; letter-spacing: 1px; margin-top: 48px; }
+    #retry { border: 1px solid #566b4d; background: #566b4d; color: #f3f0e8; padding: 10px 24px; border-radius: 3px; margin-top: 16px; font: inherit; cursor: pointer; }
+    #retry:focus-visible { outline: 3px solid #bb986e; outline-offset: 4px; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <canvas id="canvas" aria-label="献给阿尔吉侬的花束互动叙事游戏">浏览器需要支持画布才能运行游戏。</canvas>
+  <div id="status" role="status" aria-live="polite">
+    <div class="loading-card">
+      <svg class="flower" aria-hidden="true" viewBox="0 0 64 64"><g fill="#809366"><ellipse cx="32" cy="19" rx="7" ry="13"/><ellipse cx="32" cy="45" rx="7" ry="13"/><ellipse cx="19" cy="32" rx="13" ry="7"/><ellipse cx="45" cy="32" rx="13" ry="7"/></g><circle cx="32" cy="32" r="7" fill="#c7b686"/></svg>
+      <p class="eyebrow">FLOWERS FOR ALGERNON</p>
+      <h1>献给阿尔吉侬的花束</h1>
+      <p id="status-label">正在翻开第一份进步报告……</p>
+      <progress id="status-progress" aria-label="游戏资源加载进度"></progress>
+      <p id="status-percent">准备中</p>
+      <button id="retry" hidden>重新加载</button>
+      <p class="caption">一段关于成长、记忆与陪伴的旅程</p>
+    </div>
+  </div>
+  <noscript>请启用 JavaScript 后重新打开游戏。</noscript>
+  <script src="$GODOT_URL"></script>
+  <script>
+    const GODOT_CONFIG = $GODOT_CONFIG;
+    (function () {
+      const status = document.getElementById('status');
+      const label = document.getElementById('status-label');
+      const progress = document.getElementById('status-progress');
+      const percent = document.getElementById('status-percent');
+      const retry = document.getElementById('retry');
+      retry.addEventListener('click', () => location.reload());
+      function fail(error) {
+        console.error(error);
+        status.setAttribute('role', 'alert');
+        label.textContent = '暂时无法打开游戏，请检查网络，并使用支持 WebGL 2 的浏览器重试。';
+        progress.hidden = true;
+        percent.textContent = '';
+        retry.hidden = false;
+      }
+      if (typeof Engine === 'undefined') { fail(new Error('Engine script download failed')); return; }
+      const missing = Engine.getMissingFeatures({ threads: false });
+      if (missing.length) { fail(new Error(missing.join(', '))); return; }
+      const engine = new Engine(GODOT_CONFIG);
+      engine.startGame({
+        onProgress(current, total) {
+          if (current > 0 && total > 0) {
+            progress.max = total;
+            progress.value = current;
+            const value = Math.min(100, Math.floor(current * 100 / total));
+            percent.textContent = value + '%';
+            label.textContent = value === 100 ? '资源已下载，正在准备故事……' : '正在翻开第一份进步报告……';
+          } else {
+            progress.removeAttribute('value');
+            percent.textContent = '准备中';
+          }
+        },
+      }).then(() => status.remove(), fail);
+    }());
+  </script>
+</body>
+</html>

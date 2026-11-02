@@ -1,0 +1,85 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="Theme" path="res://ui/game_theme.tres" id="2_theme"]
+
+[node name="Game" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_main")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.953, 0.941, 0.91, 1)
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 44
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 44
+theme_override_constants/margin_bottom = 20
+
+[node name="Layout" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+
+[node name="Header" type="HBoxContainer" parent="Margin/Layout"]
+layout_mode = 2
+
+[node name="Brand" type="VBoxContainer" parent="Margin/Layout/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="Margin/Layout/Header/Brand"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "献给阿尔吉侬的花束"
+
+[node name="Subtitle" type="Label" parent="Margin/Layout/Header/Brand"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.57, 0.42, 1)
+theme_override_font_sizes/font_size = 11
+text = "FLOWERS FOR ALGERNON / INTERACTIVE STORY"
+
+[node name="StoryButton" type="Button" parent="Margin/Layout/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+toggle_mode = true
+text = "01 / 故事"
+
+[node name="MazeButton" type="Button" parent="Margin/Layout/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+toggle_mode = true
+text = "02 / 迷宫"
+
+[node name="Separator" type="HSeparator" parent="Margin/Layout"]
+layout_mode = 2
+
+[node name="SceneHost" type="Control" parent="Margin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="FooterSeparator" type="HSeparator" parent="Margin/Layout"]
+layout_mode = 2
+
+[node name="Footer" type="Label" parent="Margin/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.59, 0.5, 1)
+theme_override_font_sizes/font_size = 12
+text = "一段关于成长、记忆与陪伴的旅程                                         Godot · 网页开发原型"

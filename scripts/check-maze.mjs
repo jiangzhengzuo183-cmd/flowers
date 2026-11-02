@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { validateMaze, countReachableCells } from '../src/maze/validateMaze.ts';
+
+const maze = JSON.parse(readFileSync(new URL('../src/maze/data/maze_01.json', import.meta.url), 'utf8'));
+validateMaze(maze);
+const reachable = countReachableCells(maze);
+assert.equal(reachable, maze.grid.rows * maze.grid.cols, '所有格子应可从入口到达');
+const walls = [...maze.grid.verticalWalls, ...maze.grid.horizontalWalls].flat().filter(Boolean).length;
+assert.equal(walls, maze.validation.wallSegments, '墙体总数与原始记录一致');
+const damaged = structuredClone(maze);
+damaged.grid.verticalWalls.pop();
+assert.throws(() => validateMaze(damaged), /verticalWalls/, '损坏的墙体矩阵必须被拒绝');
+const blocked = structuredClone(maze);
+blocked.openings.entry.side = 'south';
+assert.throws(() => validateMaze(blocked), /entry/, '被封闭的入口必须被拒绝');
+const brokenRoute = structuredClone(maze);
+brokenRoute.routes.A.cellPath[1] = [...maze.openings.exit.cell];
+assert.throws(() => validateMaze(brokenRoute), /路线 A/, '不连续的路线必须被拒绝');
+console.log(`地图验证通过：${maze.grid.rows}×${maze.grid.cols}，${walls} 段墙，${reachable} 个可达格子，路线 A/B = ${maze.routes.A.moveCount}/${maze.routes.B.moveCount} 步。`);
+console.log('异常数据检查通过：矩阵损坏、入口封闭、路线断裂均被拒绝。');
