@@ -1,8 +1,10 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/maze/maze_scene.gd" id="1_scene"]
 [ext_resource type="Script" path="res://scripts/maze/maze_generator.gd" id="2_generator"]
 [ext_resource type="Script" path="res://scripts/maze/orbit_camera.gd" id="3_camera"]
+[ext_resource type="Script" path="res://scripts/maze/walk_player.gd" id="4_player"]
+[ext_resource type="Script" path="res://scripts/maze/follow_camera.gd" id="5_follow"]
 
 [sub_resource type="Environment" id="Environment"]
 background_mode = 1
@@ -83,6 +85,19 @@ msaa_3d = 1
 
 [node name="World" type="Node3D" parent="ViewportContainer/Viewport"]
 
+[node name="Player" type="CharacterBody3D" parent="ViewportContainer/Viewport/World"]
+unique_name_in_owner = true
+script = ExtResource("4_player")
+
+[node name="FollowRig" type="Node3D" parent="ViewportContainer/Viewport/World"]
+unique_name_in_owner = true
+script = ExtResource("5_follow")
+
+[node name="Camera3D" type="Camera3D" parent="ViewportContainer/Viewport/World/FollowRig"]
+fov = 55.0
+near = 0.1
+far = 200.0
+
 [node name="WorldEnvironment" type="WorldEnvironment" parent="ViewportContainer/Viewport/World"]
 unique_name_in_owner = true
 environment = SubResource("Environment")
@@ -110,6 +125,7 @@ near = 0.1
 far = 500.0
 
 [node name="Legend" type="Label" parent="."]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "● 橙色入口    ● 粉色出口    ● 青色检查点     /     左键旋转，松开对齐 · 滚轮缩放 · 右键平移"
@@ -120,3 +136,16 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.49, 0.56, 0.42, 1)
 theme_override_font_sizes/font_size = 12
 text = "地图数据已接入；人物移动与正式玩法将在后续加入。"
+
+[node name="WalkControls" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="WalkButton" type="Button" parent="WalkControls"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "全图查看"
+
+[node name="RestartWalk" type="Button" parent="WalkControls"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "回到入口"

@@ -60,6 +60,33 @@ func _run() -> void:
 	maze_scene.set_soft_palette(false)
 	check(generated.wall_material.albedo_color == original_wall_color, "必须能返回原始灰盒配色")
 	var camera: Node3D = maze_scene.get_node("%CameraRig")
+	var player: CharacterBody3D = maze_scene.get_node("%Player")
+	check(maze_scene.walk_mode and player.controls_enabled, "进入迷宫默认可步行")
+	var start_position := player.position
+	var key := InputEventKey.new()
+	key.physical_keycode = KEY_W
+	key.pressed = true
+	Input.parse_input_event(key)
+	for frame in range(30):
+		await physics_frame
+	key.pressed = false
+	Input.parse_input_event(key)
+	check(player.position.z < start_position.z - 0.5, "W 必须能沿入口的开放通道前进")
+	maze_scene.reset_walk()
+	key = InputEventKey.new()
+	key.physical_keycode = KEY_D
+	key.pressed = true
+	Input.parse_input_event(key)
+	for frame in range(40):
+		await physics_frame
+	key.pressed = false
+	Input.parse_input_event(key)
+	check(player.position.x < 2.0, "入口东侧墙必须阻挡人物，不能穿墙")
+	maze_scene.reset_walk()
+	check(player.position.distance_to(player.spawn_point) < 0.01, "回到入口必须恢复出生点")
+	maze_scene.set_walk_mode(false)
+	check(not player.controls_enabled and camera.camera.current, "全图查看必须停用人物操作并切换镜头")
+	maze_scene.set_walk_mode(true)
 	var viewing_direction: Vector3 = (camera.camera.global_position - camera.to_global(camera.center)).normalized().abs()
 	check(viewing_direction.is_equal_approx(Vector3.ONE.normalized()), "等距初始视角的三个世界轴必须均匀缩短")
 	var wheel := InputEventMouseButton.new()

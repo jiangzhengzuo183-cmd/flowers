@@ -6,6 +6,7 @@ const WALL_THICKNESS := 0.3
 var route_nodes: Dictionary = {}
 var wall_count := 0
 var marker_count := 0
+var marker_pins: Array[MeshInstance3D] = []
 var floor_material: StandardMaterial3D
 var wall_material: StandardMaterial3D
 
@@ -111,7 +112,7 @@ func _marker(cell: Array, color: Color, size: float, id: String) -> void:
 	var pin_mesh := SphereMesh.new()
 	pin_mesh.radius = 0.28
 	pin_mesh.height = 0.56
-	_add_mesh(pin_mesh, _material(color, true), center + Vector3(0, WALL_HEIGHT + 0.3, 0), self)
+	marker_pins.append(_add_mesh(pin_mesh, _material(color, true), center + Vector3(0, WALL_HEIGHT + 0.3, 0), self))
 	marker_count += 1
 
 func set_route(id: String) -> void:
@@ -121,3 +122,10 @@ func set_route(id: String) -> void:
 func set_soft_palette(enabled: bool) -> void:
 	wall_material.albedo_color = Color("f5e7cd") if enabled else Color("9b9d9b")
 	floor_material.albedo_color = Color("d6c2b7") if enabled else Color("eeede8")
+
+func set_walk_cutaway(enabled: bool) -> void:
+	# Only the displayed wall height changes; the original collision and layout stay intact.
+	for id: String in ["VerticalWalls", "HorizontalWalls"]:
+		get_node(id).scale.y = 0.38 if enabled else 1.0
+	for pin: MeshInstance3D in marker_pins:
+		pin.visible = not enabled
