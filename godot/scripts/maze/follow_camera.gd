@@ -1,10 +1,12 @@
 extends Node3D
 
 @onready var camera: Camera3D = $Camera3D
+const DEFAULT_PITCH := 0.68
+const DEFAULT_DISTANCE := 2.8
 var target: CharacterBody3D
 var yaw := 0.0
-var pitch := 0.68
-var distance := 6.0
+var pitch := DEFAULT_PITCH
+var distance := DEFAULT_DISTANCE
 var enabled := false
 
 func configure(player: CharacterBody3D) -> void:
@@ -13,8 +15,8 @@ func configure(player: CharacterBody3D) -> void:
 
 func reset_view() -> void:
 	yaw = 0
-	pitch = 0.68
-	distance = 6
+	pitch = DEFAULT_PITCH
+	distance = DEFAULT_DISTANCE
 	if is_instance_valid(target):
 		position = target.position + Vector3(0, 1.1, 0)
 	_update_pose()

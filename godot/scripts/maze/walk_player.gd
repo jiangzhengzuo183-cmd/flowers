@@ -1,6 +1,8 @@
 extends CharacterBody3D
 
-const SPEED := 3.6
+const CHARLIE_SCENE := preload("res://scenes/characters/charlie_visual.tscn")
+const WALK_SPEED := 1.6
+const RUN_SPEED := 2.7
 var controls_enabled := false
 var movement_camera: Camera3D
 var spawn_point := Vector3.ZERO
@@ -17,36 +19,8 @@ func _ready() -> void:
 	collider.shape = shape
 	collider.position.y = 0.8
 	add_child(collider)
-	visual = Node3D.new()
+	visual = CHARLIE_SCENE.instantiate()
 	add_child(visual)
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color("567a64")
-	var body := MeshInstance3D.new()
-	var capsule := CapsuleMesh.new()
-	capsule.radius = 0.3
-	capsule.height = 1.15
-	body.mesh = capsule
-	body.material_override = material
-	body.position.y = 0.65
-	visual.add_child(body)
-	var head := MeshInstance3D.new()
-	var sphere := SphereMesh.new()
-	sphere.radius = 0.25
-	sphere.height = 0.5
-	head.mesh = sphere
-	var skin := StandardMaterial3D.new()
-	skin.albedo_color = Color("e3c8a7")
-	head.material_override = skin
-	head.position.y = 1.47
-	visual.add_child(head)
-	var nose := MeshInstance3D.new()
-	var nose_mesh := SphereMesh.new()
-	nose_mesh.radius = 0.08
-	nose_mesh.height = 0.16
-	nose.mesh = nose_mesh
-	nose.material_override = skin
-	nose.position = Vector3(0, 1.45, -0.24)
-	visual.add_child(nose)
 
 func configure(entry: Array, size: float, width: float, depth: float) -> void:
 	spawn_point = Vector3((entry[1] + 0.5) * size, 0.08, (entry[0] + 0.5) * size)
@@ -58,6 +32,7 @@ func reset_player() -> void:
 	velocity = Vector3.ZERO
 	if is_instance_valid(visual):
 		visual.rotation.y = 0
+		visual.set_locomotion(0.0)
 
 func _physics_process(delta: float) -> void:
 	var direction := Vector3.ZERO
@@ -69,12 +44,14 @@ func _physics_process(delta: float) -> void:
 		direction = movement_camera.global_basis.x * horizontal + forward.normalized() * forward_input
 	direction.y = 0
 	direction = direction.limit_length(1)
-	velocity.x = direction.x * SPEED
-	velocity.z = direction.z * SPEED
+	var speed := RUN_SPEED if Input.is_physical_key_pressed(KEY_SHIFT) else WALK_SPEED
+	velocity.x = direction.x * speed
+	velocity.z = direction.z * speed
 	if not is_on_floor():
 		velocity.y -= 18.0 * delta
 	else:
 		velocity.y = 0
+	var previous_position := position
 	move_and_slide()
 	# Keep the prototype on its finite floor even through the boundary entry/exit.
 	position.x = clampf(position.x, 0.32, map_size.x - 0.32)
@@ -83,3 +60,8 @@ func _physics_process(delta: float) -> void:
 		visual.rotation.y = lerp_angle(visual.rotation.y, atan2(-direction.x, -direction.z), minf(1, delta * 12))
 	if position.y < -2:
 		reset_player()
+		return
+	# Use actual travel after collision and boundary clamping, so pushing into a
+	# wall does not keep the walk/run animation playing on a stationary body.
+	var travel := position - previous_position
+	visual.set_locomotion(Vector2(travel.x, travel.z).length() / maxf(delta, 0.0001))

@@ -8,7 +8,7 @@ var active_id := ""
 func _ready() -> void:
 	%StoryButton.pressed.connect(show_scene.bind("story"))
 	%MazeButton.pressed.connect(show_scene.bind("maze"))
-	show_scene("story")
+	show_scene("maze")
 
 func show_scene(id: String) -> void:
 	if id == active_id:

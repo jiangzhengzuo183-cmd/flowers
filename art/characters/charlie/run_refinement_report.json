@@ -1,0 +1,22 @@
+{
+  "source": "charlie_rigged.blend",
+  "output": "charlie_refined.glb",
+  "mesh_uv_weights_unchanged": true,
+  "other_animation_channels_unchanged": true,
+  "changed_bones": [
+    "LeftUpperArm",
+    "LeftLowerArm",
+    "LeftHand",
+    "RightUpperArm",
+    "RightLowerArm",
+    "RightHand"
+  ],
+  "changed_action": "Run",
+  "upper_arm_swing_degrees": 28,
+  "upper_arm_inward_rotation_degrees": 32,
+  "elbow_flexion_degrees": [
+    46,
+    64
+  ],
+  "mesh_signature": "64b02f931c4173479a5a7070cd70b9f6e6b4fa8579cdaf3cec21af872b605087"
+}

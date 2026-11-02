@@ -1,0 +1,48 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/characters/charlie_visual.tscn" id="1_charlie"]
+[ext_resource type="Script" path="res://scripts/characters/charlie_preview.gd" id="2_preview"]
+
+[sub_resource type="Environment" id="Environment_preview"]
+background_mode = 1
+background_color = Color(0.953, 0.941, 0.91, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.9, 0.91, 1, 1)
+ambient_light_energy = 0.4
+tonemap_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="Material_floor"]
+albedo_color = Color(0.76, 0.80, 0.73, 1)
+roughness = 1.0
+
+[sub_resource type="PlaneMesh" id="Plane_floor"]
+material = SubResource("Material_floor")
+size = Vector2(8, 8)
+
+[node name="CharliePreview" type="Node3D"]
+script = ExtResource("2_preview")
+
+[node name="CharlieVisual" parent="." instance=ExtResource("1_charlie")]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_preview")
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.005, 0)
+mesh = SubResource("Plane_floor")
+
+[node name="KeyLight" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-40, -30, 0)
+light_energy = 0.75
+shadow_enabled = true
+directional_shadow_max_distance = 12.0
+
+[node name="FillLight" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-30, 130, 0)
+light_energy = 0.25
+
+[node name="Camera3D" type="Camera3D" parent="."]
+current = true
+fov = 35.0
+near = 0.05
+far = 30.0

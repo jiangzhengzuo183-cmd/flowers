@@ -32,7 +32,13 @@ func _run() -> void:
 	var game: Control = load("res://scenes/main.tscn").instantiate()
 	root.add_child(game)
 	await process_frame
-	check(game.active_id == "story", "默认进入剧情")
+	check(game.active_id == "maze", "启动必须直接进入迷宫")
+	check(not game.get_node("%StoryButton").visible, "当前试玩界面不显示故事入口")
+	check(game.active_scene.loaded_ok and game.active_scene.walk_mode, "启动后地图与人物操作必须就绪")
+	# The narrative module is retained for future team integration, but is no
+	# longer part of the visible tryout entry flow.
+	game.show_scene("story")
+	await process_frame
 	var story: Control = game.active_scene
 	story.advance()
 	check(story.index == 1, "剧情必须能推进")
@@ -122,7 +128,7 @@ func _run() -> void:
 	check(is_equal_approx(follow.distance, 150.0), "跟随镜头应能拉远至地图尺度")
 	maze_scene.show_top_view()
 	maze_scene.set_walk_mode(true)
-	check(is_equal_approx(follow.distance, 6.0), "重置必须恢复适合步行的距离")
+	check(is_equal_approx(follow.distance, 2.8), "重置必须恢复近距离跟随视角")
 	for i in range(3):
 		game.show_scene("story")
 		await process_frame

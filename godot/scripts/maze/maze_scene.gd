@@ -72,8 +72,8 @@ func set_walk_mode(enabled: bool) -> void:
 	%GeneratedMaze.set_walk_cutaway(enabled)
 	%WalkButton.text = "全图查看" if enabled else "亲自走迷宫"
 	%RestartWalk.visible = enabled
-	%Legend.text = "WASD / 方向键移动 · 拖动观察 · 滚轮可拉远看全图 · 俯视全貌可一键查看" if enabled else "左键旋转，松开对齐 · 滚轮缩放 · 右键平移"
-	%Status.text = "绿色临时人物可步行；行走模式采用矮墙显示，原地图与墙体碰撞保持不变。" if enabled else "全图查看模式；点击“亲自走迷宫”进入步行体验。"
+	%Legend.text = "WASD / 方向键走路 · 按住 Shift 跑步 · 拖动观察 · 滚轮缩放 · 俯视全貌" if enabled else "左键旋转，松开对齐 · 滚轮缩放 · 右键平移"
+	%Status.text = "查理已进入迷宫：待机 / 走路 / 跑步动画随实际移动切换；暂不支持跳跃。" if enabled else "全图查看模式；点击“亲自走迷宫”进入步行体验。"
 	get_viewport().gui_release_focus()
 
 func select_route(id: String) -> void:
