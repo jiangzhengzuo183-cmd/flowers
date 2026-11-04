@@ -2,7 +2,9 @@
 
 三人小组课程项目，以丹尼尔·凯斯的《献给阿尔吉侬的花束》为灵感。当前开发方向为 **Godot 统一制作、优先发布电脑浏览器版本**，组合 2D 剧情与 3D 迷宫。
 
-当前本地 Maze 01 已接入新版灰模：圆形教堂、六处高低空间、下沉石廊、拱形桥洞和可手动平视/轻微仰视的镜头。继续用原来的 Godot 工程，按 **F5** 即可进入新版；原地图数据和旧迷宫场景保留。详见 [Maze 01 灰模说明](docs/MAZE_01_GREYBOX.md)。源码交付分支为 `codex/maze-01-delivery`；本轮未重新导出网页。
+当前本地 Maze 01 已接入新版灰模：圆形教堂、六处高低空间、下沉石廊、拱形桥洞和可手动平视/轻微仰视的镜头。继续用原来的 Godot 工程，按 **F5** 即可进入新版；原地图数据和旧迷宫场景保留。详见 [Maze 01 灰模说明](docs/MAZE_01_GREYBOX.md)。源码交付分支为 `codex/maze-three-runs`；本轮未重新导出网页。
+
+三次运行框架与跳跃均在本分支。双击根目录 `试玩三次迷宫.cmd`，或在 Godot 打开 `scenes/maze_runs/maze_runs_preview.tscn` 后运行当前场景（Windows F6），可分别检查三轮。F5 仍进入原灰模试玩，也支持跳跃。三轮当前机制相同，正式道具、幽影、倒计时和竞速尚未接入。详见 [三次运行说明](docs/MAZE_RUNS.md)。
 
 ## 先打开哪里
 
@@ -33,7 +35,7 @@ C:\Users\30968\Documents\ChatGPT\献给阿尔吉侬的花束\godot\project.godot
 - 查理模型与骨骼动画已接入迷宫：WASD / 方向键走路，按住 Shift 跑步，松开或撞墙停止时恢复待机。鼠标拖动观察，滚轮调整距离，镜头平滑跟随；可切回全图查看、回到入口。步行时使用矮墙显示以便看清人物，完整墙体碰撞与原地图保持不变。
 - 滚轮支持大范围缩放：行走镜头距离 2.5–150，拉远后逐渐对准地图中心并提高俯视角。可一键“俯视全貌”，正交俯视自动容纳全图，拖动平移、滚轮细看；点击“亲自走迷宫”返回人物操作。
 
-查理基础模型与待机、走路、跑步动画已可试玩。走路速度 1.6 米/秒，跑步 2.7 米/秒，步频随实际速度匹配。默认采用距离 2.8 米、48° 视野的近距离第三人称镜头，仍可拖动、缩放和重置；迷宫使用 AgX 色彩映射、较低对比度和补光，让角色更接近动画 GIF。跑步手臂已收拢，原版模型保留，游戏使用 `charlie_refined.glb` 修正版。阿尔吉侬 AI、计时、正式剧情、存档、报告与证据玩法仍待开发。迷宫暂不支持跳跃，地图外边界限制在地面范围内；Jump 动画保留在角色独立预览中。角色与测试细节见 [角色说明](art/characters/charlie/README.md)。
+查理基础模型与待机、走路、跑步动画已可试玩。走路速度 1.6 米/秒，跑步 2.7 米/秒，步频随实际速度匹配。默认采用距离 2.8 米、48° 视野的近距离第三人称镜头，仍可拖动、缩放和重置；迷宫使用 AgX 色彩映射、较低对比度和补光，让角色更接近动画 GIF。跑步手臂已收拢，原版模型保留，游戏使用 `charlie_refined.glb` 修正版。阿尔吉侬 AI、计时、正式剧情、存档、报告与证据玩法仍待开发。迷宫现已支持空格物理跳跃，可边走或边跑边跳；高度约 40 厘米，不能二段跳或按住连跳。模型与地图资源保留原样。角色与测试细节见 [角色说明](art/characters/charlie/README.md)。
 
 ## 安装、检查与网页导出
 
@@ -113,14 +115,14 @@ scripts/serve-godot.mjs      本地网页预览服务
 
 旧 README 已完整保留为 [网页版原型说明](docs/README.web-prototype.md)，最初的仓库说明保存在 [初始化前 README](docs/README.before-initialization.md)。原始地图资料仍在 `D:\maze_01`，运行不再依赖这个目录。
 
-`main` 为稳定分支。本次完整 Maze 01 灰模交付位于 `codex/maze-01-delivery`，基于已带查理与动画的版本；由团队通过 Pull Request 检查后再合并。组员已有克隆时：先关闭 Godot，保存自己的工作，在 GitHub Desktop 点击 Fetch origin，切换到 `codex/maze-01-delivery`，如显示 Pull origin 则点击更新。再用 Godot 导入同一仓库的 `godot/project.godot`，等待首次导入完成，点击编辑器右上角 ▶ 运行项目（Windows 也可按 F5）。切换分支时如提示保留改动，应将自己的改动留在原分支，不混入试玩分支。
+`main` 为稳定分支。本次完整 Maze 01 灰模交付位于 `codex/maze-three-runs`，基于已带查理与动画的版本；由团队通过 Pull Request 检查后再合并。组员已有克隆时：先关闭 Godot，保存自己的工作，在 GitHub Desktop 点击 Fetch origin，切换到 `codex/maze-three-runs`，如显示 Pull origin 则点击更新。再用 Godot 导入同一仓库的 `godot/project.godot`，等待首次导入完成，点击编辑器右上角 ▶ 运行项目（Windows 也可按 F5）。切换分支时如提示保留改动，应将自己的改动留在原分支，不混入试玩分支。
 
 试玩无需重新克隆，也无需发布网页；其他成员本机应安装相同版本的 Godot。Windows 根目录灰模启动脚本为可选入口，macOS 请直接通过 Godot 项目管理器打开工程。
 
 后续成员从团队确认的最新稳定版本创建各自功能分支，避免同时编辑共享场景、主题和配置。首次下载本次试玩可直接克隆：
 
 ```powershell
-git clone --branch codex/maze-01-delivery https://github.com/jiangzhengzuo183-cmd/flowers.git
+git clone --branch codex/maze-three-runs https://github.com/jiangzhengzuo183-cmd/flowers.git
 ```
 
 - [团队协作流程](docs/TEAM_WORKFLOW.md)

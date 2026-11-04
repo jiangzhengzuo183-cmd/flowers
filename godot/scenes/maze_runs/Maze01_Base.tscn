@@ -1,0 +1,7 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/levels/maze_01_greybox.tscn" id="1_space"]
+[ext_resource type="Script" path="res://scripts/maze_runs/maze01_base.gd" id="2_base"]
+
+[node name="Maze01Base" instance=ExtResource("1_space")]
+script = ExtResource("2_base")

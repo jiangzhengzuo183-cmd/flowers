@@ -40,9 +40,7 @@ func _ready() -> void:
 	box.size = Vector3(1.9,2.0,1.9)
 	shape.shape = box
 	exit.add_child(shape)
-	exit.body_entered.connect(func(body: Node3D):
-		if body == %Player and %GeneratedMaze.gates.D1.is_open and %GeneratedMaze.gates.D3.is_open and %GeneratedMaze.gates.D4.is_open:
-			completed = true)
+	exit.body_entered.connect(_on_exit_body_entered)
 	%Player.get_parent().add_child(exit)
 	_refresh_hud()
 
@@ -68,14 +66,30 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and (event.physical_keycode == KEY_E or event.keycode == KEY_E):
 		if walk_mode and is_instance_valid(closest_switch):
 			var id: String = closest_switch.gate_id
-			closest_switch.set_used(true)
-			%GeneratedMaze.gates[id].open_gate()
+			try_activate_gate(id)
 			get_viewport().set_input_as_handled()
+
+func try_activate_gate(id: String) -> bool:
+	if not %GeneratedMaze.gates.has(id):
+		return false
+	%GeneratedMaze.switches[id].set_used(true)
+	%GeneratedMaze.gates[id].open_gate()
+	return true
+
+func can_finish() -> bool:
+	return %GeneratedMaze.gates.D1.is_open and %GeneratedMaze.gates.D3.is_open and %GeneratedMaze.gates.D4.is_open
+
+func _on_exit_body_entered(body: Node3D) -> void:
+	if body == %Player and can_finish():
+		complete_level()
+
+func complete_level() -> void:
+	completed = true
 
 func _refresh_hud() -> void:
 	if not loaded_ok:
 		return
-	%Legend.text = "WASD 移动 / Shift 跑步 / E 开门 / 按住鼠标拖动可平视、轻微仰视 / 滚轮缩放" if walk_mode else "全图查看 · 两条线为原始参考走向，实际通行还需操作机关"
+	%Legend.text = "WASD 移动 / Shift 跑步 / 空格跳跃 / E 开门 / 鼠标拖动视角 / 滚轮缩放" if walk_mode else "全图查看 · 两条线为原始参考走向，实际通行还需操作机关"
 	var parts: Array[String] = []
 	for id: String in ["D1","D2","D4","D3"]:
 		parts.append(id+(" 已开" if %GeneratedMaze.gates[id].is_open else " 关闭"))

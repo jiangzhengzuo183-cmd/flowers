@@ -42,9 +42,13 @@ func open_gate() -> void:
 	opened.emit()
 
 func reset_gate() -> void:
+	set_open_state(false)
+
+## Apply initial/reset state immediately, with no animation, sound or opened event.
+func set_open_state(open: bool) -> void:
 	if is_instance_valid(tween):
 		tween.kill()
-	is_open = false
-	leaf.position.y = 0
-	leaf.get_node("GateCollision").set_deferred("disabled",false)
-	state_label.text = gate_id+" · 关闭"
+	is_open = open
+	leaf.position.y = 2.85 if open else 0.0
+	leaf.get_node("GateCollision").set_deferred("disabled",open)
+	state_label.text = gate_id+(" · 开启" if open else " · 关闭")

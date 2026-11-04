@@ -8,6 +8,7 @@ const WALK_SPEED := 1.2
 const RUN_SPEED := 2.7
 var animation_player: AnimationPlayer
 var _jumping := false
+var _physics_jump := false
 var _requested_speed := 0.0
 
 func _ready() -> void:
@@ -56,12 +57,44 @@ func play_jump(use_baked_height: bool = true) -> void:
 	if _jumping or not is_instance_valid(animation_player):
 		return
 	_jumping = true
+	_physics_jump = false
 	animation_player.active = true
 	animation_player.speed_scale = 1.0
 	animation_player.play(&"Jump" if use_baked_height else &"JumpInPlace", 0.08)
 
+## Physics owns height and contact timing; sample the existing in-place pose.
+func begin_physics_jump() -> void:
+	_jumping = true
+	_physics_jump = true
+	animation_player.play(&"JumpInPlace",0.0)
+	animation_player.speed_scale = 0.0
+	animation_player.seek(0.30,true)
+
+func update_physics_jump(vertical_speed: float, launch_speed: float) -> void:
+	if not _physics_jump:
+		return
+	var ratio := clampf(absf(vertical_speed)/launch_speed,0.0,1.0)
+	var time := lerpf(0.60,0.30,ratio) if vertical_speed>0 else lerpf(0.60,0.90,ratio)
+	animation_player.seek(time,true)
+
+func end_physics_jump() -> void:
+	if not _physics_jump:
+		return
+	_physics_jump = false
+	_jumping = false
+	set_locomotion(_requested_speed)
+	jump_finished.emit()
+
+func cancel_jump() -> void:
+	_physics_jump = false
+	_jumping = false
+	_requested_speed = 0.0
+	animation_player.speed_scale = 1.0
+	animation_player.play(&"Idle",0.0)
+	animation_player.seek(0.0,true)
+
 func _on_animation_finished(clip: StringName) -> void:
-	if _jumping and (clip == &"Jump" or clip == &"JumpInPlace"):
+	if _jumping and not _physics_jump and (clip == &"Jump" or clip == &"JumpInPlace"):
 		_jumping = false
 		set_locomotion(_requested_speed)
 		jump_finished.emit()

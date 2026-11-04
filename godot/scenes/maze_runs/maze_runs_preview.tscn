@@ -1,0 +1,35 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/maze_runs/maze_run_controller.gd" id="1_controller"]
+[ext_resource type="Theme" path="res://ui/game_theme.tres" id="2_theme"]
+
+[node name="MazeRunsPreview" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource("2_theme")
+script = ExtResource("1_controller")
+
+[node name="RunToolbar" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Retry" type="Button" parent="RunToolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "重新开始本次"
+
+[node name="Next" type="Button" parent="RunToolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "下一次"
+
+[node name="RunStatus" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="RunHost" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
