@@ -1,7 +1,7 @@
 extends Control
 
 const STORY_SCENE := preload("res://scenes/story.tscn")
-const MAZE_SCENE := preload("res://scenes/maze.tscn")
+const MAZE_SCENE := preload("res://scenes/levels/maze_01_greybox.tscn")
 var active_scene: Control
 var active_id := ""
 

@@ -2,6 +2,8 @@
 
 三人小组课程项目，以丹尼尔·凯斯的《献给阿尔吉侬的花束》为灵感。当前开发方向为 **Godot 统一制作、优先发布电脑浏览器版本**，组合 2D 剧情与 3D 迷宫。
 
+当前本地 Maze 01 已接入新版灰模：圆形教堂、六处高低空间、下沉石廊、拱形桥洞和可手动平视/轻微仰视的镜头。继续用原来的 Godot 工程，按 **F5** 即可进入新版；原地图数据和旧迷宫场景保留。详见 [Maze 01 灰模说明](docs/MAZE_01_GREYBOX.md)。源码交付分支为 `codex/maze-01-delivery`；本轮未重新导出网页。
+
 ## 先打开哪里
 
 本机仓库根目录：
@@ -18,9 +20,9 @@ C:\Users\30968\Documents\ChatGPT\献给阿尔吉侬的花束\godot\project.godot
 
 - 开发游戏：双击根目录 `打开Godot工程.cmd`，或手动导入 `godot/project.godot`，按 F5 直接进入迷宫试玩。
 - 查看网页成品：本机已完成导出时，双击 `启动游戏.cmd`，在 `http://127.0.0.1:5180/` 预览。
-- 其他成员第一次克隆时，需要先安装 Godot 并导出网页；导出产物与引擎程序不提交到源码仓库。
+- 其他成员本机试玩只需安装 Godot 并导入工程；需要网页版本时才另外导出。导出产物与引擎程序不提交到源码仓库。
 
-## 当前能体验什么
+## 基础版本功能（旧迷宫场景保留）
 
 - 启动后直接进入查理迷宫试玩，不再经过开场剧情页；当前界面不显示“故事”入口。占位剧情源文件保留供叙事模块后续使用。
 - 原样读取 `godot/data/maze_01.json`，生成 19×19 迷宫、378 段墙与地面。
@@ -111,12 +113,14 @@ scripts/serve-godot.mjs      本地网页预览服务
 
 旧 README 已完整保留为 [网页版原型说明](docs/README.web-prototype.md)，最初的仓库说明保存在 [初始化前 README](docs/README.before-initialization.md)。原始地图资料仍在 `D:\maze_01`，运行不再依赖这个目录。
 
-`main` 为稳定分支，基础 Godot 迁移已合并。当前带查理、动画与近景镜头的试玩交付位于 `feature/charlie-rig`，待团队通过 Pull Request 审阅后再合并到 `main`。组员已有克隆时，在 GitHub Desktop 点击 Fetch origin，切换到 `feature/charlie-rig` 并按提示 Pull，然后用 Godot 打开同一个 `godot/project.godot`，按 F5 即可试玩。
+`main` 为稳定分支。本次完整 Maze 01 灰模交付位于 `codex/maze-01-delivery`，基于已带查理与动画的版本；由团队通过 Pull Request 检查后再合并。组员已有克隆时：先关闭 Godot，保存自己的工作，在 GitHub Desktop 点击 Fetch origin，切换到 `codex/maze-01-delivery`，如显示 Pull origin 则点击更新。再用 Godot 导入同一仓库的 `godot/project.godot`，等待首次导入完成，点击编辑器右上角 ▶ 运行项目（Windows 也可按 F5）。切换分支时如提示保留改动，应将自己的改动留在原分支，不混入试玩分支。
 
-后续成员从最新主分支创建各自功能分支，避免同时编辑共享场景、主题和配置。新成员查看本次查理试玩可直接克隆该分支：
+试玩无需重新克隆，也无需发布网页；其他成员本机应安装相同版本的 Godot。Windows 根目录灰模启动脚本为可选入口，macOS 请直接通过 Godot 项目管理器打开工程。
+
+后续成员从团队确认的最新稳定版本创建各自功能分支，避免同时编辑共享场景、主题和配置。首次下载本次试玩可直接克隆：
 
 ```powershell
-git clone --branch feature/charlie-rig https://github.com/jiangzhengzuo183-cmd/flowers.git
+git clone --branch codex/maze-01-delivery https://github.com/jiangzhengzuo183-cmd/flowers.git
 ```
 
 - [团队协作流程](docs/TEAM_WORKFLOW.md)

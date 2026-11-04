@@ -1,0 +1,21 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/maze.tscn" id="1_base"]
+[ext_resource type="Script" path="res://scripts/levels/greybox_scene.gd" id="2_scene"]
+[ext_resource type="Script" path="res://scripts/levels/greybox_generator.gd" id="3_generator"]
+[ext_resource type="Script" path="res://scripts/levels/greybox_player.gd" id="4_player"]
+[ext_resource type="Script" path="res://scripts/levels/greybox_camera.gd" id="5_camera"]
+[ext_resource type="Theme" path="res://ui/game_theme.tres" id="6_theme"]
+
+[node name="Maze01Greybox" instance=ExtResource("1_base")]
+theme = ExtResource("6_theme")
+script = ExtResource("2_scene")
+
+[node name="Player" parent="ViewportContainer/Viewport/World" index="0"]
+script = ExtResource("4_player")
+
+[node name="FollowRig" parent="ViewportContainer/Viewport/World" index="1"]
+script = ExtResource("5_camera")
+
+[node name="GeneratedMaze" parent="ViewportContainer/Viewport/World" index="5"]
+script = ExtResource("3_generator")

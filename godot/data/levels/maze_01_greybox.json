@@ -1,0 +1,1684 @@
+{
+  "base_map": "res://data/maze_01.json",
+  "doors": [
+    {
+      "id": "D1",
+      "edge": [
+        [
+          16,
+          1
+        ],
+        [
+          15,
+          1
+        ]
+      ],
+      "switch_cell": [
+        16,
+        1
+      ],
+      "switch_position": [
+        2.7,
+        0.95,
+        39.6
+      ],
+      "floor": 0
+    },
+    {
+      "id": "D2",
+      "edge": [
+        [
+          14,
+          13
+        ],
+        [
+          14,
+          14
+        ]
+      ],
+      "switch_cell": [
+        15,
+        13
+      ],
+      "switch_position": [
+        32.4,
+        0.95,
+        36.3
+      ],
+      "floor": 0
+    },
+    {
+      "id": "D3",
+      "edge": [
+        [
+          4,
+          17
+        ],
+        [
+          3,
+          17
+        ]
+      ],
+      "switch_cell": [
+        7,
+        15
+      ],
+      "switch_position": [
+        36.5,
+        3.55,
+        18
+      ],
+      "floor": 0
+    },
+    {
+      "id": "D4",
+      "edge": [
+        [
+          7,
+          16
+        ],
+        [
+          6,
+          16
+        ]
+      ],
+      "switch_cell": [
+        9,
+        18
+      ],
+      "switch_position": [
+        45,
+        0.95,
+        22.8
+      ],
+      "floor": 2.6
+    }
+  ],
+  "arches": [
+    {
+      "id": "G1",
+      "edge": [
+        [
+          18,
+          0
+        ],
+        [
+          17,
+          0
+        ]
+      ]
+    },
+    {
+      "id": "G2",
+      "edge": [
+        [
+          15,
+          3
+        ],
+        [
+          16,
+          3
+        ]
+      ]
+    },
+    {
+      "id": "G3",
+      "edge": [
+        [
+          4,
+          5
+        ],
+        [
+          4,
+          6
+        ]
+      ]
+    },
+    {
+      "id": "G4",
+      "edge": [
+        [
+          14,
+          11
+        ],
+        [
+          13,
+          11
+        ]
+      ]
+    },
+    {
+      "id": "G5",
+      "edge": [
+        [
+          3,
+          17
+        ],
+        [
+          3,
+          16
+        ]
+      ]
+    },
+    {
+      "id": "G6",
+      "edge": [
+        [
+          7,
+          9
+        ],
+        [
+          8,
+          9
+        ]
+      ],
+      "name": "北侧主门"
+    },
+    {
+      "id": "G7",
+      "edge": [
+        [
+          7,
+          11
+        ],
+        [
+          8,
+          11
+        ]
+      ],
+      "name": "东北拱廊门"
+    },
+    {
+      "id": "G8",
+      "edge": [
+        [
+          10,
+          10
+        ],
+        [
+          11,
+          10
+        ]
+      ],
+      "name": "南侧露台门"
+    }
+  ],
+  "wall_patches": [
+    {
+      "axis": "v",
+      "row": 3,
+      "col": 3,
+      "wall": false
+    },
+    {
+      "axis": "v",
+      "row": 5,
+      "col": 1,
+      "wall": false
+    },
+    {
+      "axis": "v",
+      "row": 5,
+      "col": 2,
+      "wall": true
+    },
+    {
+      "axis": "v",
+      "row": 6,
+      "col": 16,
+      "wall": false
+    },
+    {
+      "axis": "v",
+      "row": 6,
+      "col": 17,
+      "wall": false
+    },
+    {
+      "axis": "v",
+      "row": 6,
+      "col": 18,
+      "wall": true
+    },
+    {
+      "axis": "v",
+      "row": 8,
+      "col": 9,
+      "wall": false
+    },
+    {
+      "axis": "v",
+      "row": 8,
+      "col": 10,
+      "wall": false
+    },
+    {
+      "axis": "v",
+      "row": 9,
+      "col": 9,
+      "wall": false
+    },
+    {
+      "axis": "v",
+      "row": 9,
+      "col": 11,
+      "wall": false
+    },
+    {
+      "axis": "v",
+      "row": 10,
+      "col": 8,
+      "wall": true
+    },
+    {
+      "axis": "h",
+      "row": 4,
+      "col": 3,
+      "wall": false
+    },
+    {
+      "axis": "h",
+      "row": 5,
+      "col": 1,
+      "wall": false
+    },
+    {
+      "axis": "h",
+      "row": 8,
+      "col": 18,
+      "wall": false
+    },
+    {
+      "axis": "h",
+      "row": 9,
+      "col": 11,
+      "wall": false
+    },
+    {
+      "axis": "h",
+      "row": 10,
+      "col": 9,
+      "wall": false
+    },
+    {
+      "axis": "h",
+      "row": 10,
+      "col": 10,
+      "wall": false
+    }
+  ],
+  "ground_close": [
+    [
+      [
+        6,
+        17
+      ],
+      [
+        6,
+        18
+      ]
+    ]
+  ],
+  "ground_open": [
+    [
+      [
+        7,
+        18
+      ],
+      [
+        8,
+        18
+      ]
+    ]
+  ],
+  "underpass": [
+    [
+      6,
+      15
+    ],
+    [
+      6,
+      16
+    ],
+    [
+      6,
+      17
+    ]
+  ],
+  "surfaces": [
+    {
+      "id": "H1_Up",
+      "rect": [
+        9.2,
+        13.2,
+        43.45,
+        45.35
+      ],
+      "axis": "x",
+      "heights": [
+        0,
+        1.2
+      ],
+      "solid": true
+    },
+    {
+      "id": "H1_Deck",
+      "rect": [
+        13.2,
+        15.6,
+        43.45,
+        45.35
+      ],
+      "axis": "x",
+      "heights": [
+        1.2,
+        1.2
+      ],
+      "solid": true
+    },
+    {
+      "id": "H1_Down",
+      "rect": [
+        15.6,
+        19.6,
+        43.45,
+        45.35
+      ],
+      "axis": "x",
+      "heights": [
+        1.2,
+        0
+      ],
+      "solid": true
+    },
+    {
+      "id": "H2_UpWest",
+      "rect": [
+        40.55,
+        43.6,
+        19.45,
+        21.35
+      ],
+      "axis": "x",
+      "heights": [
+        2,
+        0
+      ],
+      "solid": true
+    },
+    {
+      "id": "H2_TurnSouth",
+      "rect": [
+        38.65,
+        40.55,
+        19.45,
+        21.35
+      ],
+      "axis": "x",
+      "heights": [
+        2,
+        2
+      ],
+      "solid": true
+    },
+    {
+      "id": "H2_UpNorth",
+      "rect": [
+        38.65,
+        40.55,
+        18.45,
+        19.45
+      ],
+      "axis": "z",
+      "heights": [
+        2.6,
+        2
+      ],
+      "solid": true
+    },
+    {
+      "id": "H2_Bridge",
+      "rect": [
+        38.65,
+        40.55,
+        14.9,
+        18.45
+      ],
+      "axis": "z",
+      "heights": [
+        2.6,
+        2.6
+      ],
+      "solid": false
+    },
+    {
+      "id": "H2_SwitchBalcony",
+      "rect": [
+        36.25,
+        38.65,
+        17.05,
+        18.45
+      ],
+      "axis": "x",
+      "heights": [
+        2.6,
+        2.6
+      ],
+      "solid": true
+    },
+    {
+      "id": "H2_DownNorth",
+      "rect": [
+        38.65,
+        40.55,
+        11.75,
+        14.9
+      ],
+      "axis": "z",
+      "heights": [
+        0.3,
+        2.6
+      ],
+      "solid": true
+    },
+    {
+      "id": "H2_TurnNorth",
+      "rect": [
+        38.65,
+        40.55,
+        9.85,
+        11.75
+      ],
+      "axis": "x",
+      "heights": [
+        0.3,
+        0.3
+      ],
+      "solid": true
+    },
+    {
+      "id": "H2_DownEast",
+      "rect": [
+        40.55,
+        41.2,
+        9.85,
+        11.75
+      ],
+      "axis": "x",
+      "heights": [
+        0.3,
+        0
+      ],
+      "solid": true
+    },
+    {
+      "id": "H3_Up",
+      "rect": [
+        35.2,
+        36.6,
+        29.05,
+        30.95
+      ],
+      "axis": "x",
+      "heights": [
+        0,
+        0.6
+      ],
+      "solid": true
+    },
+    {
+      "id": "H3_Deck",
+      "rect": [
+        36.6,
+        37.8,
+        29.05,
+        30.95
+      ],
+      "axis": "x",
+      "heights": [
+        0.6,
+        0.6
+      ],
+      "solid": true
+    },
+    {
+      "id": "H3_Down",
+      "rect": [
+        37.8,
+        39.2,
+        29.05,
+        30.95
+      ],
+      "axis": "x",
+      "heights": [
+        0.6,
+        0
+      ],
+      "solid": true
+    },
+    {
+      "id": "H4_Up",
+      "rect": [
+        24.25,
+        26.15,
+        27.6,
+        29.6
+      ],
+      "axis": "z",
+      "heights": [
+        0,
+        1.2
+      ],
+      "solid": true
+    },
+    {
+      "id": "H4_Turn",
+      "rect": [
+        24.25,
+        26.15,
+        29.6,
+        30.95
+      ],
+      "axis": "x",
+      "heights": [
+        1.2,
+        1.2
+      ],
+      "solid": true
+    },
+    {
+      "id": "H4_Deck",
+      "rect": [
+        22.8,
+        24.25,
+        29.6,
+        30.95
+      ],
+      "axis": "x",
+      "heights": [
+        1.2,
+        1.2
+      ],
+      "solid": true
+    },
+    {
+      "id": "H4_Down",
+      "rect": [
+        20.8,
+        22.8,
+        29.6,
+        30.95
+      ],
+      "axis": "x",
+      "heights": [
+        0,
+        1.2
+      ],
+      "solid": true
+    }
+  ],
+  "version": 3,
+  "building": {
+    "id": "house",
+    "rows": [
+      8,
+      10
+    ],
+    "cols": [
+      8,
+      11
+    ],
+    "size": [
+      9.6,
+      7.2
+    ],
+    "floor": 0,
+    "eave": 5.8,
+    "ridge": 11.2,
+    "doors": [
+      {
+        "id": "G6",
+        "edge": [
+          [
+            7,
+            9
+          ],
+          [
+            8,
+            9
+          ]
+        ],
+        "name": "北侧主门"
+      },
+      {
+        "id": "G7",
+        "edge": [
+          [
+            7,
+            11
+          ],
+          [
+            8,
+            11
+          ]
+        ],
+        "name": "东北拱廊门"
+      },
+      {
+        "id": "G8",
+        "edge": [
+          [
+            10,
+            10
+          ],
+          [
+            11,
+            10
+          ]
+        ],
+        "name": "南侧露台门"
+      }
+    ],
+    "rooms": [
+      {
+        "name": "门厅与主房间",
+        "rect": [
+          8,
+          8,
+          10,
+          10
+        ]
+      },
+      {
+        "name": "侧廊与人物凹室",
+        "rect": [
+          8,
+          11,
+          10,
+          11
+        ]
+      }
+    ],
+    "shape": "circular-hall-with-three-porches",
+    "circle": {
+      "center": [
+        24,
+        22.8
+      ],
+      "usableRadius": 3.1,
+      "outerRadius": 3.5
+    },
+    "porches": [
+      {
+        "id": "G6",
+        "rect": [
+          21.9,
+          23.7,
+          19.2,
+          20.8
+        ]
+      },
+      {
+        "id": "G7",
+        "rect": [
+          26.7,
+          28.5,
+          19.2,
+          21.3
+        ]
+      },
+      {
+        "id": "G7_link",
+        "rect": [
+          24.3,
+          28.5,
+          19.5,
+          21.3
+        ]
+      },
+      {
+        "id": "G8",
+        "rect": [
+          24.3,
+          26.1,
+          24.8,
+          26.4
+        ]
+      }
+    ],
+    "style": "tall-european-round-chapel"
+  },
+  "northwest": {
+    "id": "H5",
+    "name": "西北半下沉花庭与起伏回廊",
+    "rows": [
+      2,
+      5
+    ],
+    "cols": [
+      0,
+      3
+    ],
+    "size": [
+      9.6,
+      9.6
+    ],
+    "minimum": -0.6,
+    "maximum": 0.9,
+    "levels": [
+      [
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        -0.6,
+        -0.6,
+        0.9,
+        0
+      ],
+      [
+        0,
+        -0.6,
+        0.9,
+        0.9
+      ]
+    ],
+    "entry": {
+      "inside": [
+        5,
+        0
+      ],
+      "outside": [
+        6,
+        0
+      ],
+      "height": 0
+    },
+    "exit": {
+      "inside": [
+        4,
+        3
+      ],
+      "outside": [
+        4,
+        4
+      ],
+      "height": 0
+    },
+    "preservedInterfaces": [
+      [
+        [
+          2,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      [
+        [
+          3,
+          3
+        ],
+        [
+          3,
+          4
+        ]
+      ]
+    ],
+    "open": [
+      [
+        [
+          4,
+          1
+        ],
+        [
+          5,
+          1
+        ]
+      ],
+      [
+        [
+          5,
+          0
+        ],
+        [
+          5,
+          1
+        ]
+      ],
+      [
+        [
+          3,
+          2
+        ],
+        [
+          3,
+          3
+        ]
+      ],
+      [
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          3
+        ]
+      ]
+    ],
+    "close": [
+      [
+        [
+          5,
+          1
+        ],
+        [
+          5,
+          2
+        ]
+      ]
+    ],
+    "mainPath": [
+      [
+        5,
+        0
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        4,
+        1
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        4,
+        2
+      ],
+      [
+        5,
+        2
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        4,
+        3
+      ]
+    ],
+    "groundBypass": [
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        4,
+        3
+      ]
+    ],
+    "northGroundPath": [
+      [
+        2,
+        0
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        4,
+        3
+      ]
+    ],
+    "lowerLoop": [
+      [
+        5,
+        0
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        4,
+        1
+      ],
+      [
+        5,
+        1
+      ],
+      [
+        5,
+        0
+      ]
+    ],
+    "window": {
+      "from": [
+        3,
+        0
+      ],
+      "to": [
+        4,
+        0
+      ],
+      "passable": false,
+      "sill": 0.6,
+      "top": 1.8
+    },
+    "flowerbed": {
+      "center": [
+        4.5,
+        0.5
+      ],
+      "size": [
+        1.2,
+        1.2
+      ],
+      "passable": false
+    },
+    "reservedAnchors": [
+      {
+        "id": "P1",
+        "cell": [
+          5,
+          1
+        ],
+        "purpose": "下沉花庭调查物占位，不在必需机关链上"
+      },
+      {
+        "id": "P2",
+        "cell": [
+          5,
+          3
+        ],
+        "purpose": "上层加宽回廊人物或观察点占位"
+      }
+    ],
+    "transitions": [
+      {
+        "a": [
+          3,
+          1
+        ],
+        "b": [
+          4,
+          1
+        ],
+        "heights": [
+          0,
+          -0.6
+        ]
+      },
+      {
+        "a": [
+          3,
+          2
+        ],
+        "b": [
+          4,
+          2
+        ],
+        "heights": [
+          0,
+          0.9
+        ]
+      },
+      {
+        "a": [
+          4,
+          0
+        ],
+        "b": [
+          5,
+          0
+        ],
+        "heights": [
+          -0.6,
+          0
+        ]
+      },
+      {
+        "a": [
+          4,
+          3
+        ],
+        "b": [
+          5,
+          3
+        ],
+        "heights": [
+          0,
+          0.9
+        ]
+      },
+      {
+        "a": [
+          5,
+          0
+        ],
+        "b": [
+          5,
+          1
+        ],
+        "heights": [
+          0,
+          -0.6
+        ]
+      }
+    ]
+  },
+  "high_zones": [],
+  "low_zones": [
+    {
+      "id": "south-court",
+      "name": "南侧观察通路",
+      "rect": [
+        17,
+        3,
+        18,
+        8
+      ],
+      "height": 1.1
+    },
+    {
+      "id": "east-court",
+      "name": "东庭短台",
+      "rect": [
+        11,
+        14,
+        12,
+        16
+      ],
+      "height": 1.1
+    },
+    {
+      "id": "house-terrace",
+      "name": "南露台",
+      "rect": [
+        11,
+        8,
+        12,
+        10
+      ],
+      "height": 1.1
+    },
+    {
+      "id": "entry-open",
+      "name": "入口低围墙",
+      "rect": [
+        14,
+        0,
+        18,
+        3
+      ],
+      "height": 1.25
+    }
+  ],
+  "base_wall_height": 1.25,
+  "wall_policy": "connected-arch-clusters-with-low-main-routes",
+  "occlusion": {
+    "mode": "line-of-sight-alpha",
+    "opacity": 0.22,
+    "restore_delay": 0.1,
+    "hidden_fraction": 0.85,
+    "release_fraction": 0.8
+  },
+  "arch_wall_extensions": [
+    {
+      "arch": "G1",
+      "axis": "v",
+      "row": 17,
+      "col": 0,
+      "height": 3.2
+    },
+    {
+      "arch": "G1",
+      "axis": "v",
+      "row": 17,
+      "col": 1,
+      "height": 3.2
+    },
+    {
+      "arch": "G1",
+      "axis": "v",
+      "row": 16,
+      "col": 0,
+      "height": 3.2
+    },
+    {
+      "arch": "G1",
+      "axis": "h",
+      "row": 17,
+      "col": 1,
+      "height": 2
+    },
+    {
+      "arch": "G2",
+      "axis": "v",
+      "row": 15,
+      "col": 3,
+      "height": 3.2
+    },
+    {
+      "arch": "G2",
+      "axis": "h",
+      "row": 16,
+      "col": 2,
+      "height": 3.2
+    },
+    {
+      "arch": "G2",
+      "axis": "v",
+      "row": 15,
+      "col": 4,
+      "height": 3.2
+    },
+    {
+      "arch": "G2",
+      "axis": "h",
+      "row": 16,
+      "col": 4,
+      "height": 3.2
+    },
+    {
+      "arch": "G2",
+      "axis": "v",
+      "row": 15,
+      "col": 2,
+      "height": 2
+    },
+    {
+      "arch": "G2",
+      "axis": "v",
+      "row": 16,
+      "col": 2,
+      "height": 2
+    },
+    {
+      "arch": "G2",
+      "axis": "v",
+      "row": 14,
+      "col": 4,
+      "height": 2
+    },
+    {
+      "arch": "G3",
+      "axis": "v",
+      "row": 3,
+      "col": 6,
+      "height": 3.2
+    },
+    {
+      "arch": "G3",
+      "axis": "h",
+      "row": 4,
+      "col": 5,
+      "height": 3.2
+    },
+    {
+      "arch": "G3",
+      "axis": "h",
+      "row": 5,
+      "col": 5,
+      "height": 3.2
+    },
+    {
+      "arch": "G3",
+      "axis": "h",
+      "row": 5,
+      "col": 6,
+      "height": 3.2
+    },
+    {
+      "arch": "G3",
+      "axis": "v",
+      "row": 2,
+      "col": 6,
+      "height": 2
+    },
+    {
+      "arch": "G3",
+      "axis": "h",
+      "row": 3,
+      "col": 5,
+      "height": 3.2
+    },
+    {
+      "arch": "G3",
+      "axis": "h",
+      "row": 4,
+      "col": 4,
+      "height": 2
+    },
+    {
+      "arch": "G3",
+      "axis": "h",
+      "row": 5,
+      "col": 4,
+      "height": 2
+    },
+    {
+      "arch": "G3",
+      "axis": "v",
+      "row": 4,
+      "col": 7,
+      "height": 2
+    },
+    {
+      "arch": "G3",
+      "axis": "v",
+      "row": 5,
+      "col": 7,
+      "height": 3.2
+    },
+    {
+      "arch": "G4",
+      "axis": "v",
+      "row": 13,
+      "col": 11,
+      "height": 3.2
+    },
+    {
+      "arch": "G4",
+      "axis": "h",
+      "row": 14,
+      "col": 10,
+      "height": 3.2
+    },
+    {
+      "arch": "G4",
+      "axis": "v",
+      "row": 14,
+      "col": 12,
+      "height": 3.2
+    },
+    {
+      "arch": "G4",
+      "axis": "v",
+      "row": 12,
+      "col": 11,
+      "height": 3.2
+    },
+    {
+      "arch": "G4",
+      "axis": "h",
+      "row": 13,
+      "col": 10,
+      "height": 3.2
+    },
+    {
+      "arch": "G4",
+      "axis": "h",
+      "row": 13,
+      "col": 11,
+      "height": 2
+    },
+    {
+      "arch": "G4",
+      "axis": "v",
+      "row": 14,
+      "col": 10,
+      "height": 2
+    },
+    {
+      "arch": "G4",
+      "axis": "v",
+      "row": 15,
+      "col": 12,
+      "height": 3.2
+    },
+    {
+      "arch": "G4",
+      "axis": "h",
+      "row": 15,
+      "col": 11,
+      "height": 2
+    },
+    {
+      "arch": "G5",
+      "axis": "h",
+      "row": 3,
+      "col": 17,
+      "height": 3.2
+    },
+    {
+      "arch": "G5",
+      "axis": "h",
+      "row": 4,
+      "col": 16,
+      "height": 3.2
+    },
+    {
+      "arch": "G5",
+      "axis": "v",
+      "row": 3,
+      "col": 18,
+      "height": 3
+    },
+    {
+      "arch": "G5",
+      "axis": "v",
+      "row": 4,
+      "col": 16,
+      "height": 2
+    },
+    {
+      "arch": "G5",
+      "axis": "h",
+      "row": 4,
+      "col": 15,
+      "height": 2
+    }
+  ],
+  "central_wall_extensions": [
+    {
+      "group": "north",
+      "axis": "v",
+      "row": 7,
+      "col": 9,
+      "height": 3
+    },
+    {
+      "group": "north",
+      "axis": "h",
+      "row": 7,
+      "col": 9,
+      "height": 3
+    },
+    {
+      "group": "north",
+      "axis": "v",
+      "row": 6,
+      "col": 10,
+      "height": 2.2
+    },
+    {
+      "group": "northeast",
+      "axis": "v",
+      "row": 7,
+      "col": 11,
+      "height": 3
+    },
+    {
+      "group": "northeast",
+      "axis": "v",
+      "row": 6,
+      "col": 11,
+      "height": 3
+    },
+    {
+      "group": "northeast",
+      "axis": "v",
+      "row": 5,
+      "col": 11,
+      "height": 2.2
+    },
+    {
+      "group": "northwest",
+      "axis": "v",
+      "row": 6,
+      "col": 8,
+      "height": 3
+    },
+    {
+      "group": "northwest",
+      "axis": "h",
+      "row": 7,
+      "col": 7,
+      "height": 3
+    },
+    {
+      "group": "northwest",
+      "axis": "h",
+      "row": 7,
+      "col": 6,
+      "height": 2.2
+    },
+    {
+      "group": "northwest",
+      "axis": "v",
+      "row": 5,
+      "col": 8,
+      "height": 2.2
+    },
+    {
+      "group": "west",
+      "axis": "h",
+      "row": 9,
+      "col": 6,
+      "height": 3
+    },
+    {
+      "group": "west",
+      "axis": "v",
+      "row": 9,
+      "col": 6,
+      "height": 3
+    },
+    {
+      "group": "west",
+      "axis": "v",
+      "row": 8,
+      "col": 6,
+      "height": 2.2
+    },
+    {
+      "group": "east",
+      "axis": "h",
+      "row": 10,
+      "col": 12,
+      "height": 3
+    },
+    {
+      "group": "east",
+      "axis": "h",
+      "row": 10,
+      "col": 13,
+      "height": 3
+    },
+    {
+      "group": "east",
+      "axis": "h",
+      "row": 10,
+      "col": 14,
+      "height": 2.2
+    },
+    {
+      "group": "east-court",
+      "axis": "v",
+      "row": 8,
+      "col": 13,
+      "height": 3
+    },
+    {
+      "group": "east-court",
+      "axis": "h",
+      "row": 8,
+      "col": 13,
+      "height": 2.2
+    },
+    {
+      "group": "east-court",
+      "axis": "h",
+      "row": 9,
+      "col": 13,
+      "height": 2.2
+    },
+    {
+      "group": "east-court",
+      "axis": "v",
+      "row": 7,
+      "col": 13,
+      "height": 2.2
+    },
+    {
+      "group": "southwest",
+      "axis": "v",
+      "row": 11,
+      "col": 8,
+      "height": 3
+    },
+    {
+      "group": "southwest",
+      "axis": "v",
+      "row": 12,
+      "col": 8,
+      "height": 3
+    },
+    {
+      "group": "southwest",
+      "axis": "h",
+      "row": 13,
+      "col": 7,
+      "height": 2.2
+    },
+    {
+      "group": "southeast",
+      "axis": "v",
+      "row": 11,
+      "col": 11,
+      "height": 3
+    }
+  ],
+  "camera": {
+    "indoor_distance_scale": 0.75,
+    "indoor_fov": 66,
+    "transition_speed": 7,
+    "indoor_close_fov": 84,
+    "manual_pitch_min_degrees": -15,
+    "manual_pitch_max_degrees": 85
+  },
+  "sunken_corridor": {
+    "id": "H6",
+    "rect": [
+      2.4,
+      4.8,
+      14.4,
+      28.8
+    ],
+    "foundation": -0.85,
+    "wall_top": 1.25,
+    "niches": [
+      19.8,
+      21.6,
+      23.4
+    ],
+    "sections": [
+      {
+        "id": "NorthLanding",
+        "z": [
+          14.4,
+          16.1
+        ],
+        "heights": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": "NorthRamp",
+        "z": [
+          16.1,
+          18.5
+        ],
+        "heights": [
+          0,
+          -0.6
+        ]
+      },
+      {
+        "id": "LowerWalk",
+        "z": [
+          18.5,
+          24.7
+        ],
+        "heights": [
+          -0.6,
+          -0.6
+        ]
+      },
+      {
+        "id": "SouthRamp",
+        "z": [
+          24.7,
+          27.1
+        ],
+        "heights": [
+          -0.6,
+          0
+        ]
+      },
+      {
+        "id": "SouthLanding",
+        "z": [
+          27.1,
+          28.8
+        ],
+        "heights": [
+          0,
+          0
+        ]
+      }
+    ],
+    "reserved_anchor": {
+      "id": "H6_InvestigationAnchor",
+      "position": [
+        4.68,
+        -0.05,
+        21.6
+      ]
+    }
+  },
+  "bridge_vault": {
+    "x": [
+      38.65,
+      40.55
+    ],
+    "z_center": 15.9,
+    "half_width": 0.91,
+    "spring": 1.85,
+    "crown": 2.4,
+    "segments": 18
+  }
+}
