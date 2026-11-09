@@ -1,5 +1,6 @@
 {
   "base_map": "res://data/maze_01.json",
+  "statue_plaza_cell": [6, 9],
   "doors": [
     {
       "id": "D1",
@@ -204,6 +205,30 @@
     }
   ],
   "wall_patches": [
+    {
+      "axis": "h",
+      "row": 6,
+      "col": 8,
+      "wall": false
+    },
+    {
+      "axis": "v",
+      "row": 6,
+      "col": 10,
+      "wall": false
+    },
+    {
+      "axis": "h",
+      "row": 7,
+      "col": 9,
+      "wall": false
+    },
+    {
+      "axis": "v",
+      "row": 7,
+      "col": 9,
+      "wall": false
+    },
     {
       "axis": "v",
       "row": 3,
@@ -1006,17 +1031,7 @@
       "sill": 0.6,
       "top": 1.8
     },
-    "flowerbed": {
-      "center": [
-        4.5,
-        0.5
-      ],
-      "size": [
-        1.2,
-        1.2
-      ],
-      "passable": false
-    },
+    "waterSurface": -0.31,
     "reservedAnchors": [
       {
         "id": "P1",

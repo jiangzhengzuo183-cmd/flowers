@@ -82,7 +82,8 @@ func check_jump(label: String,point: Vector3) -> void:
 			var skeleton: Skeleton3D = actor.visual.find_child("Skeleton3D",true,false)
 			if skeleton==null:
 				skeleton = actor.visual.find_children("*","Skeleton3D",true,false)[0]
-			check(skeleton.get_bone_pose_position(skeleton.find_bone("Root")).length()<0.001,"Animation does not add a second vertical lift")
+			var hip := skeleton.find_bone("Hip")
+			check(skeleton.get_bone_global_pose(hip).origin.y <= skeleton.get_bone_global_rest(hip).origin.y + 0.001,"Animation does not add a second vertical lift")
 			if label=="entry":
 				await capture("jump_apex")
 	release()

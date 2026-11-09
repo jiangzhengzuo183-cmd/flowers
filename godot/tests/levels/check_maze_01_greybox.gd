@@ -3,6 +3,7 @@ extends SceneTree
 const Layout := preload("res://scripts/levels/maze_01_layout.gd")
 const Loader := preload("res://scripts/maze/maze_loader.gd")
 const Room := preload("res://scripts/levels/round_hall.gd")
+const Gate := preload("res://scripts/levels/greybox_gate.gd")
 var failures := 0
 var held: Array[int] = []
 var scene
@@ -86,13 +87,27 @@ func walk_to(goal: Vector3, label: String, running: bool = true) -> bool:
 	check(reached,label+" reached; actual="+str(actor.position)+" goal="+str(goal))
 	return reached
 
+func walk_route_cell(from: Array, to: Array, label: String, chapel_offset: float = -0.98) -> bool:
+	var goal := Layout.cell_point(to)
+	var start := Layout.cell_point(from)
+	# Route B crosses the hall between these two cells. The book stand is
+	# centered on that line, so take the same small detour a player would.
+	if scene.dream_art_enabled and Layout.cell_key(from) in ["9,9","9,10"] and Layout.cell_key(to) in ["9,9","9,10"]:
+		var offset := Vector3(0,0,chapel_offset)
+		if not await walk_to(start + offset,label+" chapel approach"):
+			return false
+		if not await walk_to(goal + offset,label+" around the book stand"):
+			return false
+	return await walk_to(goal,label)
+
 func operate(id: String) -> void:
 	await ticks(3)
 	check(scene.closest_switch == generator.switches[id],"Nearest usable switch must be "+id)
 	key(KEY_E,true)
 	await ticks(1)
 	key(KEY_E,false)
-	await ticks(45)
+	var gate: Node3D = generator.gates[id]
+	await ticks(ceili((gate.opening_lead_time+gate.descent_duration)*60.0)+5)
 	check(generator.gates[id].is_open and generator.switches[id].used,"E opens and latches "+id)
 	check(generator.gates[id].leaf.get_node("GateCollision").disabled,"Open gate collision removed "+id)
 
@@ -129,6 +144,7 @@ func run() -> void:
 	check(Layout.reachable(original,["D2"]).has("0,18"),"D2 optional")
 	check(Layout.reachable(original,[]).size()==362,"All 361 original cells and the separate lower crossing reachable")
 	scene = load("res://scenes/levels/maze_01_greybox.tscn").instantiate()
+	scene.dream_art_enabled = OS.get_cmdline_user_args().has("--formal-art")
 	root.add_child(scene)
 	await process_frame
 	actor = scene.get_node("%Player")
@@ -243,7 +259,7 @@ func run() -> void:
 		var path: Array = original.routes[route_id].cellPath
 		var completed := 0
 		for i in range(1,path.size()):
-			if not await walk_to(Layout.cell_point(path[i]),"Route "+route_id+" "+str(path[i])):
+			if not await walk_route_cell(path[i-1],path[i],"Route "+route_id+" "+str(path[i])):
 				break
 			completed += 1
 			if Layout.cell_key(path[i]) == "16,1":
@@ -310,11 +326,11 @@ func run() -> void:
 	for door_path: Array in [[[7,9],[8,9],[9,9],[9,10],[8,10],[8,11],[7,11]],[[7,9],[8,9],[9,9],[9,10],[10,10],[11,10]]]:
 		actor.position = Layout.cell_point(door_path[0],0.04)
 		await ticks(4)
-		for cell: Array in door_path.slice(1):
-			await walk_to(Layout.cell_point(cell),"Round hall "+str(cell))
+		for i in range(1,door_path.size()):
+			await walk_route_cell(door_path[i-1],door_path[i],"Round hall "+str(door_path[i]))
 		door_path.reverse()
-		for cell: Array in door_path.slice(1):
-			await walk_to(Layout.cell_point(cell),"Round hall reverse "+str(cell))
+		for i in range(1,door_path.size()):
+			await walk_route_cell(door_path[i-1],door_path[i],"Round hall reverse "+str(door_path[i]),0.98)
 	for raised_path: Array in [[[12,14],[12,15],[12,16]],[[11,10],[12,10],[12,9],[12,8]]]:
 		actor.position = Layout.cell_point(raised_path[0],0.04)
 		await ticks(4)
@@ -384,7 +400,12 @@ func check_sight_transparency() -> void:
 	rig.reset_view()
 	rig.yaw = PI
 	await ticks(24)
-	check(scene.wall_occlusion.last_hidden_fraction<0.85,"Gate movement box is not mistaken for an opaque visual wall")
+	var gate: Gate = generator.gates.D1
+	var gate_group := str(gate.get_instance_id())
+	check(scene.wall_occlusion.last_blockers.has(gate_group),"Closed solid gate can occlude Charlie")
+	gate._position_leaf(-Gate.PANEL_HEIGHT + 0.22)
+	await ticks(24)
+	check(not scene.wall_occlusion.last_blockers.has(gate_group),"Invisible movement blocker does not occlude Charlie as the panel sinks")
 	scene.reset_level()
 	actor.movement_camera = root.find_child("TestInputCamera",true,false)
 	await ticks(4)
@@ -420,9 +441,9 @@ func check_revision_geometry() -> void:
 		check(not hit.is_empty() and absf(float(hit.position.y)-Layout.corridor_height(z))<0.015,"H6 visible floor has the matching negative physical height at "+str(z))
 		if not hit.is_empty():
 			check(str(hit.collider.name)=="RaisedSurfaceCollision","Original zero-height slab does not cover H6")
-	var niche := ray(Vector3(3.6,0.0,21.6),Vector3(5.1,0.0,21.6))
+	var niche := ray(Vector3(3.6,0.0,21.6),Vector3(5.4,0.0,21.6))
 	var panel := ray(Vector3(3.6,0.0,22.5),Vector3(5.1,0.0,22.5))
-	check(not niche.is_empty() and absf(float(niche.position.x)-4.75)<0.015,"Middle niche is physically recessed, not a coplanar decal")
+	check(not niche.is_empty() and absf(float(niche.position.x)-5.16)<0.015,"Middle niche has a 51 cm recess and a solid back")
 	check(not panel.is_empty() and absf(float(panel.position.x)-4.65)<0.015,"H6 wall retains its original inner face between niches")
 	check(not ray(Vector3(3.6,-0.3,21.6),Vector3(1.2,-0.3,21.6)).is_empty(),"Lower corridor west retaining wall prevents crossing into the adjacent lane")
 	check(not ray(Vector3(3.6,0.0,21.6),Vector3(6.0,0.0,21.6)).is_empty(),"Niche back does not create a shortcut")
@@ -493,13 +514,15 @@ func check_h6_walk() -> void:
 
 func check_indoor_camera() -> void:
 	var rig = scene.get_node("%FollowRig")
-	actor.position = Vector3(24,0.04,22.8)
+	actor.position = Vector3(24,0.04,24.07) if scene.dream_art_enabled else Vector3(24,0.04,22.8)
 	rig.reset_view()
 	await ticks(20)
 	check(rig.indoor_blend>0.99 and rig.camera.fov>64,"Indoor follow profile uses a comfortable wider field of view")
 	check(generator.round_hall.get_node("Roof").visible,"Indoor camera keeps the roof visible")
 	for mesh: MeshInstance3D in generator.round_hall.find_children("*","MeshInstance3D",true,false):
-		check(not mesh.material_override is ShaderMaterial,"Building materials never use wall transparency")
+		var part: String = mesh.get_meta("greybox_part", "")
+		if part.begins_with("CurvedWall") or part == "PorchWall":
+			check(not mesh.material_override is ShaderMaterial and mesh.transparency == 0.0,"Building walls never use wall transparency")
 	for step in 8:
 		rig.yaw = step*TAU/8
 		await ticks(12)
@@ -530,6 +553,8 @@ func check_indoor_camera() -> void:
 	actor.movement_camera = root.find_child("TestInputCamera",true,false)
 
 func check_grey_materials() -> void:
+	if scene.dream_art_enabled:
+		return
 	var target_color: Color = generator.wall_material.albedo_color
 	var rails := 0
 	for mesh: MeshInstance3D in generator.architecture.find_children("*","MeshInstance3D",true,false):

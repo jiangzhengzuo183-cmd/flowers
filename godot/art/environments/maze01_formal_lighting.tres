@@ -1,0 +1,12 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://art/environments/dream_lighting.gd" id="1_script"]
+[ext_resource type="Environment" path="res://art/environments/maze01_dream_environment.tres" id="2_environment"]
+
+[resource]
+script = ExtResource("1_script")
+environment = ExtResource("2_environment")
+sun_color = Color(1, 0.987, 0.96, 1)
+sun_energy = 0.25
+sun_rotation = Vector3(-42, -38, 0)
+shadow_opacity = 0.63

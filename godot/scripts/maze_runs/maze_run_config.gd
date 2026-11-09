@@ -7,8 +7,8 @@ extends Resource
 @export var gate_interaction_enabled: Dictionary = {"D1":true,"D2":true,"D3":true,"D4":true}
 @export var required_exit_gates: Array[String] = ["D1","D3","D4"]
 @export var environment_override: Environment
-@export_range(0.0, 4.0) var sun_energy := 0.65
-@export_range(0.0, 4.0) var fill_energy := 0.45
+@export_range(0.0, 4.0) var sun_energy := 0.26
+@export_range(0.0, 4.0) var fill_energy := 0.0
 @export var show_debug_tools := true
 # Reserved for later mechanics. Nonempty values are rejected rather than ignored.
 @export var item_rules: Dictionary = {}

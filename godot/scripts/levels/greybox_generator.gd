@@ -8,6 +8,8 @@ const RoundHall := preload("res://scripts/levels/round_hall.gd")
 const WallPlan := preload("res://scripts/levels/wall_plan.gd")
 const SunkenCorridor := preload("res://scripts/levels/sunken_corridor.gd")
 const ArchedUnderpass := preload("res://scripts/levels/arched_underpass.gd")
+const WadingPool := preload("res://scripts/levels/wading_pool.gd")
+const EarthBearer := preload("res://art/maze01/statue/earth_bearer.tscn")
 var gates: Dictionary = {}
 var switches: Dictionary = {}
 var surfaces: Array = []
@@ -18,6 +20,7 @@ var round_hall: Node3D
 var high_wall_count := 0
 var rail_edges: Array[Dictionary] = []
 var removed_rail_wall_count := 0
+var hide_inspection_marks := false
 
 func build(original: Dictionary) -> void:
 	super(Layout.patched_map(original))
@@ -27,6 +30,9 @@ func build(original: Dictionary) -> void:
 	architecture.name = "LevelArchitecture"
 	add_child(architecture)
 	_replace_ground_floor()
+	var statue := EarthBearer.instantiate() as Node3D
+	statue.position = Layout.cell_point(Layout.config().statue_plaza_cell)
+	add_child(statue)
 	_build_courtyard()
 	floor_faces.append_array(SunkenCorridor.build(architecture,Layout.config().sunken_corridor))
 	round_hall = RoundHall.build(architecture,Layout.config().building)
@@ -77,6 +83,10 @@ func build(original: Dictionary) -> void:
 		body.collision_layer = 5
 	_rebuild_route_lines(original)
 
+func _marker(cell: Array, color: Color, size: float, id: String) -> void:
+	if id not in ["Entry", "Exit"]:
+		super(cell, color, size, id)
+
 func _replace_ground_floor() -> void:
 	# Remove only the inherited runtime floor, then rebuild around the real
 	# courtyard hole. No original scene, data, or source asset is rewritten.
@@ -86,14 +96,23 @@ func _replace_ground_floor() -> void:
 			child.free()
 			break
 	var plans: Array[PackedVector2Array] = [PackedVector2Array([Vector2(-0.7,-0.7),Vector2(46.3,-0.7),Vector2(46.3,46.3),Vector2(-0.7,46.3)])]
-	for r: Array in [[0.0,9.6,4.8,14.4],Layout.config().sunken_corridor.rect]:
+	var corridor: Dictionary = Layout.config().sunken_corridor
+	var cutouts: Array[Array] = [[0.0,9.6,4.8,14.4],corridor.rect]
+	# Clear only the slab inside each deep niche. The pocket's own masonry
+	# closes the floor and sides; the adjacent lane remains at its old height.
+	for center: float in corridor.niches:
+		var half_width := SunkenCorridor.NICHE_OUTER_HALF_WIDTH
+		# End inside the back wall so the cut slab face and finished wall face
+		# cannot render at the same depth.
+		cutouts.append([SunkenCorridor.NICHE_FRONT, SunkenCorridor.NICHE_BACK+0.04, center-half_width, center+half_width])
+	for r: Array in cutouts:
 		var hole := PackedVector2Array([Vector2(r[0],r[2]),Vector2(r[1],r[2]),Vector2(r[1],r[3]),Vector2(r[0],r[3])])
 		var next: Array[PackedVector2Array] = []
 		for plan: PackedVector2Array in plans:
 			next.append_array(WallPlan.subtract(plan,hole))
 		plans = next
 	for plan: PackedVector2Array in plans:
-		# Both holes are rectangular. Retain the original BoxMesh floor shading.
+		# All cutouts are rectangular. Retain the original BoxMesh floor shading.
 		var bounds := Rect2(plan[0],Vector2.ZERO)
 		for p: Vector2 in plan:
 			bounds = bounds.expand(p)
@@ -103,38 +122,22 @@ func _build_courtyard() -> void:
 	var garden := Node3D.new()
 	garden.name = "NorthwestCourtyard"
 	architecture.add_child(garden)
+	var spec: Dictionary = Layout.config().northwest
 	var index := 0
-	for faces: PackedVector3Array in Layout.courtyard_faces:
+	for faces: PackedVector3Array in Layout.courtyard_steps:
 		var r := 2+index/4
 		var c := index%4
-		var height := float(Layout.config().northwest.levels[r-2][c])
+		var height := float(spec.levels[r-2][c])
 		var color := Color("899e9c") if height<0 else (Color("aaa899") if height>0 else Color("b5bdb7"))
-		var mesh := ArrayMesh.new()
-		var st := SurfaceTool.new()
-		st.begin(Mesh.PRIMITIVE_TRIANGLES)
-		for vertex: Vector3 in faces:
-			st.add_vertex(vertex)
-		st.generate_normals()
-		mesh = st.commit()
-		var visual := MeshInstance3D.new()
-		visual.mesh = mesh
-		visual.material_override = Geometry.material(color)
-		garden.add_child(visual)
-		floor_faces.append_array(faces)
+		_add_courtyard_surface(garden,faces,Geometry.material(color))
 		index += 1
 	var stone := Geometry.material(Color("7a8682"))
 	var rail_material := Geometry.material(Geometry.WALL_GREY)
-	for transition: Dictionary in Layout.config().northwest.transitions:
-		var a := Layout.cell_point(transition.a)
-		var b := Layout.cell_point(transition.b)
-		var along_x := absf(b.x-a.x)>0.1
-		var count := ceili(absf(float(transition.heights[1])-float(transition.heights[0]))/0.12)
-		for step in count:
-			var t := (0.5+1.4*(step+0.5)/count)/2.4
-			var p := a.lerp(b,t)
-			p.y = Layout.height_at(Vector2(p.x,p.z))+0.014
-			var size := Vector3(1.4/count*0.9,0.028,1.8) if along_x else Vector3(1.8,0.028,1.4/count*0.9)
-			Geometry.box(garden,"CourtyardTread",size,p,Geometry.material(Color("bdc2b9")),false)
+	_add_courtyard_surface(garden,Layout.courtyard_risers,stone,"CourtyardRisers")
+	for faces: PackedVector3Array in Layout.courtyard_faces:
+		floor_faces.append_array(faces)
+	floor_faces.append_array(Layout.courtyard_collision_risers)
+	WadingPool.add_surface(garden,Layout.courtyard_steps,float(spec.waterSurface),float(spec.minimum))
 	# The old non-passable wall becomes an actual framed observation window.
 	for x in [0.16,2.24]:
 		Geometry.box(garden,"WindowPier",Vector3(0.32,3.0,0.32),Vector3(x,0.9,9.6),stone)
@@ -150,13 +153,25 @@ func _build_courtyard() -> void:
 			Geometry.box(garden,"GalleryBalustrade",Vector3(0.12,0.08,2.4),Vector3(4.8,rail_y,z),rail_material)
 		for offset in [-0.9,-0.45,0.0,0.45,0.9]:
 			Geometry.box(garden,"GalleryBaluster",Vector3(0.08,0.86,0.08),Vector3(4.8,1.4,z+offset),rail_material)
-	# Centre of the lower loop: preserve both 1.8m circulation strips.
-	Geometry.box(garden,"DryFlowerbed",Vector3(1.0,0.28,1.0),Vector3(2.4,-0.46,12.0),Geometry.material(Color("747f70")))
-	for anchor: Dictionary in Layout.config().northwest.reservedAnchors:
+	for anchor: Dictionary in spec.reservedAnchors:
 		var point := Layout.cell_point(anchor.cell)
 		point.y = Layout.height_at(Vector2(point.x,point.z))+0.03
 		Geometry.box(garden,str(anchor.id)+"_Reserved",Vector3(0.32,0.02,0.32),point,Geometry.material(Color("7d9294")),false)
 	Geometry.label(garden,"H5 · 下沉花庭 −0.6m / 回廊 +0.9m",Vector3(4.8,3.9,10.8),36)
+
+func _add_courtyard_surface(parent: Node3D,faces: PackedVector3Array,mat: Material,part: String = "") -> void:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for vertex: Vector3 in faces:
+		st.add_vertex(vertex)
+	st.generate_normals()
+	var visual := MeshInstance3D.new()
+	visual.mesh = st.commit()
+	visual.material_override = mat
+	if not part.is_empty():
+		visual.name = part
+		visual.set_meta("greybox_part",part)
+	parent.add_child(visual)
 
 func _wall_height(r: int,c: int,vertical: bool) -> float:
 	var row := float(r)+(.5 if vertical else 0.0)
@@ -422,11 +437,11 @@ func _rebuild_route_lines(original: Dictionary) -> void:
 func set_walk_cutaway(enabled: bool) -> void:
 	# Heights and collisions now agree. The follow camera handles obstruction.
 	for pin: MeshInstance3D in marker_pins:
-		pin.visible = not enabled
+		pin.visible = not enabled and not hide_inspection_marks
 	if is_instance_valid(architecture) and architecture.has_node("SunkenCorridor/InspectionLabel"):
-		architecture.get_node("SunkenCorridor/InspectionLabel").visible = not enabled
+		architecture.get_node("SunkenCorridor/InspectionLabel").visible = not enabled and not hide_inspection_marks
 	if is_instance_valid(architecture) and architecture.has_node("UnderpassInspectionLabel"):
-		architecture.get_node("UnderpassInspectionLabel").visible = not enabled
+		architecture.get_node("UnderpassInspectionLabel").visible = not enabled and not hide_inspection_marks
 	if is_instance_valid(round_hall):
 		round_hall.get_node("Roof").visible = enabled
 

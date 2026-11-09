@@ -1,0 +1,30 @@
+[gd_resource type="Environment" load_steps=4 format=3]
+
+[ext_resource type="Shader" path="res://art/environments/dream_sky.gdshader" id="1_sky"]
+[sub_resource type="ShaderMaterial" id="SkyMaterial"]
+shader = ExtResource("1_sky")
+[sub_resource type="Sky" id="Sky"]
+radiance_size = 2
+sky_material = SubResource("SkyMaterial")
+
+[resource]
+resource_name = "Maze01 dream environment sample"
+background_mode = 2
+sky = SubResource("Sky")
+ambient_light_source = 2
+ambient_light_color = Color(0.97, 0.95, 1.0, 1)
+ambient_light_energy = 0.53
+reflected_light_source = 2
+tonemap_mode = 0
+tonemap_agx_white = 6.0
+ssao_enabled = true
+ssao_radius = 0.65
+ssao_intensity = 0.26
+glow_enabled = false
+glow_intensity = 0.08
+glow_bloom = 0.0
+glow_hdr_threshold = 1.15
+adjustment_enabled = false
+adjustment_brightness = 1.0
+adjustment_contrast = 1.0
+adjustment_saturation = 1.0

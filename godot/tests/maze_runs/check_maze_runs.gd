@@ -40,13 +40,19 @@ func stable_path(ancestor: Node,node: Node) -> Array[int]:
 func gate_collision(scene: Node,id: String) -> CollisionShape3D:
 	return scene.get_node("%GeneratedMaze").gates[id].leaf.get_node("GateCollision")
 
-func capture_preview() -> void:
+func transient_playing(run_scene: Node) -> bool:
+	for player: AudioStreamPlayer in run_scene.find_children("*","AudioStreamPlayer",true,false):
+		if player.name != &"Music" and player.playing:
+			return true
+	return false
+
+func capture_preview(label: String = "three_runs_preview") -> void:
 	if not OS.get_cmdline_user_args().has("--capture"):
 		return
 	await RenderingServer.frame_post_draw
 	var folder := ProjectSettings.globalize_path("res://../.verification/maze-runs")
 	DirAccess.make_dir_recursive_absolute(folder)
-	check(root.get_texture().get_image().save_png(folder.path_join("three_runs_preview.png"))==OK,"Native preview capture")
+	check(root.get_texture().get_image().save_png(folder.path_join(label + ".png"))==OK,"Native preview capture")
 
 func run() -> void:
 	root.size = Vector2i(1280,900)
@@ -102,7 +108,7 @@ func run() -> void:
 	await frames()
 	check(alternate.get_run_state().gates.D1 and gate_collision(alternate,"D1").disabled,"Initial open state has no blocking leaf")
 	check(not is_instance_valid(alternate.get_node("%GeneratedMaze").gates.D1.tween),"Initial open state is immediate")
-	check(alternate.find_children("*","AudioStreamPlayer",true,false).is_empty(),"Initial open state is silent")
+	check(not transient_playing(alternate),"Initial open state starts no gate or celebration sounds")
 	check(not alternate.try_activate_gate("D3"),"Disabled gate interaction is enforced")
 	check(not alternate.can_finish(),"Custom exit condition waits for D2")
 	var env: Environment = alternate.get_node("%WorldEnvironment").environment
@@ -122,17 +128,20 @@ func run() -> void:
 	alternate.get_node("%Player").velocity = Vector3.ZERO
 	await frames(5)
 	check(not alternate.completed,"Exit trigger rejects unmet configured conditions")
+	check(actor_a.current_animation != &"Dance", "Locked exit does not play the celebration")
 	check(alternate.try_activate_gate("D2"),"Configured required gate can be activated")
 	await frames(6)
 	check(alternate.completed and completions.size()==1,"Opening final gate while in exit emits one completion")
+	check(actor_a.current_animation == &"Dance" and actor_b.current_animation != &"Dance", "Only the successful runner plays the celebration")
 	check(completions[0].id=="isolation" and completions[0].result.completed,"Completion includes run identity and final state")
 	alternate.complete_level()
 	check(completions.size()==1,"Completion is not emitted twice")
 	alternate.reset_level()
 	await frames(45)
+	check(actor_a.current_animation == &"Idle", "Reset cancels the celebration")
 	check(not alternate.completed and alternate.get_run_state().gates.D1 and not alternate.get_run_state().gates.D2,"Reset restores the captured initial states")
 	check(not gate_collision(alternate,"D2").disabled,"Reset kills pending gate tween/collision callback")
-	check(alternate.find_children("*","AudioStreamPlayer",true,false).is_empty(),"Reset removes stopped opening sounds")
+	check(not transient_playing(alternate) and alternate.sound.get_node("Music").playing,"Reset stops cues and leaves the background music running")
 	check(not controller.active_run.get_run_state().gates.D1,"Other live instance still unchanged")
 	check(default_profile.snapshot()==untouched,"Shared profile resource remains unchanged")
 	check(JSON.stringify(Layout.config())==layout_before,"Run configuration never mutates shared spatial data")
@@ -146,6 +155,12 @@ func run() -> void:
 	active.get_node("%Player").velocity = Vector3.ZERO
 	await frames(6)
 	check(active.completed and not controller.get_node("%Next").disabled,"Completion enables next run")
+	var exit_actor = active.get_node("%Player")
+	await frames(72)
+	check(exit_actor.visual.celebrating and exit_actor.visual.animation_player.current_animation_position > 1.0, "Celebration keeps playing after crossing the exit")
+	await capture_preview("charlie_exit_dance")
+	await frames(190)
+	check(not exit_actor.visual.celebrating and exit_actor.visual.animation_player.current_animation == &"Idle", "The celebration ends and gives movement back")
 	active.reset_level()
 	await frames()
 	check(controller.results.is_empty() and controller.get_node("%Next").disabled,"Local reset invalidates old results and next permission")

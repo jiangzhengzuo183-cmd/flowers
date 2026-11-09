@@ -2,6 +2,7 @@ extends Node
 ## Real camera-to-character ray hits select whole wall segments for alpha blending.
 
 const FADE_SHADER := preload("res://scripts/levels/wall_occlusion.gdshader")
+const Gate := preload("res://scripts/levels/greybox_gate.gd")
 var player: CharacterBody3D
 var rig: Node3D
 var materials: Array[ShaderMaterial] = []
@@ -79,7 +80,7 @@ func _group_id(mesh: MeshInstance3D,generator: Node3D) -> String:
 	return str(parent.get_instance_id()) if parent is StaticBody3D else str(mesh.get_instance_id())
 
 func _can_fade(part: String) -> bool:
-	for prefix: String in ["WallSegment_","CurvedWall","PorchWall","LeftPier","RightPier","Lintel","ArchStone","WallAboveArch","Window","Pilaster","Capital","Base","Plinth","Cornice","ArchFrame","RetainingWall","TunnelEnd","UnderpassBeam","Bar","Crossbar"]:
+	for prefix: String in ["WallSegment_","CurvedWall","PorchWall","LeftPier","RightPier","Lintel","ArchStone","WallAboveArch","Window","Pilaster","Capital","Base","Plinth","Cornice","ArchFrame","RetainingWall","TunnelEnd","UnderpassBeam","GatePanel"]:
 		if part.begins_with(prefix):
 			return true
 	return false
@@ -128,9 +129,9 @@ func sight_blockers(camera_position: Vector3) -> Dictionary:
 				if hit.is_empty():
 					break
 				var collider: Object = hit.collider
-				# Gate bars use one full movement box; that box is not an
-				# opaque visual surface, since Charlie is visible through its gaps.
-				if str(collider.name)=="MovingGate":
+				# The movement blocker remains up until the door fully sinks.
+				# Only the panel still above the floor can occlude the camera.
+				if str(collider.name)=="MovingGate" and hit.position.y>collider.global_position.y+Gate.PANEL_HEIGHT:
 					excluded.append(hit.rid)
 					continue
 				if not _collider_groups.has(collider.get_instance_id()):

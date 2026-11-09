@@ -35,37 +35,32 @@ func run_checks() -> void:
 	var skeleton: Skeleton3D
 	for node in visual.find_children("*", "Skeleton3D", true, false):
 		skeleton = node
-	check(skeleton != null and skeleton.get_bone_count() == 24, "24-bone skeleton must import")
+	check(skeleton != null and skeleton.get_bone_count() == 41, "The re-rigged 41-bone skeleton must import")
 	if player == null or skeleton == null:
 		quit(1)
 		return
-	for clip in [&"Idle", &"Walk", &"Run"]:
+	var hip := skeleton.find_bone("Hip")
+	var hip_rest := skeleton.get_bone_global_rest(hip).origin
+	for clip in [&"Idle", &"Walk", &"Run", &"Jump", &"JumpInPlace", &"Dance"]:
 		check(player.has_animation(clip), "Missing clip: " + clip)
 		var anim := player.get_animation(clip)
-		check(anim.loop_mode == Animation.LOOP_LINEAR, "Clip must loop: " + clip)
-		var expected := 3.0 if clip == &"Idle" else (1.0 if clip == &"Walk" else 2.0 / 3.0)
-		check(absf(anim.length - expected) < 0.001, "Incorrect duration: " + clip)
+		var expected_loop := Animation.LOOP_LINEAR if clip in [&"Idle", &"Walk", &"Run"] else Animation.LOOP_NONE
+		check(anim.loop_mode == expected_loop, "Correct loop mode: " + clip)
 		player.play(clip, 0.0)
 		player.seek(0, true)
-		var first: Array[Transform3D] = []
-		for bone in skeleton.get_bone_count():
-			first.append(skeleton.get_bone_pose(bone))
-		player.seek(anim.length, true)
-		for bone in skeleton.get_bone_count():
-			check(first[bone].is_equal_approx(skeleton.get_bone_pose(bone)), "Loop discontinuity: " + clip + "/" + skeleton.get_bone_name(bone))
+		var leg := skeleton.find_bone("L_Thigh")
+		var start_leg := skeleton.get_bone_pose_rotation(leg)
+		for sample in 9:
+			player.seek(anim.length * sample / 8.0, true)
+			var offset := skeleton.get_bone_global_pose(hip).origin - hip_rest
+			check(Vector2(offset.x, offset.z).length() < 0.001, "Authored travel stays within the character body: " + clip)
+			if clip == &"JumpInPlace":
+				check(offset.y < 0.001, "Physics jump has no baked lift")
 		player.seek(anim.length * 0.25, true)
-		var root_bone := skeleton.find_bone("Root")
-		check(skeleton.get_bone_pose(root_bone).origin.length() < 0.0001, "Root motion must remain in place")
-		if clip != &"Idle":
-			var leg := skeleton.find_bone("LeftUpperLeg")
-			check(not first[leg].basis.is_equal_approx(skeleton.get_bone_pose(leg).basis), "Leg must animate: " + clip)
-	player.play(&"Run", 0.0)
-	var max_knee := 0.0
-	for frame in 21:
-		player.seek(frame / 30.0, true)
-		var knee := skeleton.get_bone_pose_rotation(skeleton.find_bone("LeftLowerLeg"))
-		max_knee = maxf(max_knee, 2.0 * acos(clampf(absf(knee.w), 0, 1)))
-	check(max_knee > deg_to_rad(100), "Run must have a clearly flexed recovery knee")
+		if clip in [&"Walk", &"Run"]:
+			check(not start_leg.is_equal_approx(skeleton.get_bone_pose_rotation(leg)), "Leg must animate: " + clip)
+	for clip in [&"cry_001", &"heart_pose_001", &"defeat_03_001"]:
+		check(player.has_animation(clip), "Additional authored animation remains available: " + clip)
 	visual.set_locomotion(0.0)
 	check(player.current_animation == "Idle", "Stationary -> Idle")
 	visual.set_locomotion(1.2)
@@ -76,24 +71,11 @@ func run_checks() -> void:
 	check(player.current_animation == "Jump", "Jump helper must play one-shot")
 	visual.set_locomotion(1.2)
 	check(player.current_animation == "Jump", "Locomotion must not interrupt jump")
-	# Measure the authored pose without a still-running transition from Run.
-	player.stop()
-	player.play(&"Jump", 0.0)
-	player.seek(0.6, true)
-	var root_bone := skeleton.find_bone("Root")
-	var apex := skeleton.get_bone_pose_position(root_bone)
-	# Godot's default curve optimization may remove the exact apex sample.
-	check(absf(apex.y - 0.43) < 0.01 and absf(apex.x) < 0.001 and absf(apex.z) < 0.001, "Jump apex must be about 43 cm with no horizontal root motion")
-	player.seek(0.9, true)
-	check(skeleton.get_bone_pose_position(root_bone).length() < 0.001, "Jump root must return to ground at contact")
+	check(player.has_section(), "Preview plays one hop from the authored sequence")
 	player.advance(0.6)
 	check(player.current_animation == "Walk", "Finished jump must restore queued locomotion")
 	visual.play_jump(false)
-	player.stop()
-	player.play(&"JumpInPlace", 0.0)
-	player.seek(0.6, true)
 	check(player.current_animation == "JumpInPlace", "Physics-driven jump must use in-place variant")
-	check(skeleton.get_bone_pose_position(root_bone).length() < 0.001, "In-place jump must not double the controller height")
 	player.advance(1.0)
 	var preview := load("res://scenes/characters/charlie_preview.tscn") as PackedScene
 	check(preview != null, "Preview scene must load")

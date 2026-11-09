@@ -5,6 +5,7 @@ const WALK_SPEED := 1.6
 const RUN_SPEED := 2.7
 const GRAVITY := 18.0
 const JUMP_SPEED := 3.9
+const STATIONARY_SPEED := 0.05
 var controls_enabled := false
 var movement_camera: Camera3D
 var spawn_point := Vector3.ZERO
@@ -13,6 +14,7 @@ var visual: Node3D
 var _jump_requested := false
 var _jump_key_down := false
 var _physics_jumping := false
+var _stationary_seconds := 0.0
 
 func _ready() -> void:
 	collision_layer = 2
@@ -38,6 +40,7 @@ func reset_player() -> void:
 	_jump_requested = false
 	_jump_key_down = Input.is_physical_key_pressed(KEY_SPACE)
 	_physics_jumping = false
+	_stationary_seconds = 0.0
 	if is_instance_valid(visual):
 		visual.rotation.y = 0
 		visual.cancel_jump()
@@ -56,7 +59,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 func _physics_process(delta: float) -> void:
 	var direction := Vector3.ZERO
-	if controls_enabled and is_instance_valid(movement_camera):
+	var can_move: bool = controls_enabled and not visual.celebrating
+	if can_move and is_instance_valid(movement_camera):
 		var horizontal := float(Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT)) - float(Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT))
 		var forward_input := float(Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP)) - float(Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN))
 		var forward := -movement_camera.global_basis.z
@@ -67,7 +71,7 @@ func _physics_process(delta: float) -> void:
 	var speed := RUN_SPEED if Input.is_physical_key_pressed(KEY_SHIFT) else WALK_SPEED
 	velocity.x = direction.x * speed
 	velocity.z = direction.z * speed
-	if _jump_requested and controls_enabled and is_on_floor():
+	if _jump_requested and can_move and is_on_floor():
 		velocity.y = JUMP_SPEED
 		_physics_jumping = true
 		visual.begin_physics_jump()
@@ -91,10 +95,15 @@ func _physics_process(delta: float) -> void:
 	# Use actual travel after collision and boundary clamping, so pushing into a
 	# wall does not keep the walk/run animation playing on a stationary body.
 	var travel := position - previous_position
+	var ground_speed := Vector2(travel.x, travel.z).length() / maxf(delta, 0.0001)
+	if is_on_floor() and not visual.celebrating and ground_speed < STATIONARY_SPEED:
+		_stationary_seconds += delta
+	else:
+		_stationary_seconds = 0.0
 	if _physics_jumping:
 		if is_on_floor():
 			_physics_jumping = false
 			visual.end_physics_jump()
 		else:
 			visual.update_physics_jump(velocity.y,JUMP_SPEED)
-	visual.set_locomotion(Vector2(travel.x, travel.z).length() / maxf(delta, 0.0001))
+	visual.set_locomotion(ground_speed, _stationary_seconds)

@@ -1,10 +1,18 @@
 # 查理：骨骼与基础动画
 
+## 当前游戏版本
+
+游戏使用用户重新绑定的 `charlie_rebound.glb`，包含 41 根骨骼和 8 段原始动作。模型文件按原样导入，在游戏内调整尺寸、朝向和动画位移，走跑与跳跃的实际距离由现有控制器负责。空格播放新跳跃动作中的一跳，落地后恢复移动。
+
+按 F5 试玩。停下先保持自然站姿，连续 4 秒没有操作后播放完整待机动作。满足机关条件后到达出口，查理原地跳约 4 秒的庆祝舞，然后恢复控制。另有爱心、哭泣和失败动作可在模型资源中查看。
+
+## 旧版制作记录
+
 输入为用户提供的桌面 `Untitled.blend`，已在 Blender 5.2.3 LTS 中处理。原文件未改写。
 
 ## 文件与预览
 
-当前游戏使用 `charlie_refined.glb`，可编辑源文件为 `charlie_refined.blend`。这是对原成品的增补版本：只收敛 Run 的上臂、前臂和手掌动作；网格、UV、法线、权重、贴图和其他动作保留。原 `charlie.glb`、`charlie_rigged.blend` 与六份 GIF 均保留，旧 GIF 展示的是修订前的跑步姿势。差异记录见 `run_refinement_report.json`。
+旧版使用 `charlie_refined.glb`，可编辑源文件为 `charlie_refined.blend`。这是对原成品的增补版本：只收敛 Run 的上臂、前臂和手掌动作；网格、UV、法线、权重、贴图和其他动作保留。原 `charlie.glb`、`charlie_rigged.blend` 与六份 GIF 均保留，旧 GIF 展示的是修订前的跑步姿势。差异记录见 `run_refinement_report.json`。
 
 - `charlie_rigged.blend`：可继续编辑的骨骼、权重与四个 Action，贴图已打包。
 - `idle.gif`、`walk.gif`、`run.gif`：循环预览；`run_side.gif` 为新版跑步侧面。

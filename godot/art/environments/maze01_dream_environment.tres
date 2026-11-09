@@ -1,0 +1,29 @@
+[gd_resource type="Environment" load_steps=4 format=3]
+
+[ext_resource type="Shader" path="res://art/environments/dream_sky.gdshader" id="1_sky"]
+
+[sub_resource type="ShaderMaterial" id="DreamSky"]
+shader = ExtResource("1_sky")
+shader_parameter/zenith = Color(0.53, 0.63, 0.91, 1)
+shader_parameter/middle = Color(0.79, 0.65, 0.91, 1)
+shader_parameter/horizon = Color(1.0, 0.89, 0.92, 1)
+shader_parameter/nadir = Color(0.66, 0.64, 0.88, 1)
+shader_parameter/sky_details = true
+
+[sub_resource type="Sky" id="Sky"]
+radiance_size = 2
+sky_material = SubResource("DreamSky")
+
+[resource]
+resource_name = "Maze 01 blue violet and pink"
+background_mode = 2
+sky = SubResource("Sky")
+ambient_light_source = 2
+ambient_light_color = Color(0.95, 0.93, 1, 1)
+ambient_light_energy = 0.48
+reflected_light_source = 2
+tonemap_mode = 0
+ssao_enabled = true
+ssao_radius = 0.48
+ssao_intensity = 0.17
+glow_enabled = false

@@ -30,11 +30,14 @@ func _ready() -> void:
 	%WorldEnvironment.environment = environment if environment else %WorldEnvironment.environment.duplicate(true)
 	var world := %Player.get_parent()
 	world.get_node("Sun").light_energy = _settings.sun_energy
-	world.get_node("SoftFill").light_energy = _settings.fill_energy
+	var fill: DirectionalLight3D = world.get_node("SoftFill")
+	fill.light_energy = _settings.fill_energy
+	fill.visible = fill.light_energy > 0.0
 	_exit_area = world.get_node("ExitTrigger")
 	_configured = true
 	get_node("Heading").text = _settings.display_name+" · Maze 01"
-	%Summary.text = "共用最终灰模结构 / 当前为三次运行基础框架"
+	if not dream_art_enabled:
+		%Summary.text = "共用 Maze 01 / 当前为三次运行基础框架"
 	inspection_picker.visible = _settings.show_debug_tools
 	for button: Button in [%HideRoute,%RouteA,%RouteB]:
 		button.visible = _settings.show_debug_tools
@@ -61,12 +64,10 @@ func try_activate_gate(id: String) -> bool:
 	return true
 
 func can_finish() -> bool:
-	if not _configured:
-		return false
-	for id: String in _settings.required_exit_gates:
-		if not %GeneratedMaze.gates[id].is_open:
-			return false
-	return true
+	return _configured and super()
+
+func required_exit_gates() -> Array:
+	return _settings.required_exit_gates
 
 func complete_level() -> void:
 	if completed or not can_finish():
@@ -85,20 +86,18 @@ func _process(delta: float) -> void:
 func reset_level() -> void:
 	if not _configured:
 		return
-	_stop_run_audio()
+	_stop_legacy_gate_chimes()
 	super()
 	_apply_initial_gates()
 	_refresh_hud()
 	run_reset.emit(str(_settings.run_id))
 
-func _exit_tree() -> void:
-	_stop_run_audio()
-
-func _stop_run_audio() -> void:
-	# A detached run must not leave an opening chime playing into the next run.
-	for sound: AudioStreamPlayer in find_children("*","AudioStreamPlayer",true,false):
-		sound.stop()
-		sound.queue_free()
+func _stop_legacy_gate_chimes() -> void:
+	# The sound layer handles its own transients. Only raw runs make gate-local players.
+	for gate: Node3D in %GeneratedMaze.gates.values():
+		for chime: AudioStreamPlayer in gate.find_children("*","AudioStreamPlayer",false,false):
+			chime.stop()
+			chime.queue_free()
 
 func get_run_state() -> Dictionary:
 	var gates: Dictionary = {}

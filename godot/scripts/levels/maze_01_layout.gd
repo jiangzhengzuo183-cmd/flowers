@@ -1,8 +1,14 @@
 extends RefCounted
 
 const CONFIG_PATH := "res://data/levels/maze_01_greybox.json"
+const H5_GRID_UNIT := 0.025
+const H5_CELL_UNITS := 96
+const H5_RISER_HEIGHT := 0.15
 static var _cached: Dictionary = {}
 static var courtyard_faces: Array[PackedVector3Array] = []
+static var courtyard_steps: Array[PackedVector3Array] = []
+static var courtyard_risers := PackedVector3Array()
+static var courtyard_collision_risers := PackedVector3Array()
 
 static func config() -> Dictionary:
 	if _cached.is_empty():
@@ -20,47 +26,104 @@ static func patched_map(original: Dictionary) -> Dictionary:
 	for r in int(result.grid.rows):
 		for c in int(result.grid.cols):
 			result.grid.cellWalls[r][c] = {"north":result.grid.horizontalWalls[r][c],"south":result.grid.horizontalWalls[r+1][c],"west":result.grid.verticalWalls[r][c],"east":result.grid.verticalWalls[r][c+1]}
-	_build_courtyard_faces(result)
+	if courtyard_faces.is_empty():
+		_build_courtyard_faces()
 	return result
 
 static func _nw_level(r: int,c: int) -> float:
 	return float(config().northwest.levels[r-2][c]) if r>=2 and r<=5 and c>=0 and c<=3 else 0.0
 
-static func _corner_level(r: int,c: int) -> float:
-	var total := 0.0
-	var count := 0
-	for rr in [r-1,r]:
-		for cc in [c-1,c]:
-			if rr>=2 and rr<=5 and cc>=0 and cc<=3:
-				total += _nw_level(rr,cc)
-				count += 1
-	return total/maxi(1,count)
+static func _build_courtyard_faces() -> void:
+	var spec: Dictionary = config().northwest
+	var shore: Array = spec.entry.inside
+	var ramps: Dictionary = {}
+	for transition: Dictionary in spec.transitions:
+		for side in 2:
+			var from: Array = transition.a if side==0 else transition.b
+			var to: Array = transition.b if side==0 else transition.a
+			var tile := Vector2i(int(from[1]),int(from[0]))
+			var direction := Vector2i(int(to[1]),int(to[0]))-tile
+			var start := float(transition.heights[side])
+			var finish := float(transition.heights[1-side])
+			if to==shore:
+				continue # The southwest stair descends wholly inside its dry entry cell.
+			if not ramps.has(tile):
+				ramps[tile] = {}
+			var edge_height := finish if from==shore else (start+finish)*0.5
+			var run := 1.0 if from==shore else (0.9 if absf(start-finish)>0.7 else 0.6)
+			ramps[tile][direction] = Vector2(edge_height,run)
+	# Keep the invisible walking surface continuous. Visible treads change
+	# height midway between the collision levels, at most half a riser away.
+	# Grid cuts mark the ends of the 0.6/0.9/1.0 m runs and each tread edge.
+	var entry_tile := Vector2i(int(shore[1]),int(shore[0]))
+	courtyard_collision_risers = _courtyard_grid(ramps,entry_tile,[0,24,36,40,56,60,72,96],false,courtyard_faces)
+	courtyard_risers = _courtyard_grid(ramps,entry_tile,[0,5,6,15,18,24,25,30,35,36,40,56,60,61,66,71,72,78,81,90,91,96],true,courtyard_steps)
 
-static func _build_courtyard_faces(map: Dictionary) -> void:
-	courtyard_faces.clear()
+static func _courtyard_grid(ramps: Dictionary,entry_tile: Vector2i,cuts: Array,stepped: bool,surfaces_out: Array[PackedVector3Array]) -> PackedVector3Array:
+	surfaces_out.clear()
+	var edges: Dictionary = {}
+	var risers := PackedVector3Array()
 	for r in range(2,6):
 		for c in range(4):
 			var y := _nw_level(r,c)
-			var center := cell_point([r,c],y)
-			var outer: Array[Vector3] = []
-			var inner: Array[Vector3] = []
-			# A 1m flat landing at every cell centre; the remaining 1.4m between
-			# adjacent landings carries a 0.6/0.9m rise with continuous seams.
-			for p: Vector2 in [Vector2(-1,-1),Vector2(0,-1),Vector2(1,-1),Vector2(1,0),Vector2(1,1),Vector2(0,1),Vector2(-1,1),Vector2(-1,0)]:
-				var h := y
-				if p.x!=0 and p.y!=0:
-					h = _corner_level(r+(1 if p.y>0 else 0),c+(1 if p.x>0 else 0))
-				else:
-					var side := "north" if p.y<0 else ("south" if p.y>0 else ("west" if p.x<0 else "east"))
-					if not map.grid.cellWalls[r][c][side]:
-						h = (y+_nw_level(r+int(p.y),c+int(p.x)))/2
-				outer.append(center+Vector3(p.x*1.2,h-y,p.y*1.2))
-				inner.append(center+Vector3(p.x*0.5,0,p.y*0.5))
+			var tile := Vector2i(c,r)
+			var slopes: Dictionary = ramps.get(tile,{})
 			var faces := PackedVector3Array()
-			for i in 8:
-				var j := (i+1)%8
-				faces.append_array(PackedVector3Array([center,inner[j],inner[i],inner[i],inner[j],outer[j],inner[i],outer[j],outer[i]]))
-			courtyard_faces.append(faces)
+			for j in cuts.size()-1:
+				for i in cuts.size()-1:
+					var lo := Vector2(cuts[i],cuts[j])*H5_GRID_UNIT
+					var hi := Vector2(cuts[i+1],cuts[j+1])*H5_GRID_UNIT
+					var x0: int = c*H5_CELL_UNITS+cuts[i]
+					var x1: int = c*H5_CELL_UNITS+cuts[i+1]
+					var z0: int = r*H5_CELL_UNITS+cuts[j]
+					var z1: int = r*H5_CELL_UNITS+cuts[j+1]
+					var h := Vector4.ZERO
+					if stepped:
+						h = Vector4.ONE*snappedf(_courtyard_ramp_height(y,slopes,(lo+hi)*0.5),H5_RISER_HEIGHT)
+					else:
+						h = Vector4(
+							_courtyard_ramp_height(y,slopes,lo),
+							_courtyard_ramp_height(y,slopes,Vector2(hi.x,lo.y)),
+							_courtyard_ramp_height(y,slopes,hi),
+							_courtyard_ramp_height(y,slopes,Vector2(lo.x,hi.y))
+						)
+					var a := Vector3(x0*H5_GRID_UNIT,h.x,z0*H5_GRID_UNIT)
+					var b := Vector3(x1*H5_GRID_UNIT,h.y,z0*H5_GRID_UNIT)
+					var d := Vector3(x0*H5_GRID_UNIT,h.w,z1*H5_GRID_UNIT)
+					var corner := Vector3(x1*H5_GRID_UNIT,h.z,z1*H5_GRID_UNIT)
+					if slopes.size()>1:
+						# The two southwest flights meet on a diagonal at the L-shaped turn.
+						faces.append_array(PackedVector3Array([a,d,b,b,d,corner]))
+					else:
+						faces.append_array(PackedVector3Array([a,corner,b,a,d,corner]))
+					_join_courtyard_edge(edges,risers,Vector4i(x0,z0,x1,z0),a,b)
+					_join_courtyard_edge(edges,risers,Vector4i(x0,z1,x1,z1),d,corner)
+					_join_courtyard_edge(edges,risers,Vector4i(x0,z0,x0,z1),a,d)
+					_join_courtyard_edge(edges,risers,Vector4i(x1,z0,x1,z1),b,corner)
+					if tile==entry_tile and j==cuts.size()-2:
+						_join_courtyard_edge(edges,risers,Vector4i(x0,z1,x1,z1),Vector3(d.x,0,d.z),Vector3(corner.x,0,corner.z))
+			surfaces_out.append(faces)
+	return risers
+
+static func _courtyard_ramp_height(y: float,slopes: Dictionary,p: Vector2) -> float:
+	var height := y
+	for direction: Vector2i in slopes:
+		var edge: Vector2 = slopes[direction]
+		var distance := 1.2-(p-Vector2(1.2,1.2)).dot(Vector2(direction))
+		var ramp := lerpf(edge.x,y,clampf(distance/edge.y,0.0,1.0))
+		height = minf(height,ramp) if edge.x<y else maxf(height,ramp)
+	return height
+
+static func _join_courtyard_edge(edges: Dictionary,risers: PackedVector3Array,key: Vector4i,a: Vector3,b: Vector3) -> void:
+	if not edges.has(key):
+		edges[key] = PackedVector3Array([a,b])
+		return
+	# Straight retaining faces close the sides of a ramp or a level change.
+	var other: PackedVector3Array = edges[key]
+	if not is_equal_approx(a.y,other[0].y):
+		risers.append_array(PackedVector3Array([a,other[0],other[1]]))
+	if not is_equal_approx(b.y,other[1].y):
+		risers.append_array(PackedVector3Array([a,other[1],b]))
 
 static func courtyard_height(point: Vector2) -> float:
 	for faces: PackedVector3Array in courtyard_faces:
