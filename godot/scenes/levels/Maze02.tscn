@@ -1,13 +1,14 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/levels/maze02_scene.gd" id="1_scene"]
-[ext_resource type="Script" path="res://scripts/levels/greybox_generator.gd" id="2_generator"]
+[ext_resource type="Script" path="res://scripts/levels/maze02_generator.gd" id="2_generator"]
 [ext_resource type="Script" path="res://scripts/maze/orbit_camera.gd" id="3_camera"]
 [ext_resource type="Script" path="res://scripts/levels/greybox_player.gd" id="4_player"]
 [ext_resource type="Script" path="res://scripts/levels/greybox_camera.gd" id="5_follow"]
 
 [ext_resource type="Theme" path="res://ui/game_theme.tres" id="6_theme"]
 [ext_resource type="Resource" path="res://art/maze02/environment/maze02_lighting.tres" id="7_lighting"]
+[ext_resource type="AudioStream" path="res://art/maze02/audio/sandstone_corridor_loop.wav" id="8_music"]
 
 [sub_resource type="Environment" id="Environment"]
 background_mode = 1
@@ -31,6 +32,9 @@ anchor_bottom = 1.0
 script = ExtResource("1_scene")
 theme = ExtResource("6_theme")
 maze02_lighting = ExtResource("7_lighting")
+maze02_music = ExtResource("8_music")
+use_gate_keys = true
+finish_doctor_enabled = false
 
 [node name="Heading" type="Label" parent="."]
 layout_mode = 2

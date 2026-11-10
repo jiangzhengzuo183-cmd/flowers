@@ -30,20 +30,22 @@ float cloud_lobe(vec2 point, vec2 center, vec2 radius) {
 }
 
 void fragment() {
-	vec2 p = (cloud_world + offset) * pattern_scale * vec2(0.64, 1.0) + TIME * drift;
+	vec2 flow = TIME * vec2(4.15, 0.44);
+	vec2 p = (cloud_world + offset - flow) * pattern_scale * vec2(0.60, 1.42) + TIME * drift;
 	float form = soft_noise(p) * 0.73 + soft_noise(p * 2.3 + vec2(4.2, 8.6)) * 0.27;
 	float edge = 1.0 - smoothstep(110.0, 208.0, length(cloud_world - vec2(22.8)));
-	vec2 q = cloud_world - vec2(22.8) + offset * 0.58 + drift * TIME * 18.0;
+	vec2 q = cloud_world - vec2(22.8) + offset * 0.58 - vec2(sin(TIME * 0.19) * 7.2, 0.0);
 	float bank = cloud_lobe(q, vec2(41.0, -34.0), vec2(37.0, 14.0));
 	bank = max(bank, cloud_lobe(q, vec2(30.0, -39.0), vec2(20.0, 14.0)) * 0.85);
 	bank = max(bank, cloud_lobe(q, vec2(68.0, -29.0), vec2(24.0, 12.0)) * 0.72);
 	float drift_cloud = cloud_lobe(q, vec2(-38.0, 26.0), vec2(26.0, 14.0));
 	drift_cloud = max(drift_cloud, cloud_lobe(q, vec2(-22.0, 30.0), vec2(18.0, 10.0)) * 0.78);
 	float angle_fade = smoothstep(0.035, 0.28, abs(dot(normalize(NORMAL), VIEW)));
-	ALBEDO = cloud_tint.rgb;
+	ALBEDO = mix(vec3(0.77, 0.65, 0.48), cloud_tint.rgb, smoothstep(0.26, 0.76, form));
 	vec2 from_maze = abs(cloud_world - vec2(22.8));
 	float outside = smoothstep(23.0, 36.0, max(from_maze.x, from_maze.y));
 	float surrounding = outside * smoothstep(0.36, 0.75, form) * 0.74;
 	float bank_shape = max(max(bank, drift_cloud * 0.65), surrounding) * (0.54 + 0.45 * form);
-	ALPHA = (bank_shape + 0.19 * smoothstep(0.39, 0.79, form)) * edge * angle_fade * opacity;
+	float streaks = smoothstep(0.34, 0.74, form) * mix(0.20, 0.54, outside);
+	ALPHA = (bank_shape + streaks) * edge * angle_fade * opacity;
 }

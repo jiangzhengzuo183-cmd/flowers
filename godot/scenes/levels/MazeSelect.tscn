@@ -1,0 +1,60 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/maze_select.gd" id="1_selector"]
+[ext_resource type="Theme" path="res://ui/game_theme.tres" id="2_theme"]
+
+[node name="MazeSelect" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource("2_theme")
+script = ExtResource("1_selector")
+
+[node name="Back" type="Button" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_colors/font_focus_color = Color(0.23, 0.31, 0.21, 1)
+text = "‹ 返回迷宫选择"
+
+[node name="Picker" type="CenterContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Choices" type="VBoxContainer" parent="Picker"]
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="Picker/Choices"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "迷宫选择"
+
+[node name="Description" type="Label" parent="Picker/Choices"]
+layout_mode = 2
+text = "Godot 开发测试 · 选择一个场景开始"
+
+[node name="Maze01" type="Button" parent="Picker/Choices"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+theme_override_colors/font_focus_color = Color(0.23, 0.31, 0.21, 1)
+text = "Maze 01    梦境迷宫"
+alignment = 0
+
+[node name="Maze02" type="Button" parent="Picker/Choices"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+theme_override_colors/font_focus_color = Color(0.23, 0.31, 0.21, 1)
+text = "Maze 02    Memory Distortion"
+alignment = 0
+
+[node name="LevelHost" type="Control" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
