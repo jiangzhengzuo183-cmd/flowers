@@ -1,36 +1,54 @@
 extends HBoxContainer
 
 signal enter_maze
-var lines: Array = []
-var index := 0
+const BAKERY_SCENE := preload("res://scenes/bakery.tscn")
+const CONTINUATION := preload("res://scripts/story/continuation_chapter.gd")
+var bakery: Control
+var completed_day01: RefCounted
 
 func _ready() -> void:
-	var data: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/prologue.json"))
-	if data is Dictionary and data.get("lines") is Array:
-		lines = data.lines
-	%NextButton.pressed.connect(advance)
-	%RestartButton.pressed.connect(restart)
-	_refresh()
+	if "--preview-day02" in OS.get_cmdline_user_args() or "--preview-part3" in OS.get_cmdline_user_args() or "--preview-chapter4" in OS.get_cmdline_user_args(): show_continuation()
+	else: show_bakery()
 
 func advance() -> void:
-	if lines.is_empty():
+	if is_instance_valid(bakery):
+		bakery.advance()
+
+func show_bakery() -> void:
+	if is_instance_valid(bakery):
 		return
-	if index < lines.size() - 1:
-		index += 1
-		_refresh()
-	else:
-		enter_maze.emit()
+	for child: Node in get_children():
+		if child is Control:
+			child.hide()
+	bakery = BAKERY_SCENE.instantiate()
+	add_child(bakery)
+	bakery.enter_maze.connect(func() -> void: enter_maze.emit())
+	bakery.return_to_story.connect(restart)
+	bakery.continue_chapter.connect(show_continuation)
+
+func show_continuation() -> void:
+	if is_instance_valid(bakery):
+		if bakery.get_script() == CONTINUATION: return
+		if not bakery.flow.report_completed: return
+		completed_day01 = bakery.flow
+		remove_child(bakery)
+		bakery.queue_free()
+	for child: Node in get_children():
+		if child is Control: child.hide()
+	bakery = CONTINUATION.new()
+	bakery.theme = preload("res://ui/chapter1_theme.tres")
+	bakery.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bakery.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	add_child(bakery)
+	bakery.return_to_story.connect(restart)
+	bakery.next_button.grab_focus()
+	if OS.has_feature("web") and "--report-qa" in OS.get_cmdline_user_args():
+		JavaScriptBridge.get_interface("window").flowerReportQA = JSON.stringify({"node":"day02","scene":bakery.narrative.scene().id,"report_completed":completed_day01 != null and completed_day01.report_completed,"history":completed_day01.history.size() if completed_day01 != null else 0})
 
 func restart() -> void:
-	index = 0
-	_refresh()
-
-func _refresh() -> void:
-	if lines.is_empty():
-		%DialogueText.text = "剧情资料读取失败，请检查 data/prologue.json。"
-		%NextButton.disabled = true
-		return
-	%Speaker.text = str(lines[index].get("speaker", "旁白"))
-	%DialogueText.text = str(lines[index].get("text", ""))
-	%Progress.text = "序章 · %d / %d" % [index + 1, lines.size()]
-	%NextButton.text = "继续阅读 ↗" if index < lines.size() - 1 else "进入迷宫 ↗"
+	completed_day01 = null
+	if is_instance_valid(bakery):
+		remove_child(bakery)
+		bakery.queue_free()
+		bakery = null
+	show_bakery()

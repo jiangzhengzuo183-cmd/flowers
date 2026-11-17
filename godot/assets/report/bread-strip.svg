@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="570" height="111" viewBox="0 0 570 111">
+<path fill="#f4d57d" d="M0 0h190v111H0z"/><path fill="#9cbbb4" d="M190 0h190v111H190z"/><path fill="#cbb18a" d="M380 0h190v111H380z"/>
+<g fill="none" stroke="#7b6140" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+<path fill="#f6dfa2" d="M29 77C20 58 85 25 128 30c38 4 42 26 13 41-32 16-104 25-112 6z"/><path d="M46 69C51 54 62 44 71 42c10-2-7 24-15 27m22-8c4-18 12-25 21-25 10 1-7 24-14 26m25-6c4-14 14-24 20-20 7 5-5 17-10 22M34 77c36 7 89-5 115-17"/>
+<path fill="#b7ccc1" d="M230 74c-15-10-13-33 7-39 4-25 36-25 49-12 22-13 43-2 45 16 23 5 31 29 15 42-24 20-88 15-116-7z"/><path d="M227 50c18-8 36 0 39 17m-29-32c17-2 26 6 29 17m20-29c-8 10-9 17-6 24m51-8c-15-5-26 1-30 11m-36 17c9-18 24-24 36-17 17 7 19 23 12 33m-70-25c-5 7-6 14-2 20m91-22c6 6 7 12 3 17"/>
+<path fill="#d8bc8f" d="M405 80c-10-6 7-35 28-36 7-16 24-21 38-13 21-10 39 2 43 16 20 7 30 31 20 36-8 3-25-8-30-8-22 12-58 9-74-1-10 0-19 11-25 6z"/><path d="M431 45c19-4 32 16 23 34m16-48c20 8 27 24 19 48m25-32c-12 1-17 13-10 28m-71-30c-10 10-13 21-3 29m-15-12c8-4 12-2 14 2m-20 8c8-5 13-3 15-1m94-9c8-2 11 4 12 9m-17 1c8-1 12 2 14 7"/>
+</g><filter id="grain"><feTurbulence baseFrequency=".7" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><path d="M0 0h570v111H0z" filter="url(#grain)" opacity=".12"/>
+</svg>

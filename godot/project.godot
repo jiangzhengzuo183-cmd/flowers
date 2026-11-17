@@ -11,13 +11,14 @@ boot_splash/bg_color=Color(0.953, 0.941, 0.91, 1)
 boot_splash/minimum_display_time=0
 
 [display]
-window/size/viewport_width=1280
+window/size/viewport_width=1600
 window/size/viewport_height=900
 window/size/window_width_override=1280
-window/size/window_height_override=900
-window/size/min_width=720
-window/size/min_height=600
+window/size/window_height_override=720
+window/size/min_width=960
+window/size/min_height=540
 window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
 
 [rendering]
 renderer/rendering_method="gl_compatibility"

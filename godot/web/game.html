@@ -65,7 +65,23 @@
       const missing = Engine.getMissingFeatures({ threads: false });
       if (missing.length) { fail(new Error(missing.join(', '))); return; }
       const engine = new Engine(GODOT_CONFIG);
+      const chapter = new URL(location.href).searchParams.get('chapter');
+        const previews = {day02:'--preview-day02',part3:'--preview-part3',chapter4:'--preview-chapter4',report1:'--preview-report1'};
+      const args = previews[chapter] ? ['--', previews[chapter]] : [];
+      if(new URL(location.href).searchParams.get('qa') === 'ink'){
+        if(!args.length) args.push('--');
+        args.push('--ink-qa');
+      }
+      if(new URL(location.href).searchParams.get('qa') === 'report1'){
+        if(!args.length) args.push('--');
+        args.push('--report-qa');
+      }
+      if(new URL(location.href).searchParams.get('qa') === 'experience'){
+        if(!args.length) args.push('--');
+        args.push('--experience-qa');
+      }
       engine.startGame({
+        args,
         onProgress(current, total) {
           if (current > 0 && total > 0) {
             progress.max = total;
