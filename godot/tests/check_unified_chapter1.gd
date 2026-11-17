@@ -25,6 +25,8 @@ func run()->void:
 	day.runtime.letters=10000
 	var right:=InputEventKey.new();right.pressed=true;right.keycode=KEY_RIGHT
 	day.runtime._input(right);check(day.flow.section=="exterior","右方向键翻下一页")
+	day.flow.section="people";day.flow.phase="people";day._refresh();await frames()
+	check(day.day01_view.dialogue_cast.current.is_empty(),"人物探索插画已有查理，不叠加第二个查理")
 	day.flow.section="classroom";day.flow._begin(day.flow.data.school.intro);day._refresh();await frames()
 	check(day.day01_view.dialogue_cast.current==["charlie_left"] and not day.day01_view.alice_portrait.visible,"夜校独白显示查理，爱丽丝不提前出现")
 	while day.flow.section=="classroom":day.advance()

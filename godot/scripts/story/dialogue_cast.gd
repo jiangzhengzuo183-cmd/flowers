@@ -48,6 +48,8 @@ func build() -> void:
 
 func _participants() -> Array[String]:
 	var state: RefCounted = host.flow
+	# The exploration artwork already contains Charlie; do not draw a second copy.
+	if state.phase=="people":return []
 	if state.current_line().speaker.begins_with("查理") and (state.phase!="reading" or state.section in ["classroom","home"]):return ["charlie_left"]
 	if state.phase != "reading": return []
 	if state.section == "closing": return ["charlie_left","gimpy"]

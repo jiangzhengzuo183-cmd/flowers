@@ -223,8 +223,8 @@ func _process(dt: float) -> void:
 		var group := "lab" if scene_id().begins_with("d2-") else "bakery"
 		if "hospital" in scene_id(): group="hospital"
 		if scene_id() in ["leaving","home","classroom","alice"]: group="night"
-		if scene_id().begins_with("p4-"):
-			group={"lab":"lab","office":"lab","bar":"night","school":"night","cafeteria":"night"}.get(m.scene().bg,"bakery") if m.phase!="complete" else "night"
+		if host.get("narrative")!=null:
+			group={"lab":"lab","office":"lab","bar":"night","school":"night","cafeteria":"night","home":"night","home-night":"night","hospital":"hospital"}.get(m.scene().bg,"bakery") if m.phase!="complete" else "night"
 		audio.choose(group)
 	task_panel.visible=host.task.visible and not black and m.phase in ["people","objects","explore"]
 	if OS.has_feature("web") and "--experience-qa" in OS.get_cmdline_user_args():
