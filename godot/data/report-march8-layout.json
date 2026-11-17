@@ -1,0 +1,88 @@
+{
+  "design_size": [
+    1920,
+    1080
+  ],
+  "sections": [
+    {
+      "id": "title",
+      "font_size": 40,
+      "color": "rgb(73, 63, 48)",
+      "lines": [
+        {
+          "text": "进步抱告—2",
+          "x": 160,
+          "baseline": 144
+        }
+      ]
+    },
+    {
+      "id": "date",
+      "font_size": 32,
+      "color": "rgb(73, 63, 48)",
+      "lines": [
+        {
+          "text": "3月8日",
+          "x": 160,
+          "baseline": 200
+        }
+      ]
+    },
+    {
+      "id": "left",
+      "font_size": 30,
+      "color": "rgb(73, 63, 48)",
+      "lines": [
+        {
+          "text": "乔伊来唐纳先生给我的巧克力旦高。",
+          "x": 160,
+          "baseline": 279
+        },
+        {
+          "text": "医生说手术前不能吃。",
+          "x": 160,
+          "baseline": 327
+        }
+      ]
+    },
+    {
+      "id": "middle",
+      "font_size": 30,
+      "color": "rgb(73, 63, 48)",
+      "lines": [
+        {
+          "text": "爱丽丝老师代来杂志还帮",
+          "x": 1000,
+          "baseline": 398
+        },
+        {
+          "text": "我把东西整理好。我拿着",
+          "x": 1000,
+          "baseline": 446
+        },
+        {
+          "text": "幸运兔脚就不那么怕。",
+          "x": 1000,
+          "baseline": 494
+        }
+      ]
+    },
+    {
+      "id": "bottom",
+      "font_size": 30,
+      "color": "rgb(73, 63, 48)",
+      "lines": [
+        {
+          "text": "我不要便有名。我只想读懂更多东西和",
+          "x": 1020,
+          "baseline": 858
+        },
+        {
+          "text": "大家说话。",
+          "x": 1020,
+          "baseline": 906
+        }
+      ]
+    }
+  ]
+}

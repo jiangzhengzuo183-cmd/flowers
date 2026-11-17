@@ -1,0 +1,45 @@
+{
+  "intro": [
+    {"speaker": "查理（内心独白）", "text": "我在唐纳先生的面包店工作。"},
+    {"speaker": "查理（内心独白）", "text": "今天我把一整盘要放进炉子的面包卷掉在地上了。"},
+    {"speaker": "查理（内心独白）", "text": "吉姆皮很生气，因为地上和面包都得重新收拾。"}
+  ],
+  "characters": [
+    {
+      "id": "gimpy", "name": "吉姆皮", "activity": "正在烘焙",
+      "portrait": "res://assets/bakery/gimpy.png",
+      "lines": [
+        {"speaker": "吉姆皮", "text": "查理，盘子拿稳一点！这些还要进炉子。"},
+        {"speaker": "查理", "text": "对不起，金皮。我会把地上清干净。"},
+        {"speaker": "吉姆皮", "text": "先把东西都收拾好，别挡在这里！"},
+        {"speaker": "查理（内心独白）", "text": "金皮做错事时会对我大叫。\n可是他真的喜欢我。\n他是我的朋友。"}
+      ]
+    },
+    {
+      "id": "karp", "name": "卡普尔", "activity": "在店内闲谈", "leaves_after": true,
+      "portrait": "res://assets/bakery/karp.png",
+      "lines": [
+        {"speaker": "卡普尔", "text": "哟，看看是谁又闯祸了。"},
+        {"speaker": "查理", "text": "早上好，卡普尔。"},
+        {"speaker": "卡普尔", "text": "今天又和四肢闹别扭了吗？"},
+        {"speaker": "查理", "text": "不是的，我只是……不小心。"},
+        {"speaker": "卡普尔", "text": "哈哈，没关系。反正你总是有办法解释。"},
+        {"speaker": "查理", "text": "我下次会注意的。"},
+        {"speaker": "卡普尔", "text": "那就好。可别让我们一直帮你。"},
+        {"speaker": "旁白", "text": "卡普尔转身离开。"}
+      ]
+    },
+    {
+      "id": "donner", "name": "唐纳店长", "activity": "核对订单",
+      "portrait": "res://assets/bakery/donner.png",
+      "lines": [
+        {"speaker": "唐纳店长", "text": "查理，早上好。"},
+        {"speaker": "查理", "text": "早上好，唐纳先生。对不起，我把面包卷打翻了。"},
+        {"speaker": "唐纳店长", "text": "没关系，先打扫好吧。"},
+        {"speaker": "查理", "text": "好的！我会做好的。"},
+        {"speaker": "唐纳店长", "text": "靠窗的面包架需要整理一下，还有今天的订单也要核对。"},
+        {"speaker": "查理", "text": "我知道了。"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>进步抱告—1 · 双页排版预览</title>
+<style>
+@font-face{font-family:ReportHand;src:url('./assets/fonts/YeLiHangJiuLinKaTong.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:ProjectSans;src:url('./assets/fonts/SourceHanSansSC-Regular.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{background:#d8cebc;color:#493f30;font:14px ProjectSans,'Microsoft YaHei',sans-serif}.viewport{position:absolute;inset:0;display:grid;place-items:center}.frame{position:absolute;width:1920px;height:1080px;transform-origin:center;background:radial-gradient(ellipse at 50% 45%,#e8e0d0,#c4b8a7);font-family:ReportHand,ProjectSans,sans-serif;font-synthesis:none;visibility:hidden}.ready .frame{visibility:visible}.cover{position:absolute;inset:26px 40px 28px;border:10px solid #d8ab40;border-radius:40px;background:#eed39b;box-shadow:0 8px 18px #513e3a66,inset 0 0 0 3px #f8d779}.pages{position:absolute;inset:39px 58px 44px;border:1px solid #c6af88;border-radius:28px;background:linear-gradient(90deg,#f1e2c9,#fff5df 4%,#fff4de 47%,#d6c5a5 49.8%,#ecddc1 50.2%,#fff5e3 53%,#fcf0d9 96%,#e4d1ac);box-shadow:inset 0 0 0 5px #f7edda,inset 0 0 0 9px #dfccac,0 1px 4px #6d4f2e55}.left-sheet{position:absolute;left:108px;top:80px;width:830px;height:930px;background:linear-gradient(105deg,#f9e6ac,#fae8b8 70%,#f2dfa5);box-shadow:1px 3px 5px #80642a22;transform:rotate(-.3deg)}.grain{position:absolute;inset:0;pointer-events:none;opacity:.18;background:url('./assets/report/paper-grain.svg');mix-blend-mode:multiply}.fold{position:absolute;left:948px;top:64px;width:12px;height:956px;border-radius:50%;background:linear-gradient(90deg,#e9dcc4,#ae98754d,#fff6e3);opacity:.55}.stitch{position:absolute;left:951px;width:7px;height:10px;border-radius:50%;background:#9c825b55;box-shadow:1px 1px 2px #fff4dc}.title,.date,.copy,.signature,.photo-label,.word-strip,.page-number{position:absolute;margin:0;font-weight:400}.title{left:184px;top:119px;font-size:44px;line-height:64px}.date{left:184px;top:191px;font-size:34px;line-height:48px}.copy{font-size:30px;line-height:48px;letter-spacing:0;text-align:left;white-space:normal;word-break:normal;line-break:strict;overflow-wrap:normal}.line{display:block;white-space:pre;height:48px}.intro{left:184px;top:294px;width:682px}.work{left:1024px;top:270px;width:748px}.school{left:1024px;top:558px;width:748px}.signature{right:145px;top:832px;font-size:30px;line-height:48px;white-space:nowrap}.ruling{position:absolute;left:980px;right:105px;top:210px;bottom:69px;background:repeating-linear-gradient(to bottom,transparent 0 47px,#a5947229 47px 48px)}.photo-mat{position:absolute;left:175px;top:656px;width:600px;height:320px;background:#cfa66c;transform:rotate(-4deg);box-shadow:2px 3px 6px #79572b33}.photo{position:absolute;left:226px;top:574px;width:590px;height:360px;border:10px solid #fff8e9;background:#fff8e9;box-shadow:2px 6px 10px #66513455;transform:rotate(-3deg);margin:0}.photo img{display:block;width:100%;height:100%;object-fit:cover}.tape{position:absolute;left:463px;top:554px;width:140px;height:47px;background:#89b9b2c9;transform:rotate(-9deg);box-shadow:1px 2px 3px #57746b22;z-index:1}.photo-label{left:207px;top:901px;font-size:30px;line-height:53px;padding:0 28px;background:#fae8bd;box-shadow:1px 3px 5px #69503044;transform:rotate(-7deg)}.bread{position:absolute;left:1110px;top:90px;width:570px;height:111px;transform:rotate(-.25deg);box-shadow:1px 3px 4px #7b624733}.word-strip{left:976px;top:925px;width:285px;height:72px;background:#92bdb2;box-shadow:2px 4px 5px #5b6b5b44;transform:rotate(-5deg);font-size:37px;line-height:72px;text-align:center;letter-spacing:3px}.page-number{right:125px;bottom:69px;font-size:24px}.tools{position:fixed;right:12px;top:8px;z-index:5;font:12px ProjectSans,sans-serif;color:#4d493e}.tools summary{cursor:pointer;opacity:.35;text-align:right}.tools:hover summary,.tools[open] summary{opacity:1}.tool-panel{padding:16px;background:#fcf6e9;border:1px solid #bdae92;box-shadow:0 4px 20px #50432822;max-width:350px;line-height:1.8}select,button{font:inherit;color:inherit;padding:5px;border:1px solid #bdae92;background:#fffaf0}#status{display:block;color:#4c6d61}.capture .tools{display:none}.loading{position:fixed;inset:0;display:grid;place-items:center}.ready .loading{display:none}.other-report .photo,.other-report .photo-mat,.other-report .tape,.other-report .photo-label{display:none}.other-report .copy{font-size:26px;line-height:40px}
+</style>
+<body>
+<div class="loading" role="status">正在加载字体…</div>
+<details class="tools"><summary>预览设置</summary><div class="tool-panel"><label>报告 <select id="report"></select></label><span id="status" role="status">正在加载字体…</span><div>1920 × 1080 · 正文 30px / 行高 48px</div><div>缩放窗口时整张画面等比缩放。</div></div></details>
+<div class="viewport"><main class="frame" aria-label="进步报告双页">
+<div class="cover" aria-hidden="true"></div><div class="pages" aria-hidden="true"></div><div class="left-sheet" aria-hidden="true"></div><div class="ruling" aria-hidden="true"></div><div class="fold" aria-hidden="true"></div>
+<div class="stitch" style="top:150px" aria-hidden="true"></div><div class="stitch" style="top:310px" aria-hidden="true"></div><div class="stitch" style="top:470px" aria-hidden="true"></div><div class="stitch" style="top:630px" aria-hidden="true"></div><div class="stitch" style="top:790px" aria-hidden="true"></div><div class="stitch" style="top:950px" aria-hidden="true"></div>
+<h1 class="title" id="title"></h1><p class="date" id="date"></p><p class="copy intro" id="opening"></p>
+<div class="photo-mat" aria-hidden="true"></div><figure class="photo"><img src="./assets/bakery/interior.png" alt="阳光照进唐纳先生的面包店"></figure><div class="tape" aria-hidden="true"></div><span class="photo-label">面包店</span>
+<img class="bread" src="./assets/report/bread-strip.svg" alt="法棍、圆面包与可颂图样">
+<div id="body"><p class="copy work"></p><p class="copy school"></p><p class="signature"></p></div>
+<span class="word-strip">rain smile</span><span class="page-number" id="number">1</span><div class="grain" aria-hidden="true"></div>
+</main></div>
+<script src="./font-preview-data.js"></script>
+<script>
+if(new URLSearchParams(location.search).has('capture'))document.body.classList.add('capture');
+const reports=window.REPORT_PREVIEW,select=document.querySelector('#report'),frame=document.querySelector('.frame');
+reports.forEach((r,i)=>select.add(new Option(r.title,i)));
+function fit(){const scale=Math.min(innerWidth/1920,innerHeight/1080);frame.style.transform=`scale(${scale})`;window.reportScale=scale}addEventListener('resize',fit);fit();
+// Measure after font loading. Line spans preserve every original character.
+const keepWords=['三十二岁','朋友','斯特劳斯','查理·高登','唐纳先生','卡普尔','爱丽丝','面包店','便匆名','洗欢','望记','是是看','记下来','认真','考是'];
+function wrap(el,text,width,fontSize=30){
+ const ctx=document.createElement('canvas').getContext('2d');ctx.font=`${fontSize}px ReportHand`;
+ const chars=[...text],measure=(a,b)=>ctx.measureText(chars.slice(a,b).join('')).width;
+ const forbidden=new Set();for(const word of keepWords){let from=0,pos;while((pos=text.indexOf(word,from))!==-1){for(let k=pos+1;k<pos+word.length;k++)forbidden.add(k);from=pos+word.length}}
+ const close=/^[，。！？；：、）》」』】…—·,.!?;:]/u,open=/[（《「『【]$/u;
+ const allowed=i=>!forbidden.has(i)&&!close.test(chars[i]||'')&&!open.test(chars[i-1]||'');
+ let count=Math.ceil(measure(0,chars.length)/width),answer;
+ for(;count<=chars.length&&!answer;count++){
+  const memo=new Map(),target=measure(0,chars.length)/count;
+  function solve(start,left){const key=start+','+left;if(memo.has(key))return memo.get(key);if(!left)return start===chars.length?{cost:0,ends:[]}:null;
+   let best=null;for(let end=start+1;end<=chars.length;end++){const w=measure(start,end);if(w>width+.01)break;if(end<chars.length&&!allowed(end))continue;if(left===1&&(end!==chars.length||end-start<Math.min(5,chars.length)))continue;const tail=solve(end,left-1);if(!tail)continue;let cost=(w-target)**2+tail.cost;if(/[。！？]/u.test(chars[end-1]))cost-=150;if(!best||cost<best.cost)best={cost,ends:[end,...tail.ends]}}memo.set(key,best);return best}
+  answer=solve(0,count);
+ }
+ el.replaceChildren();let start=0;for(const end of answer.ends){const span=document.createElement('span');span.className='line';span.textContent=chars.slice(start,end).join('');el.append(span);start=end}
+}
+function show(){const r=reports[Number(select.value)],parts=r.text.split('\n\n');frame.classList.toggle('other-report',select.value!=='0');document.querySelector('#title').textContent=r.title;document.querySelector('#date').textContent=r.date;const nodes=[document.querySelector('#opening'),...document.querySelectorAll('#body p')];
+ if(select.value==='0'){parts.forEach((text,i)=>{if(i===3)nodes[i].textContent=text;else wrap(nodes[i],text,i===0?682:748)})}
+ else{nodes.forEach(n=>n.replaceChildren());nodes[0].textContent=parts[0];nodes[1].textContent=parts.slice(1,Math.ceil(parts.length/2)).join('\n\n');nodes[2].textContent=parts.slice(Math.ceil(parts.length/2)).join('\n\n')}
+ document.querySelector('#number').textContent=Number(select.value)+1;
+ if(select.value==='0'){
+  // A zero-height inline box gives the font's actual alphabetic baseline.
+  const line=document.querySelector('.work .line'),probe=document.createElement('i');probe.style.cssText='display:inline-block;width:0;height:0;vertical-align:baseline';line.append(probe);
+  const baseline=(probe.getBoundingClientRect().top-frame.getBoundingClientRect().top)/window.reportScale;probe.remove();
+  document.querySelector('.ruling').style.top=(baseline-96+1)+'px';
+  document.querySelector('.signature').style.top='846px';
+ }
+}
+window.layoutReady=Promise.all([document.fonts.load('30px ReportHand',reports[0].text),document.fonts.load('14px ProjectSans','预览设置')]).then(async([hand,sans])=>{if(!hand.length||!sans.length)throw Error('font load failed');await document.fonts.ready;show();select.addEventListener('change',show);await Promise.all([...document.images].map(img=>img.decode()));document.querySelector('#status').textContent='字体已加载';document.body.classList.add('ready');return true}).catch(e=>{document.querySelector('.loading').textContent='字体或图片加载失败，请检查项目资源';throw e});
+</script>
+</body></html>

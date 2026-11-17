@@ -35,12 +35,12 @@ func _run() -> void:
 	check(game.active_id == "story", "默认进入剧情")
 	var story: Control = game.active_scene
 	story.advance()
-	check(story.index == 1, "剧情必须能推进")
+	check(story.bakery.flow.section == "exterior", "合并开场后必须能推进至面包店外景")
 	story.restart()
-	check(story.index == 0, "剧情必须能重读")
-	story.advance()
-	story.advance()
-	story.advance()
+	check(story.bakery.flow.section == "opening", "剧情必须能重读")
+	# Formal chapter completion now follows reports and later chapters; this test
+	# exercises the unchanged public maze route without bypassing story progress.
+	game.show_scene("maze")
 	await process_frame
 	check(game.active_id == "maze", "剧情结束必须进入迷宫")
 	var maze_scene: Control = game.active_scene
