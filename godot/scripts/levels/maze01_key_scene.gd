@@ -24,10 +24,6 @@ func _ready() -> void:
 	super()
 	if not is_instance_valid(_key_items):
 		return
-	if OS.has_feature("web"):
-		_web_window = get_window()
-		_previous_aspect = _web_window.content_scale_aspect
-		_web_window.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_EXPAND
 	_key_items.setup_keys(required_exit_gates())
 	if use_marked_pickups:
 		_perks = Perks.new()
@@ -37,8 +33,14 @@ func _ready() -> void:
 		_perks.flour_seconds = flour_seconds
 		add_child(_perks)
 		_perks.install(%Player, %ViewportContainer, _key_items.inventory, sound.play_item_pickup)
-	_fullscreen_layout = FullscreenLayout.new()
-	_fullscreen_layout.install(self, _key_items.inventory)
+	# Legacy previews keep their original controller; the three formal levels share GameHUD.
+	if scene_file_path not in ["res://scenes/levels/maze_01_greybox.tscn", "res://scenes/levels/Maze02.tscn"]:
+		if OS.has_feature("web"):
+			_web_window = get_window()
+			_previous_aspect = _web_window.content_scale_aspect
+			_web_window.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_EXPAND
+		_fullscreen_layout = FullscreenLayout.new()
+		_fullscreen_layout.install(self, _key_items.inventory)
 	for id: String in Keys.GATES:
 		var gate: Node3D = %GeneratedMaze.gates[id]
 		var entry: Dictionary = Keys.GATES[id]
@@ -140,7 +142,7 @@ func _refresh_hud() -> void:
 		super()
 		return
 	if walk_mode:
-		%Legend.text = "WASD 移动 / Shift 跑步 / 空格跳跃 / E 解锁 / 鼠标拖动视角 / 滚轮缩放"
+		%Legend.text = "WASD 移动 / Shift 开/关冲刺 / 空格跳跃 / E 解锁 / 鼠标拖动视角 / 滚轮缩放"
 	var hint := "沿路拾取幸运道具，靠近机关门按 E。"
 	var context := ""
 	var id := _nearest_key_gate()

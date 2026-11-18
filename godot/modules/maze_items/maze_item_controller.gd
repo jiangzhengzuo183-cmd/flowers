@@ -79,6 +79,7 @@ func _spawn_rabbit(point: Vector3) -> Pickup:
 	var rabbit := Pickup.new()
 	rabbit.name = "LuckyRabbitFoot"
 	rabbit.actor = _actor
+	rabbit.can_collect = inventory.can_accept_pickup
 	rabbit.position = point
 	rabbit.collected.connect(_picked_up)
 	_world.add_child(rabbit, true)

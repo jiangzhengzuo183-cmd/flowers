@@ -13,7 +13,8 @@ const JUMP_PREPARE := 0.48
 const JUMP_TAKEOFF := 0.55
 const JUMP_APEX := 0.75
 const JUMP_CONTACT := 0.99
-const VICTORY_DURATION := 4.2
+const VICTORY_DURATION := 7.2
+var celebration_remaining := 0.0
 const CLIP_NAMES := {
 	&"idle_001": &"Idle", &"walk_001": &"Walk", &"run_001": &"Run",
 	&"jump_001": &"Jump", &"dance_01_001": &"Dance",
@@ -38,7 +39,7 @@ func _ready() -> void:
 		var animation := imported.get_animation(source)
 		if CLIP_NAMES.has(source):
 			animation = animation.duplicate()
-			animation.loop_mode = Animation.LOOP_LINEAR if clip in [&"Idle", &"Walk", &"Run"] else Animation.LOOP_NONE
+			animation.loop_mode = Animation.LOOP_LINEAR if clip in [&"Idle", &"Walk", &"Run", &"Dance"] else Animation.LOOP_NONE
 			_pin_hip(animation, hip_rest, parent_basis, false)
 			if clip == &"Idle":
 				_open_idle_stance(animation, skeleton)
@@ -137,7 +138,15 @@ func play_victory_dance() -> void:
 	celebrating = true
 	animation_player.active = true
 	animation_player.speed_scale = 1.0
-	animation_player.play_section(&"Dance", 0.0, VICTORY_DURATION, 0.16)
+	celebration_remaining = VICTORY_DURATION
+	animation_player.play_section(&"Dance", 0.0, 4.2, 0.16)
+
+func _process(delta: float) -> void:
+	if not celebrating: return
+	celebration_remaining = maxf(0.0, celebration_remaining-delta)
+	if celebration_remaining <= 0.0:
+		celebrating = false
+		_rest_pose()
 
 func play_jump(use_baked_height: bool = true) -> void:
 	if _jumping or not is_instance_valid(animation_player):

@@ -129,7 +129,7 @@ func snapshot(node: Node, index_path: String, result: Dictionary, atmosphere := 
 			data.visible = node.visible
 		if node.get_script():
 			var script: Script = node.get_script()
-			if script == RuinGenerator:
+			if script == RuinGenerator or script.resource_path == "res://scripts/levels/maze02_player.gd":
 				script = script.get_base_script()
 			data.script = script.resource_path
 	if node is CollisionObject3D:
@@ -158,7 +158,11 @@ func snapshot(node: Node, index_path: String, result: Dictionary, atmosphere := 
 	var index := 0
 	for child: Node in node.get_children():
 		if child.name in [&"Maze02SandParticles", &"Maze02FloorDebris", &"LuckyRabbitFoot",
-				&"Maze02FishLeaps", &"Maze02Ruins"] or replaced_by_ruins(child):
+				&"Maze02FishLeaps", &"Maze02Ruins", &"Maze02ItemEffects", &"Maze02PickupBursts",
+				&"CakeSpeedLines", &"Maze02GhostEvent"] or replaced_by_ruins(child):
+			continue
+		if child is Area3D and (String(child.name).begins_with("LuckyCoin_") or String(child.name).begins_with("LuckyHorseshoe_")
+				or String(child.name).begins_with("ChocolateCake")):
 			continue
 		snapshot(child, index_path + "/" + str(index), result, atmosphere)
 		index += 1
@@ -353,10 +357,10 @@ func check_visuals(scene: Node) -> void:
 	check(chips.find_children("*", "CollisionObject3D", true, false).is_empty(), "Floor debris is visual only")
 	check(sand.occupied_cells >= 310 and sand.gust_count >= 50, "Sand covers the map and has localized gusts")
 	check(sand.height_range.y < 5.8 and sand.height_range.y > 3.7, "Sand reaches the mid and upper air below the chapel eaves")
-	check(not world.has_node("Maze02MemoryEchoes") and not world.has_node("LuckyRabbitFoot"), "Optional ghost and rabbit are absent")
+	check(not world.has_node("Maze02MemoryEchoes") and world.has_node("LuckyRabbitFoot"), "The marked rabbit is back and legacy ghosts remain disabled")
 	var inventory: Control = scene._key_items.inventory
-	check(not inventory.get_node("LuckyRabbitFoot").visible and not inventory.get_node("UseItem").visible
-		and inventory.get_node("LuckyCoin").visible and inventory.get_node("LuckyHorseshoe").visible, "Only gate items appear in the inventory")
+	check(inventory.get_node("LuckyRabbitFoot").visible and inventory.get_node("UseItem").visible
+		and inventory.get_node("LuckyCoin").visible and inventory.get_node("LuckyHorseshoe").visible, "Rabbit and gate items appear in the inventory")
 	check(scene._key_items.key_pickups.size() == 4, "Four gate pickups still spawn")
 	check(not world.get_node("SkyMemories/SparseStars").visible and world.get_node("SkyMemories/DistantCity").visible, "Sky has sparse glints and still uses the skyline")
 	check(not world.has_node("Maze02Gust") and not scene.get_node("%ViewportContainer").has_node("Maze02Gust"),
@@ -530,7 +534,8 @@ func run() -> void:
 	for path: String in first_state:
 		check(second_state.has(path) and equivalent(first_state[path], second_state[path]), "Identical geometry, collision, building materials and cameras: " + path)
 	check(one.maze_data == two.maze_data, "Identical map and routes")
-	for path: String in ["%Player", "%FollowRig", "%CameraRig"]:
+	check(two.get_node("%Player").get_script().get_base_script() == one.get_node("%Player").get_script(), "Maze02 player keeps the shared movement implementation")
+	for path: String in ["%FollowRig", "%CameraRig"]:
 		check(one.get_node(path).get_script() == two.get_node(path).get_script(), "Shared implementation " + path)
 	check(two.get_node("%GeneratedMaze").get_script().get_base_script() == one.get_node("%GeneratedMaze").get_script(), "Maze02 reuses the shared generator")
 	check(not is_instance_valid(two._doctor), "Maze02 does not spawn the doctor")
@@ -574,7 +579,7 @@ func run() -> void:
 	check(not one.get_node("%GeneratedMaze").gates.D1.is_open, "Mechanism state is independent")
 	two.reset_level()
 	check(not two.get_node("%GeneratedMaze").gates.D1.is_open, "Maze02 mechanism reset works")
-	check(not is_instance_valid(two._items._pickup), "Reset does not respawn the rabbit")
+	check(is_instance_valid(two._items._pickup), "Reset respawns the marked rabbit")
 	# Release node snapshots before freeing scenes; they contain canonical resources.
 	first_state.clear()
 	second_state.clear()

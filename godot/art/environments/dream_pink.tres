@@ -1,0 +1,31 @@
+[gd_resource type="Environment" format=3 uid="uid://cemu4xa757rg"]
+
+[ext_resource type="Shader" uid="uid://c6nm143imgbf0" path="res://art/environments/dream_sky.gdshader" id="1_sky"]
+
+[sub_resource type="ShaderMaterial" id="SkyMaterial"]
+shader = ExtResource("1_sky")
+shader_parameter/zenith = Color(0.7, 0.75, 0.97, 1)
+shader_parameter/middle = Color(0.89, 0.78, 0.93, 1)
+shader_parameter/horizon = Color(0.99, 0.93, 0.93, 1)
+shader_parameter/nadir = Color(0.74, 0.72, 0.93, 1)
+shader_parameter/cloud_color = Color(0.99, 0.97, 1, 1)
+shader_parameter/sky_details = false
+
+[sub_resource type="Sky" id="Sky"]
+sky_material = SubResource("SkyMaterial")
+radiance_size = 2
+
+[resource]
+resource_name = "Maze01 dream environment sample"
+background_mode = 2
+sky = SubResource("Sky")
+ambient_light_source = 2
+ambient_light_color = Color(0.97, 0.95, 1, 1)
+ambient_light_energy = 0.53
+reflected_light_source = 2
+tonemap_agx_white = 6.0
+ssao_enabled = true
+ssao_radius = 0.65
+ssao_intensity = 0.26
+glow_intensity = 0.08
+glow_hdr_threshold = 1.15

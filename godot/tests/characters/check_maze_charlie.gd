@@ -60,8 +60,17 @@ func run_checks() -> void:
 	var visual = actor.visual
 	var animation: AnimationPlayer = visual.animation_player
 	check(visual.scene_file_path == "res://scenes/characters/charlie_visual.tscn", "Maze must instance the Charlie module")
+	check(visual.get_node("Model").scene_file_path.ends_with("charlie_rebound.glb"), "The main game loads the re-rigged Charlie")
 	check(visual.find_children("*", "Skeleton3D", true, false).size() == 1, "Maze actor must have a skeleton")
 	check(animation.current_animation == "Idle", "Spawn must be Idle")
+	await ticks(222)
+	check(animation.has_section(), "Before four seconds Charlie stays in the resting pose")
+	var drag := InputEventMouseMotion.new()
+	drag.button_mask = MOUSE_BUTTON_MASK_LEFT
+	drag.relative = Vector2(18,0)
+	Input.parse_input_event(drag)
+	await ticks(16)
+	check(animation.current_animation == &"Idle" and not animation.has_section(), "Four seconds stationary starts full idle even after dragging the camera")
 	check(actor.get_child_count() == 2, "Controller must contain only collider and Charlie visual")
 	var collider := actor.get_child(0) as CollisionShape3D
 	check(collider.shape is CapsuleShape3D and is_equal_approx(collider.shape.radius, 0.3) and is_equal_approx(collider.shape.height, 1.6), "Existing collision capsule must be preserved")
@@ -87,6 +96,7 @@ func run_checks() -> void:
 	release_keys()
 	await ticks(15)
 	check(animation.current_animation == "Idle", "Releasing movement must restore Idle")
+	check(animation.has_section(), "Movement resets the idle countdown")
 
 	actor.reset_player()
 	await ticks(3)
@@ -96,6 +106,8 @@ func run_checks() -> void:
 	check(actor.position.x < 2.0, "Running into entry east wall must not pass through it")
 	check(animation.current_animation == "Idle", "Blocked actor must idle even while run keys are held")
 	check(absf(wrapf(visual.rotation.y + PI / 2, -PI, PI)) < 0.05, "Charlie -Z must turn to face east")
+	await ticks(235)
+	check(not animation.has_section(), "Holding a movement key against a wall still reaches full idle")
 	release_keys()
 	scene.reset_walk()
 	await ticks(3)

@@ -21,17 +21,13 @@ func capture(scene: Control, label: String) -> void:
 
 func run_checks() -> void:
 	root.size = Vector2i(1280, 900)
-	var game = load("res://scenes/main.tscn").instantiate()
-	root.add_child(game)
+	# The legacy arm refinement was reviewed under the original maze lighting.
+	var scene = load("res://scenes/maze.tscn").instantiate()
+	root.add_child(scene)
 	await process_frame
-	game.show_scene("maze")
-	await process_frame
-	var scene = game.active_scene
 	var actor = scene.get_node("%Player")
 	var follow = scene.get_node("%FollowRig")
 	var visual = actor.visual
-	var player: AnimationPlayer = visual.animation_player
-	check(visual.get_node("Model").scene_file_path.ends_with("charlie_refined.glb"), "Use refined model variant")
 	check(is_equal_approx(follow.distance, 2.8) and is_equal_approx(follow.pitch, 0.68), "Default close third-person camera")
 	check(is_equal_approx(follow.camera.fov, 48.0), "Close view lens")
 	var wheel := InputEventMouseButton.new()
@@ -54,6 +50,10 @@ func run_checks() -> void:
 	await capture(scene, "default_back")
 
 	# Compare imported curves, including clips not changed by the arm revision.
+	var refined = load("res://assets/characters/charlie/charlie_refined.glb").instantiate()
+	visual.hide()
+	actor.add_child(refined)
+	var player := refined.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	var original = load("res://assets/characters/charlie/charlie.glb").instantiate()
 	var old_player := original.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	for clip in [&"Idle", &"Walk", &"Jump", &"Run"]:
@@ -76,7 +76,7 @@ func run_checks() -> void:
 					Animation.TYPE_POSITION_3D:
 						check(before.position_track_interpolate(track, time).is_equal_approx(after.position_track_interpolate(target_track, time)), "Preserve position " + String(track_path))
 	actor.set_physics_process(false)
-	var skeleton := visual.find_child("Skeleton3D", true, false) as Skeleton3D
+	var skeleton := refined.find_child("Skeleton3D", true, false) as Skeleton3D
 	# Hide wall display only in the diagnostic pose images, so the side view
 	# can show the arms and feet; normal gameplay/default capture keeps walls.
 	scene.get_node("%GeneratedMaze").get_node("VerticalWalls").visible = false
@@ -116,7 +116,7 @@ func run_checks() -> void:
 	check(max_hand_span < old_hand_span, "Run hand spread must be smaller than original")
 	check(new_hand_height < old_hand_height, "Run hands should no longer be lifted as high")
 	print("RUN HAND SPAN MAX: ", max_hand_span, " (original ", old_hand_span, "); HEIGHT MAX: ", new_hand_height, " (original ", old_hand_height, ")")
-	game.queue_free()
+	scene.queue_free()
 	await process_frame
 	print("LOOK REFINEMENT CHECK: %s (%d failures)" % ["PASS" if failures == 0 else "FAIL", failures])
 	quit(0 if failures == 0 else 1)

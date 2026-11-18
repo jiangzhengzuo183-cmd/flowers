@@ -5,14 +5,21 @@ const Chime := preload("res://modules/maze_items/rabbit_pickup.wav")
 const Dust := preload("res://modules/maze_pickups/flour_puff.gdshader")
 const Inventory := preload("res://modules/maze_items/maze_inventory.gd")
 const Player := preload("res://scripts/maze/walk_player.gd")
+const CAKE := &"ChocolateCake"
+const CakeIcon := preload("res://assets/UI/HUD/slices/icon_cake.png")
 const CAKE_PATH := "res://modules/maze_pickups/chocolate_cake.tscn"
 const FLOUR_PATH := "res://modules/maze_pickups/flour.tscn"
-const CAKES := [Vector3(13.2, 0, 8.4), Vector3(37.2, 0, 25.2)]
-const FLOUR := [Vector3(32.4, 0, 20.4), Vector3(13.2, 0, 34.8)]
+const CAKES := [Vector3(13.2, 0, 8.4), Vector3(42.0, 0, 30.0)]
+const Layout := preload("res://scripts/levels/maze_01_layout.gd")
+# Narrow north–south passages on routes A and B, respectively.
+const FLOUR_CELLS := [[15, 10], [5, 11]]
 const TRAIL_INTERVAL := 0.025
 const TRAIL_LIFETIME := 0.48
 const TRAIL_COLORS := [Color("ffca38"), Color("ffde64")]
 
+var cake_positions: Array = CAKES
+var enable_flour := true
+var ground_display := false
 var boost_multiplier := 1.3
 var boost_seconds := 8.0
 var flour_seconds := 3.0
@@ -39,6 +46,8 @@ func install(actor: Player, viewport_frame: Control, inventory: Inventory, sound
 	_actor = actor
 	_world = actor.get_parent()
 	_inventory = inventory
+	_inventory.register_item(CAKE, "巧克力蛋糕", CakeIcon)
+	_inventory.use_requested.connect(_use_item)
 	_sound = sound
 	_screen = ColorRect.new()
 	_screen.name = "FlourScreen"
@@ -78,13 +87,22 @@ func reset() -> void:
 		if is_instance_valid(pickup):
 			pickup.queue_free()
 	pickups.clear()
-	_spawn(load(CAKE_PATH), CAKES)
-	_spawn(load(FLOUR_PATH), FLOUR)
+	_spawn(load(CAKE_PATH), cake_positions)
+	if not enable_flour:
+		return
+	var flour_points: Array[Vector3] = []
+	for cell: Array in FLOUR_CELLS:
+		var point := Layout.cell_point(cell)
+		point.y = Layout.height_at(Vector2(point.x, point.z))
+		flour_points.append(point)
+	_spawn(load(FLOUR_PATH), flour_points)
 
 func _spawn(scene: PackedScene, points: Array) -> void:
 	for point: Vector3 in points:
 		var pickup = scene.instantiate()
 		pickup.actor = _actor
+		if pickup.effect == 0: pickup.can_collect = _inventory.can_accept_pickup
+		pickup.ground_display = ground_display
 		pickup.position = point
 		pickup.collected.connect(_apply.bind(pickup.effect, point))
 		_world.add_child(pickup, true)
@@ -93,14 +111,22 @@ func _spawn(scene: PackedScene, points: Array) -> void:
 func _apply(effect: int, point: Vector3) -> void:
 	_sound.call(Chime)
 	if effect == 0:
-		boost_remaining = boost_seconds
-		_actor.move_speed_multiplier = boost_multiplier
-		_inventory.show_notice("巧克力蛋糕 · 移动加速！")
+		_inventory.grant(CAKE)
 	else:
 		flour_remaining = flour_seconds
 		_inventory.show_notice("视线受到干扰！")
 	_burst(point, Color("ffe1a8d0") if effect == 0 else Color("fff9eae8"))
 	_update_visuals()
+
+func _use_item(id: StringName) -> void:
+	if id != CAKE or not _actor.controls_enabled or get_tree().paused: return
+	if not _inventory.consume(CAKE): return
+	_sound.call(Chime)
+	_actor.stamina.restore(_actor.stamina.settings.cake_restore, &"cake")
+	boost_remaining = boost_seconds
+	_actor.move_speed_multiplier = boost_multiplier
+	_inventory.show_notice("使用巧克力蛋糕 · 恢复体力并移动加速！")
+	_burst(_actor.global_position, Color("ffe1a8d0"))
 
 func _process(delta: float) -> void:
 	_update_trail(delta)

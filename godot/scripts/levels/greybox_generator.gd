@@ -208,6 +208,9 @@ func _build_walls(matrix: Array,vertical: bool,size: float,mat: StandardMaterial
 			if not matrix[r][c]:
 				continue
 			wall_count += 1
+			# Leave the two entry foreground segments open, matching the finished Maze03 view.
+			if not vertical and r==19 and c in [0,1]:
+				continue
 			# The repaired full-height porch wall replaces this old low board.
 			if not vertical and r==8 and c==10:
 				continue

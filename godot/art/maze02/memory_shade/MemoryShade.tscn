@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="memory_shade.gd" id="1_script"]
+[ext_resource type="PackedScene" path="Ghost_MemoryShade_Modified.glb" id="2_model"]
+[ext_resource type="PackedScene" path="MemoryMotes.tscn" id="3_motes"]
+[ext_resource type="PackedScene" path="MotionMotes.tscn" id="4_motion"]
+
+[node name="MemoryShade" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="Visual" type="Node3D" parent="."]
+position = Vector3(0, 0.012, 0)
+
+[node name="Model" parent="Visual" instance=ExtResource("2_model")]
+position = Vector3(0, -0.0115827555, 0)
+rotation = Vector3(0, -1.5707963, 0)
+
+[node name="MemoryMotes" parent="." instance=ExtResource("3_motes")]
+
+[node name="MotionMotes" parent="." instance=ExtResource("4_motion")]

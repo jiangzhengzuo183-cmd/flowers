@@ -53,8 +53,19 @@ func release() -> void:
 	for code: int in held.duplicate():
 		key(code,false)
 
+func set_sprint(enabled: bool) -> void:
+	# Set the desired test state through a real Shift tap; never alter the actor directly.
+	if actor.sprint_toggled == enabled:
+		return
+	key(KEY_SHIFT,false)
+	await ticks(1)
+	key(KEY_SHIFT,true)
+	await ticks(1)
+	key(KEY_SHIFT,false)
+	await ticks(1)
+
 func walk_to(goal: Vector3, label: String, running: bool = true) -> bool:
-	key(KEY_SHIFT,running)
+	await set_sprint(running)
 	var code := 0
 	var reached := false
 	# A two-cell walking check takes about 180 physics steps. Keep enough
@@ -73,7 +84,7 @@ func walk_to(goal: Vector3, label: String, running: bool = true) -> bool:
 		await ticks(1)
 	if code != 0:
 		key(code,false)
-	key(KEY_SHIFT,false)
+	await set_sprint(false)
 	await ticks(3)
 	if not reached:
 		print("ACTOR STATE floor=",actor.is_on_floor()," wall=",actor.is_on_wall()," velocity=",actor.velocity," normal=",actor.get_floor_normal()," max=",actor.floor_max_angle)

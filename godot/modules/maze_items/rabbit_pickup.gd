@@ -8,6 +8,9 @@ const Sparkle := preload("res://modules/maze_items/rabbit_sparkle.svg")
 
 var actor: CharacterBody3D
 var claimed := false
+var can_collect: Callable
+var ground_display := false
+var _ground_half_height := 0.46
 var _display := Node3D.new()
 var _sparkles: Array[Sprite3D] = []
 var _pool: MeshInstance3D
@@ -69,7 +72,7 @@ func _update_glow(delta: float) -> void:
 	var attention := 1.0 - smoothstep(0.78, 2.65, actor.global_position.distance_to(global_position))
 	_near = move_toward(_near, attention, delta * 2.6)
 	_time += delta * (1.0 + 0.48 * _near)
-	_display.position.y = 0.99 + sin(_time * 1.85) * 0.135
+	_display.position.y = _ground_half_height + 0.015 if ground_display else 0.99 + sin(_time * 1.85) * 0.135
 	_display.rotation.y = _time * 0.63
 	_pool.transparency = 0.28 - 0.22 * _near + 0.08 * sin(_time * 1.85)
 	_pool.scale = Vector3.ONE * (1.0 + 0.17 * _near + 0.06 * sin(_time * 1.85))
@@ -89,6 +92,8 @@ func _update_glow(delta: float) -> void:
 
 func _on_body_entered(body: Node3D) -> void:
 	if claimed or body != actor or not actor.controls_enabled:
+		return
+	if can_collect.is_valid() and not can_collect.call():
 		return
 	claimed = true
 	set_deferred("monitoring", false)

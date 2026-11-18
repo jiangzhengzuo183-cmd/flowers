@@ -53,6 +53,14 @@ theme_override_colors/font_focus_color = Color(0.23, 0.31, 0.21, 1)
 text = "Maze 02    Memory Distortion"
 alignment = 0
 
+[node name="Maze03" type="Button" parent="Picker/Choices"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+theme_override_colors/font_focus_color = Color(0.23, 0.31, 0.21, 1)
+text = "Maze 03    银蓝圣堂"
+alignment = 0
+
 [node name="LevelHost" type="Control" parent="."]
 unique_name_in_owner = true
 visible = false

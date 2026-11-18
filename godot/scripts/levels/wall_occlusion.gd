@@ -12,6 +12,9 @@ var groups: Dictionary = {}
 var _collider_groups: Dictionary = {}
 var _clock := 0.0
 var last_blockers: Dictionary = {}
+var guide_blockers: Dictionary = {}
+var guide_strength := 0.0
+var _guide_collider_groups: Dictionary = {}
 var target_opacity := 0.22
 var restore_delay := 0.10
 var hidden_fraction := 0.85
@@ -32,30 +35,62 @@ func configure(generator: Node3D,actor: CharacterBody3D,camera_rig: Node3D,setti
 		var part := str(mesh.get_meta("greybox_part",mesh.name))
 		if not _can_fade(part):
 			continue
-		var original: Material = mesh.material_override
-		if original==null:
-			original = mesh.mesh.surface_get_material(0)
-		if not original is StandardMaterial3D:
-			continue
-		var id := _group_id(mesh,generator)
-		if not groups.has(id):
-			groups[id] = {"entries":[],"opacity":1.0,"last_seen":-1000.0}
-		var material := ShaderMaterial.new()
-		material.shader = FADE_SHADER
-		material.set_shader_parameter("stone_color",original.albedo_color)
-		material.set_shader_parameter("stone_roughness",original.roughness)
-		material.set_shader_parameter("opacity",1.0)
+		_register_wall(mesh, generator, true)
+
+func register_guide_buildings(generator: Node3D, plaster_fade: Shader) -> void:
+	for mesh: MeshInstance3D in generator.find_children("*", "MeshInstance3D", true, false):
+		var part := str(mesh.get_meta("greybox_part", mesh.name))
+		if _is_building(mesh, generator) and (_can_fade(part) or mesh.get_meta("art_role", "") == "chapel_wall"):
+			_register_wall(mesh, generator, false, plaster_fade)
+
+func guide_group(collider: Object) -> String:
+	var id := collider.get_instance_id()
+	return _collider_groups.get(id, _guide_collider_groups.get(id, ""))
+
+func _register_wall(mesh: MeshInstance3D, generator: Node3D, player_occluder: bool, plaster_fade: Shader = null) -> void:
+	var original: Material = mesh.material_override
+	if original == null:
+		original = mesh.mesh.surface_get_material(0)
+	var tint: Color
+	var roughness := 0.9
+	if original is StandardMaterial3D:
+		tint = original.albedo_color
+		roughness = original.roughness
+	elif not player_occluder and original is ShaderMaterial and original.get_shader_parameter("finish_color") is Color:
+		tint = original.get_shader_parameter("finish_color")
+	else:
+		return
+	var id := _group_id(mesh, generator)
+	if not groups.has(id):
+		groups[id] = {"entries": [], "opacity": 1.0, "last_seen": -1000.0}
+	var material := ShaderMaterial.new()
+	material.shader = FADE_SHADER
+	material.set_shader_parameter("stone_color", tint)
+	material.set_shader_parameter("stone_roughness", roughness)
+	material.set_shader_parameter("opacity", 1.0)
+	if plaster_fade != null and mesh.has_meta("maze02_plaster"):
+		material.shader = plaster_fade
+		material.set_shader_parameter("stone_color", tint)
+		material.set_shader_parameter("stone_roughness", roughness)
+		material.set_shader_parameter("weather_strength", mesh.get_meta("maze02_weather_strength", 0.0))
+		if original is ShaderMaterial:
+			for parameter: StringName in [&"grain", &"legacy_winding", &"wall_half_height"]:
+				var value: Variant = original.get_shader_parameter(parameter)
+				if value != null:
+					material.set_shader_parameter(parameter, value)
+	groups[id].entries.append({"mesh": mesh, "original": original, "alpha": material})
+	var parent := mesh.get_parent()
+	while parent != generator and not parent is StaticBody3D:
+		parent = parent.get_parent()
+	if player_occluder:
 		materials.append(material)
-		groups[id].entries.append({"mesh":mesh,"original":original,"alpha":material})
 		faded_mesh_count += 1
-		var parent: Node = mesh.get_parent()
-		while parent!=generator and not parent is StaticBody3D:
-			parent = parent.get_parent()
 		if parent is StaticBody3D:
 			_collider_groups[parent.get_instance_id()] = id
-			# Walking/visibility physics remain on layer 1. These walls no
-			# longer force camera motion: only true ceilings still do that.
-			parent.set_collision_layer_value(3,false)
+			# Walking and visibility stay on layer 1. The camera can pass these walls.
+			parent.set_collision_layer_value(3, false)
+	elif parent is StaticBody3D:
+		_guide_collider_groups[parent.get_instance_id()] = id
 
 func _is_building(mesh: Node,generator: Node) -> bool:
 	var parent := mesh.get_parent()
@@ -99,9 +134,12 @@ func _process(delta: float) -> void:
 		var group: Dictionary = groups[id]
 		var blocked: bool = rig.enabled and _clock-float(group.last_seen)<=restore_delay
 		var desired := target_opacity if blocked else 1.0
+		if guide_blockers.has(id):
+			desired = minf(desired, lerpf(1.0, 0.24, guide_strength))
 		var previous := float(group.opacity)
 		group.opacity = move_toward(float(group.opacity),desired,delta*(5.0 if blocked else 3.5))
-		strength = maxf(strength,1.0-float(group.opacity))
+		if blocked or guide_strength <= 0.0:
+			strength = maxf(strength, 1.0 - float(group.opacity))
 		if is_equal_approx(previous,float(group.opacity)):
 			continue
 		for entry: Dictionary in group.entries:

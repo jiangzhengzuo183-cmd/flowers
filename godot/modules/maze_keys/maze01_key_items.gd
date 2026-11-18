@@ -45,6 +45,7 @@ func _spawn_keys() -> void:
 		pickup.name = String(entry.item) + "_" + id
 		pickup.definition = Keys.ITEMS[entry.item]
 		pickup.actor = _actor
+		pickup.can_collect = inventory.can_accept_pickup
 		pickup.position = key_positions.get(id, entry.pickup)
 		pickup.collected.connect(_collect_key.bind(entry.item))
 		key_pickups[id] = pickup

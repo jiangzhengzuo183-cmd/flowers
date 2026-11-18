@@ -106,6 +106,7 @@ func _ready() -> void:
 		_items = _make_items()
 		_items.install(self, %Player, %GeneratedMaze.architecture, %GeneratedMaze.gates,
 			[exit], required_exit_gates(), rabbit_guide_seconds, rabbit_guide_distance, sound.play_item_pickup)
+	preload("res://modules/stamina/runtime.gd").install(self, true)
 	_refresh_hud()
 
 func _make_items() -> MazeItems:
@@ -169,7 +170,7 @@ func complete_level() -> void:
 func _refresh_hud() -> void:
 	if not loaded_ok:
 		return
-	%Legend.text = "WASD 移动 / Shift 跑步 / 空格跳跃 / E 开门 / 鼠标拖动视角 / 滚轮缩放" if walk_mode else "全图查看 · 两条线为原始参考走向，实际通行还需操作机关"
+	%Legend.text = "WASD 移动 / Shift 开/关冲刺 / 空格跳跃 / E 开门 / 鼠标拖动视角 / 滚轮缩放" if walk_mode else "全图查看 · 两条线为原始参考走向，实际通行还需操作机关"
 	var parts: Array[String] = []
 	for id: String in ["D1","D2","D4","D3"]:
 		parts.append(id+(" 已开" if %GeneratedMaze.gates[id].is_open else " 关闭"))

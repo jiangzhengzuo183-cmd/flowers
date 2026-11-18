@@ -6,6 +6,7 @@ signal maze_chosen(index: int)
 const MAZES := [
 	"res://scenes/levels/maze_01_greybox.tscn",
 	"res://scenes/levels/Maze02.tscn",
+	"res://scenes/levels/Maze03.tscn",
 ]
 var open_in_host := false
 var active_level: Control
@@ -13,6 +14,7 @@ var active_level: Control
 func _ready() -> void:
 	%Maze01.pressed.connect(open_maze.bind(0))
 	%Maze02.pressed.connect(open_maze.bind(1))
+	%Maze03.pressed.connect(open_maze.bind(2))
 	%Back.pressed.connect(show_selection)
 	if open_in_host:
 		$Picker/Choices/Description.text = "选择一座迷宫开始试玩"

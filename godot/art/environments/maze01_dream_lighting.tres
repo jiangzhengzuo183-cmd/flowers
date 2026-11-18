@@ -1,0 +1,6 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+[ext_resource type="Script" path="res://art/environments/dream_lighting.gd" id="1_script"]
+[ext_resource type="Environment" path="res://art/environments/dream_pink.tres" id="2_env"]
+[resource]
+script = ExtResource("1_script")
+environment = ExtResource("2_env")

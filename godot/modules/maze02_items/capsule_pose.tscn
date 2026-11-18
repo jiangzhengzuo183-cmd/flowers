@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://modules/maze02_items/assets/pink_capsule.glb" id="1"]
+
+[node name="CapsulePose" type="Node3D"]
+
+[node name="SourceModel" parent="." instance=ExtResource("1")]
+rotation = Vector3(0.7853982, 0, 0)

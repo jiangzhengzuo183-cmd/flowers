@@ -1,0 +1,29 @@
+extends RefCounted
+## Generated source-pixel rectangles for the four original compass layers.
+const REGIONS := {
+  "base": [
+    0,
+    0,
+    1312,
+    1199
+  ],
+  "arc": [
+    690,
+    138,
+    361,
+    291
+  ],
+  "needle": [
+    459,
+    302,
+    402,
+    493
+  ],
+  "hub": [
+    601,
+    535,
+    79,
+    79
+  ]
+}
+
