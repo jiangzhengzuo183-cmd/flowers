@@ -208,7 +208,7 @@ func exploration_and_reset() -> void:
     check(actor.controls_enabled and not intro.active,"scene change cannot leave controls locked")
 func asset_checks() -> void:
     var art=load("res://assets/UI/HUD/hand_cursor/regions.gd")
-    check(art.SIZE==Vector2i(53,60),"cursor enlarged from 44 to 52px visible height")
+    check(art.SIZE==Vector2i(80,92),"cursor enlarged to 84px visible height")
     var tip: Vector2i=art.HOTSPOT
     var frames: Array[Image]=[]
     for n in 3:frames.append(Image.load_from_file(ProjectSettings.globalize_path("res://assets/UI/HUD/hand_cursor/derived/frame_%d.png"%n)))
