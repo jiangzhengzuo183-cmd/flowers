@@ -12,6 +12,7 @@ var open_in_host := false
 var active_level: Control
 
 func _ready() -> void:
+	preload("res://modules/game_hud/hand_cursor.gd").install(get_window())
 	%Maze01.pressed.connect(open_maze.bind(0))
 	%Maze02.pressed.connect(open_maze.bind(1))
 	%Maze03.pressed.connect(open_maze.bind(2))

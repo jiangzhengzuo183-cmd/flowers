@@ -2,6 +2,8 @@ extends Node
 ## Minimal adapter: existing systems own all gameplay. This node only binds their public data/actions.
 const HUD := preload("res://modules/game_hud/GameHUD.tscn")
 const Preferences := preload("res://modules/game_hud/game_settings.gd")
+const StaminaPresentation := preload("res://modules/game_hud/stamina_presentation.gd")
+var stamina_presentation := StaminaPresentation.new()
 const Clock := preload("res://modules/game_hud/session_clock.gd")
 
 static var music_enabled := true
@@ -63,7 +65,10 @@ func install(level: Control) -> void:
         inventory.item_flashed.connect(_key_feedback)
         _inventory_changed()
     actor.stamina.changed.connect(_stamina_changed)
-    actor.stamina.session_reset.connect(func():hud.clear_notifications())
+    actor.stamina.session_reset.connect(func():
+        hud.clear_notifications()
+        stamina_presentation.reset()
+        hud.get_node("HUDRoot/BottomLeftStamina").reset_state())
     actor.stamina.restored.connect(func(amount: float, source: StringName):
         if source == &"barrier": hud.show_notification({"title":"蓝色屏障 · 体力恢复", "description":"体力 +%.0f · 加速期间不消耗体力" % amount}))
     _stamina_changed()
@@ -246,7 +251,7 @@ func _key_feedback(id: StringName) -> void:
     hud.get_node("HUDRoot/BottomRightInventory").flash(id)
     hud.show_notification({"title":"机关已激活","description":"神秘符号正在点亮，机关门即将下沉。","icon":String(id)})
 func _stamina_changed() -> void:
-    hud.update_stamina(actor.stamina.percentage(),actor.stamina.is_sprinting or actor._has_free_sprint())
+    hud.update_stamina_state(stamina_presentation.read(actor,scene.get("_perks")))
 func _preference_changed(key: String, value: float) -> void:
     Preferences.change(key,value)
     Preferences.apply(scene)

@@ -253,6 +253,8 @@ func update_task(chapter: String, task: String) -> void:
     task_label.text = task
 func update_timer(seconds: float) -> void:
     $HUDRoot/TopCenterTimer.set_time(seconds)
+func update_stamina_state(data: Dictionary) -> void:
+    $HUDRoot/BottomLeftStamina.set_state(data)
 func update_stamina(ratio: float, sprinting: bool) -> void:
     $HUDRoot/BottomLeftStamina.set_ratio(ratio)
     $HUDRoot/BottomLeftStamina.set_active(sprinting)
@@ -279,18 +281,8 @@ func update_status_effects(effects: Array[Dictionary]) -> void:
         for effect: Dictionary in effects:
             var box := VBoxContainer.new()
             box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-            box.custom_minimum_size=Vector2(112,72)
+            box.custom_minimum_size=Vector2(112,32)
             $HUDRoot/StatusEffects.add_child(box)
-            var icon: Texture2D = Art.icon(effect.get("icon",""))
-            if icon != null:
-                var image := TextureRect.new()
-                image.texture = icon
-                image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-                image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-                image.custom_minimum_size = Vector2(40,40)
-                image.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
-                image.mouse_filter = Control.MOUSE_FILTER_IGNORE
-                box.add_child(image)
             var label := _label(box,"",16)
             label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
             label.custom_minimum_size=Vector2(112,28)

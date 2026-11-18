@@ -12,8 +12,14 @@ func install(adapter: Node) -> void:
     process_mode=Node.PROCESS_MODE_ALWAYS
     get_window().focus_exited.connect(_focus_lost)
     get_window().focus_entered.connect(_focus_gained)
-    runtime.hud.overlay_changed.connect(func(_open: bool):sync())
-    sync.call_deferred()
+    runtime.hud.overlay_changed.connect(_overlay_changed)
+    _resume_gameplay.call_deferred()
+func _overlay_changed(open: bool) -> void:
+    if open:sync()
+    else:_resume_gameplay.call_deferred()
+func _resume_gameplay() -> void:
+    if not OS.has_feature("web") and DisplayServer.get_name()!="headless":get_window().grab_focus()
+    capture_cursor()
 func wants_capture() -> bool:
     return is_instance_valid(runtime) and not runtime._changing and runtime.scene.walk_mode and runtime.hud.overlay.is_empty() and not get_tree().paused and not _cursor_free and _focused
 func release_cursor() -> void:

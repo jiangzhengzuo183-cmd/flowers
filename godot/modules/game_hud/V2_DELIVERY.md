@@ -1,6 +1,8 @@
 # Unified HUD and finish flow — 2026-11-18
 
-This is the current delivery; older HUD reports describe superseded layouts.
+Stamina display, status/notification icons and menu pointer return are superseded by STAMINA_RING_DELIVERY.md.
+
+This is the previous delivery; older HUD reports describe superseded layouts.
 
 ## Play
 

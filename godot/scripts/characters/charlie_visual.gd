@@ -39,7 +39,7 @@ func _ready() -> void:
 		var animation := imported.get_animation(source)
 		if CLIP_NAMES.has(source):
 			animation = animation.duplicate()
-			animation.loop_mode = Animation.LOOP_LINEAR if clip in [&"Idle", &"Walk", &"Run", &"Dance"] else Animation.LOOP_NONE
+			animation.loop_mode = Animation.LOOP_LINEAR if clip in [&"Idle", &"Walk", &"Run"] else Animation.LOOP_NONE
 			_pin_hip(animation, hip_rest, parent_basis, false)
 			if clip == &"Idle":
 				_open_idle_stance(animation, skeleton)
@@ -139,7 +139,7 @@ func play_victory_dance() -> void:
 	animation_player.active = true
 	animation_player.speed_scale = 1.0
 	celebration_remaining = VICTORY_DURATION
-	animation_player.play_section(&"Dance", 0.0, 4.2, 0.16)
+	animation_player.play_section(&"Dance", 0.0, VICTORY_DURATION, 0.16)
 
 func _process(delta: float) -> void:
 	if not celebrating: return

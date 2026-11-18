@@ -6,6 +6,7 @@ static var aspect := 0
 static var quality := 2
 static var volume := 1.0
 static var sensitivity := 1.0
+const CursorRuntime:=preload("res://modules/game_hud/hand_cursor.gd")
 static var cursor: ImageTexture
 static func ensure_loaded() -> void:
     if loaded:return
@@ -41,9 +42,5 @@ static func apply(level: Control) -> void:
     viewport.msaa_3d=Viewport.MSAA_2X if quality==2 else Viewport.MSAA_DISABLED
     AudioServer.set_bus_volume_db(0,linear_to_db(maxf(0.0001,volume)))
     AudioServer.set_bus_mute(0,volume<=0.0)
-    if cursor==null:
-        var image: Image=load("res://assets/UI/HUD/v2/derived/cursor.png").get_image()
-        image.resize(roundi(44.0*image.get_width()/image.get_height()),44,Image.INTERPOLATE_LANCZOS)
-        cursor=ImageTexture.create_from_image(image)
-    Input.set_custom_mouse_cursor(cursor,Input.CURSOR_ARROW,Vector2(2,2))
-    Input.set_custom_mouse_cursor(cursor,Input.CURSOR_POINTING_HAND,Vector2(2,2))
+    var controller: Node=CursorRuntime.install(level.get_window())
+    cursor=controller.frames[0]
