@@ -43,6 +43,7 @@ var mouse_track_time := 0.0
 var _phase_age := 0.0
 var _go_age := 1.0
 var _generation := 0
+var entrance_active := false
 
 func install(level: Node) -> void:
  name = "Maze03Race"
@@ -108,6 +109,7 @@ func restart() -> void:
  if current_mode=="Explore":
   state = "EXPLORE"
   actor.controls_enabled = scene.walk_mode
+  sync_controls()
   return
  state = "PREPARATION"
  actor.controls_enabled = false
@@ -140,13 +142,22 @@ func restart() -> void:
  sync_controls()
  _update_hud()
 
+func set_entrance_active(value: bool) -> void:
+ entrance_active=value
+ sync_controls()
+ _update_hud()
+
 func sync_controls() -> void:
- if current_mode=="Race" and state in ["PREPARATION","COUNTDOWN"]:
+ if entrance_active or (current_mode=="Race" and state in ["PREPARATION","COUNTDOWN"]):
   actor.controls_enabled = false
   actor.velocity.x = 0.0
   actor.velocity.z = 0.0
 
 func _physics_process(delta: float) -> void:
+ if entrance_active:
+  sync_controls()
+  _update_hud()
+  return
  if current_mode!="Race" or not is_instance_valid(mouse):return
  sync_controls()
  if state=="PREPARATION":
@@ -250,7 +261,7 @@ func _update_hud() -> void:
  if state=="PREPARATION":count="准备"
  elif state=="COUNTDOWN":count=str(maxi(1,3-floori(_phase_age)))
  elif state=="RACING" and _go_age<0.55:count="GO!"
- hud.update_race(state,elapsed,count,mouse_finished)
+ hud.update_race(state,elapsed,"" if entrance_active else count,mouse_finished)
 
 func set_mouse_speed_multiplier(value: float) -> void:
  var previous := effective_mouse_speed_multiplier()

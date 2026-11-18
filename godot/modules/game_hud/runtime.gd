@@ -21,6 +21,7 @@ var _refresh := 0.0
 var _pause_owned := false
 var _paused_before := false
 var _changing := false
+var intro: Node
 var play_flow: Node
 var mouse_look: Node
 var _race_readout: Control
@@ -84,9 +85,14 @@ func install(level: Control) -> void:
     play_flow.install(self)
     _build_developer_controls()
     _hide_chrome()
-    var requested: String = get_tree().root.get_meta(&"hud_restart_mode","Explore")
+    intro=preload("res://modules/maze_intro/MazeIntroController.tscn").instantiate()
+    scene.add_child(intro)
+    intro.install(self)
+    var requested: String = get_tree().root.get_meta(&"hud_restart_mode","Race" if maze_number==3 else "Explore")
     if get_tree().root.has_meta(&"hud_restart_mode"): get_tree().root.remove_meta(&"hud_restart_mode")
-    if is_instance_valid(race) and requested == "Race": race.request_mode("Race")
+    if is_instance_valid(race):
+        race.pending_mode=requested
+        race.restart()
     _sync()
 func _hide_chrome() -> void:
     var viewport := scene.get_node("%ViewportContainer")
@@ -212,7 +218,7 @@ func _sync() -> void:
     var hint := ""
     interaction_target=null
     _interaction_offset=Vector3.ZERO
-    if not get_tree().paused:
+    if not get_tree().paused and not is_intro_active():
         if is_instance_valid(race):
             if race.sanctuary.can_interact():
                 hint = "E  激活圣堂"
@@ -321,7 +327,12 @@ func _music_toggle(enabled: bool) -> void:
 func _music_volume(value: float) -> void:
     music_volume = clampf(value,0.0,1.0)
     AudioServer.set_bus_volume_db(_music_bus(),linear_to_db(maxf(0.0001,music_volume)))
+func is_intro_active() -> bool:
+    return is_instance_valid(intro) and intro.active
 func _input(event: InputEvent) -> void:
+    if is_intro_active():
+        get_viewport().set_input_as_handled()
+        return
     if not event is InputEventKey or not event.pressed or event.echo or _changing: return
     var code: int = event.physical_keycode if event.physical_keycode != 0 else event.keycode
     if code == KEY_ESCAPE:

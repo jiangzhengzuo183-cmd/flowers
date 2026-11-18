@@ -41,6 +41,7 @@ func _ready() -> void:
 	_install_game_hud.call_deferred()
 
 func _handle_camera_input(event: InputEvent) -> void:
+	if get_meta(&"maze_intro_active",false):return
 	if walk_mode and is_instance_valid(game_hud) and event is InputEventMouseMotion:
 		# Formal play receives mouse motion once through the captured-input adapter.
 		return

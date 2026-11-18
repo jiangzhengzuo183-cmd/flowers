@@ -18,6 +18,8 @@ func _overlay_changed(open: bool) -> void:
     if open:sync()
     else:_resume_gameplay.call_deferred()
 func _resume_gameplay() -> void:
+    if not is_inside_tree() or not is_instance_valid(runtime) or runtime._changing:return
+    if get_window()==null:return
     if not OS.has_feature("web") and DisplayServer.get_name()!="headless":get_window().grab_focus()
     capture_cursor()
 func wants_capture() -> bool:
@@ -40,6 +42,9 @@ func _over_interface() -> bool:
     var hovered: Control=get_viewport().gui_get_hovered_control()
     return hovered!=null and runtime.hud.get_node("HUDRoot").is_ancestor_of(hovered)
 func _input(event: InputEvent) -> void:
+    if runtime.is_intro_active():
+        get_viewport().set_input_as_handled()
+        return
     if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:
         if event.double_click and runtime.hud.overlay.is_empty() and runtime.scene.walk_mode:
             if Input.mouse_mode==Input.MOUSE_MODE_CAPTURED:release_cursor()

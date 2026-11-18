@@ -62,14 +62,25 @@ func reset() -> void:
     result_panel.hide()
     countdown.hide()
     if is_instance_valid(runtime.mouse_look):runtime.mouse_look.capture_cursor.call_deferred()
+    if runtime.is_intro_active():
+        hold_for_intro()
+    else:begin_gameplay()
+func hold_for_intro() -> void:
+    preparing=false
+    count_age=0.0
+    countdown.hide()
+    runtime.clock.ready_to_play=false
+func begin_gameplay() -> void:
     preparing=runtime.maze_number in [1,2]
     runtime.clock.ready_to_play=not preparing
     if preparing:
         runtime.actor.controls_enabled=false
         countdown.text="3"
         countdown.show()
+    elif not is_instance_valid(runtime.race) or runtime.race.current_mode=="Explore" or runtime.race.state=="ERROR":
+        runtime.actor.controls_enabled=runtime.scene.walk_mode
 func _physics_process(delta: float) -> void:
-    if not is_instance_valid(runtime) or get_tree().paused:return
+    if not is_instance_valid(runtime) or get_tree().paused or runtime.is_intro_active():return
     if preparing:
         runtime.actor.controls_enabled=false
         runtime.actor.velocity.x=0.0

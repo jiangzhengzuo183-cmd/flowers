@@ -13,7 +13,7 @@ const JUMP_PREPARE := 0.48
 const JUMP_TAKEOFF := 0.55
 const JUMP_APEX := 0.75
 const JUMP_CONTACT := 0.99
-const VICTORY_DURATION := 7.2
+const VICTORY_DURATION := 4.5
 var celebration_remaining := 0.0
 const CLIP_NAMES := {
 	&"idle_001": &"Idle", &"walk_001": &"Walk", &"run_001": &"Run",
