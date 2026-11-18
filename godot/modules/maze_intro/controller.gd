@@ -2,7 +2,8 @@ extends Node
 ## One scene-local cinematic shared by all formal mazes. Gameplay keeps its own clocks.
 signal started
 signal completed
-@export_range(4.0,6.0,0.1) var duration_seconds := 5.0
+@export_range(4.0,8.0,0.1) var duration_seconds := 6.0
+@export_range(0.0,2.0,0.05) var overview_hold_seconds := 0.8
 @export_range(1.05,1.4,0.01) var overview_padding := 1.16
 @export var overview_height := 0.0
 @export var overview_center := Vector3.INF
@@ -10,18 +11,12 @@ var runtime: Node
 var active := false
 var age := 0.0
 var maze_number := 1
-var test_title := "第一次测试"
-var game_mode := "Explore"
+var passage: Node3D
 var camera: Camera3D
 var game_camera: Camera3D
 var rig: Node3D
 var canvas: CanvasLayer
 var blocker: Control
-var clouds: ColorRect
-var title_group: Control
-var title: Label
-var subtitle: Label
-var paint: ShaderMaterial
 var start_pose := Transform3D.IDENTITY
 var end_pose := Transform3D.IDENTITY
 var handoff_error := 0.0
@@ -35,22 +30,21 @@ var _done := false
 func install(adapter: Node, information: Dictionary = {}) -> void:
     runtime=adapter
     maze_number=information.get("maze_number",runtime.maze_number)
-    test_title=information.get("title",["第一次测试","第二次测试","第三次测试"][maze_number-1])
     rig=runtime.scene.get_node("%FollowRig")
     game_camera=information.get("game_camera",rig.camera)
     overview_height=information.get("overview_height",overview_height)
     overview_center=information.get("overview_center",overview_center)
-    game_mode=information.get("game_mode","Explore")
+    overview_hold_seconds=information.get("overview_hold_seconds",overview_hold_seconds)
     _hud_root=runtime.hud.get_node("HUDRoot")
     process_priority=1000
     process_physics_priority=-1000
-    _build_overlay()
+    _build_input_blocker()
     runtime.actor.stamina.session_reset.connect(begin)
     begin()
 
-func _build_overlay() -> void:
+func _build_input_blocker() -> void:
     canvas=CanvasLayer.new()
-    canvas.name="MazeEntranceOverlay"
+    canvas.name="MazeEntranceInput"
     canvas.layer=30
     add_child(canvas)
     blocker=Control.new()
@@ -58,46 +52,6 @@ func _build_overlay() -> void:
     canvas.add_child(blocker)
     blocker.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     blocker.mouse_filter=Control.MOUSE_FILTER_STOP
-    clouds=ColorRect.new()
-    clouds.name="SoftCloudLayers"
-    blocker.add_child(clouds)
-    clouds.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-    clouds.mouse_filter=Control.MOUSE_FILTER_IGNORE
-    paint=ShaderMaterial.new()
-    paint.shader=preload("res://modules/maze_intro/clouds.gdshader")
-    clouds.material=paint
-    title_group=Control.new()
-    title_group.name="TestTitle"
-    blocker.add_child(title_group)
-    title_group.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-    title_group.offset_left=-400
-    title_group.offset_right=400
-    title_group.offset_top=-60
-    title_group.offset_bottom=60
-    title_group.pivot_offset=Vector2(400,60)
-    title_group.mouse_filter=Control.MOUSE_FILTER_IGNORE
-    title=Label.new()
-    title.name="Title"
-    title.text=test_title
-    title.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-    title.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-    title.add_theme_font_override("font",preload("res://modules/game_hud/assets.gd").hand_font())
-    title.add_theme_font_size_override("font_size",62)
-    title.add_theme_color_override("font_color",Color("57493b"))
-    title.mouse_filter=Control.MOUSE_FILTER_IGNORE
-    title_group.add_child(title)
-    title.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-    subtitle=Label.new()
-    subtitle.name="Mode"
-    subtitle.text="竞速模式"
-    subtitle.add_theme_font_override("font",preload("res://modules/game_hud/assets.gd").hand_font())
-    subtitle.add_theme_font_size_override("font_size",22)
-    subtitle.add_theme_color_override("font_color",Color("857665"))
-    subtitle.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-    subtitle.position=Vector2(0,104)
-    subtitle.size=Vector2(800,32)
-    subtitle.mouse_filter=Control.MOUSE_FILTER_IGNORE
-    title_group.add_child(subtitle)
 
 func begin() -> void:
     # The same node is reset in place, including developer 'back to entrance'.
@@ -109,13 +63,11 @@ func begin() -> void:
     _end_ready=false
     _settle_frames=0
     handoff_error=0.0
+    _clear_passage()
     runtime.scene.set_meta(&"maze_intro_active",true)
     runtime.play_flow.hold_for_intro()
     _hud_root.modulate.a=0.0
     blocker.show()
-    title_group.modulate.a=0.0
-    paint.set_shader_parameter("cover",0.0)
-    paint.set_shader_parameter("opening",0.0)
     _saved_rig_enabled=runtime.scene.walk_mode
     runtime.actor.controls_enabled=false
     if is_instance_valid(runtime.race):runtime.race.set_entrance_active(true)
@@ -159,6 +111,9 @@ func _physics_process(_delta: float) -> void:
         rig.reset_view()
         end_pose=game_camera.global_transform
         _end_ready=true
+        passage=preload("res://modules/maze_intro/air_passage.gd").new()
+        runtime.actor.get_parent().add_child(passage)
+        passage.install(self,maze_number)
         rig.enabled=false
         camera.make_current()
 
@@ -169,18 +124,20 @@ func _process(delta: float) -> void:
         return
     age+=minf(delta,0.1)
     var t:=clampf(age/duration_seconds,0.0,1.0)
-    game_mode=runtime.race.current_mode if is_instance_valid(runtime.race) else "Explore"
-    subtitle.visible=game_mode=="Race"
-    var cover:=smoothstep(0.09,0.27,t)
-    var clearing:=smoothstep(0.51,0.96,t)
-    paint.set_shader_parameter("cover",cover)
-    paint.set_shader_parameter("opening",clearing)
-    paint.set_shader_parameter("age",age)
-    paint.set_shader_parameter("aspect",blocker.size.x/maxf(1.0,blocker.size.y))
-    title_group.modulate.a=smoothstep(0.23,0.31,t)*(1.0-smoothstep(0.51,0.62,t))
-    title_group.scale=Vector2.ONE*lerpf(0.985,1.0,smoothstep(0.23,0.34,t))
-    _hud_root.modulate.a=smoothstep(0.93,1.0,t)
-    var u:=smoothstep(0.53,0.99,t)
+    _hud_root.modulate.a=smoothstep(0.94,1.0,t)
+    # Rest on the complete map, ease into the glide, then settle gently at Charlie.
+    # Quintic easing has zero velocity and acceleration at both ends.
+    var travel_seconds:=maxf(0.1,duration_seconds-overview_hold_seconds-0.15)
+    var progress:=clampf((age-overview_hold_seconds)/travel_seconds,0.0,1.0)
+    var u:=progress*progress*progress*(progress*(progress*6.0-15.0)+10.0)
+    camera.global_transform=pose_at(u)
+    if is_instance_valid(passage):passage.update_gain(u)
+    camera.fov=game_camera.fov
+    camera.make_current()
+    rig.enabled=false
+    if t>=1.0:_finish()
+
+func pose_at(u: float) -> Transform3D:
     var p0:=start_pose.origin
     var p3:=end_pose.origin
     var p1:=p0.lerp(p3,0.32)
@@ -188,16 +145,19 @@ func _process(delta: float) -> void:
     var p2:=p3+Vector3.UP*18.0
     var position:=p0.bezier_interpolate(p1,p2,p3,u)
     var rotation:=start_pose.basis.get_rotation_quaternion().slerp(end_pose.basis.get_rotation_quaternion(),u)
-    camera.global_transform=Transform3D(Basis(rotation),position)
-    camera.fov=game_camera.fov
-    camera.make_current()
-    rig.enabled=false
-    if t>=1.0:_finish()
+    return Transform3D(Basis(rotation),position)
+
+func _clear_passage() -> void:
+    if is_instance_valid(passage):
+        passage.hide()
+        passage.queue_free()
+        passage=null
 
 func _finish() -> void:
     if _done:return
     _done=true
     active=false
+    _clear_passage()
     if is_instance_valid(camera) and is_instance_valid(game_camera):
         camera.global_transform=end_pose
         handoff_error=camera.global_position.distance_to(game_camera.global_position)
@@ -216,6 +176,7 @@ func _finish() -> void:
     completed.emit()
 
 func _exit_tree() -> void:
+    _clear_passage()
     # The temporary camera is parented into the 3D world, so release it explicitly.
     if is_instance_valid(camera):
         camera.queue_free()

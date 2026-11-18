@@ -66,7 +66,12 @@ func run() -> void:
         check(not actor.controls_enabled and runtime.clock.elapsed==0.0,id+" input locked and clock zero")
         check(runtime.hud.get_node("HUDRoot").modulate.a<0.01,id+" HUD initially hidden")
         check(not runtime.play_flow.countdown.visible,id+" countdown hidden during cinematic")
-        check(intro.title.text==["第一次测试","第二次测试","第三次测试"][["maze","maze02","maze03"].find(id)],id+" correct test title")
+        check(intro.blocker.get_child_count()==0,id+" pure camera entrance has no clouds, title or visible overlay")
+        var world: Node3D=actor.get_parent()
+        var environment: Environment=level.get_node("%WorldEnvironment").environment
+        var environment_id: int=environment.get_instance_id()
+        var wind: Node=world.get_node_or_null("FinalTrialHorizon/TrialAtmosphere/HighAltitudeWind")
+        var wind_age: float=wind.elapsed if wind!=null else 0.0
         var spawn: Vector3=actor.global_position
         var distance: float=intro.rig.distance
         var pitch: float=intro.rig.pitch
@@ -96,14 +101,26 @@ func run() -> void:
         await ticks(2)
         check(actor.global_position.distance_to(spawn)<0.08 and not actor.sprint_toggled,id+" E/Shift/jump cannot start gameplay")
         check(is_equal_approx(intro.rig.distance,distance) and is_equal_approx(intro.rig.yaw,rig_yaw),id+" cinematic blocks camera input")
-        await wait_age(1.0)
-        await shot(id+"_02_clouds")
-        await wait_age(1.9)
-        check(intro.title_group.modulate.a>0.99,id+" title stable during covered hold")
-        await shot(id+"_03_title")
-        check(runtime.clock.elapsed==0.0 and not actor.controls_enabled,id+" clock still zero behind title")
-        await wait_age(3.35)
-        await shot(id+"_04_descent")
+        await wait_age(0.6)
+        check(intro.camera.global_transform.is_equal_approx(intro.start_pose),id+" pauses briefly on full maze before starting")
+        await wait_age(1.6)
+        await shot(id+"_02_departure")
+        await wait_age(2.9)
+        check(intro.camera.global_position.distance_to(intro.start_pose.origin)>1.0,id+" camera glides toward player without an intermediate pause")
+        check(intro.passage!=null and intro.passage.get_parent()==world,id+" passing air belongs to 3D world, outside HUD")
+        check(intro.passage.gain>0.5 and intro.camera.global_position.distance_to(intro.passage.zones[0])<3.0,id+" camera physically passes through first air pocket")
+        check(level.get_node("%WorldEnvironment").environment.get_instance_id()==environment_id,id+" original lighting and depth atmosphere stay active throughout the camera glide")
+        if id=="maze03":
+            check(wind!=null and wind.elapsed>wind_age+2.0,id+" existing world-space wind continues moving during intro")
+        elif id=="maze":
+            check(world.get_node("DreamAtmosphere/MazeFloorHaze").is_visible_in_tree(),id+" original maze mist remains visible in 3D")
+        else:
+            var sand: MultiMeshInstance3D=world.get_node("Maze02SandParticles")
+            check(sand.is_visible_in_tree() and sand.multimesh.instance_count>0,id+" original world-space sand remains active")
+        await shot(id+"_03_glide")
+        check(runtime.clock.elapsed==0.0 and not actor.controls_enabled,id+" clock remains zero throughout visible camera glide")
+        await wait_age(4.7)
+        await shot(id+"_04_approach")
         var last: Vector3=intro.camera.global_position
         var hits: Array=[]
         var max_step:=0.0
@@ -119,10 +136,11 @@ func run() -> void:
             await process_frame
         sweeps.append({"maze":id,"hits":hits,"max_frame_move":max_step,"handoff_error":intro.handoff_error})
         check(hits.is_empty(),id+" descending camera never crosses solid geometry")
+        check(not is_instance_valid(intro.passage),id+" temporary air is cleared after arrival")
         check(intro.handoff_error<0.002,id+" exact camera handoff")
         check(actor.get_viewport().get_camera_3d()==intro.game_camera and intro.rig.enabled,id+" original follow camera restored")
         check(is_equal_approx(intro.rig.distance,distance) and is_equal_approx(intro.rig.pitch,pitch) and absf(intro.game_camera.fov-fov)<0.01,id+" original camera parameters preserved")
-        check(runtime.hud.get_node("HUDRoot").modulate.a==1.0 and not intro.blocker.visible,id+" clouds gone and HUD visible")
+        check(runtime.hud.get_node("HUDRoot").modulate.a==1.0 and not intro.blocker.visible,id+" transparent blocker removed and HUD visible")
         check(not actor.controls_enabled,id+" existing countdown follows cinematic")
         await shot(id+"_05_countdown")
         if id=="maze03":
@@ -131,12 +149,14 @@ func run() -> void:
         check(actor.controls_enabled,id+" GO restores player controls")
         var elapsed: float=level.race.elapsed if id=="maze03" else runtime.clock.elapsed
         check(elapsed>0.0 and elapsed<1.0,id+" timer starts at GO excluding entire intro/countdown")
-        check(Input.mouse_mode==Input.MOUSE_MODE_CAPTURED,id+" returns to automatic mouse look")
+        root.grab_focus()
+        await ticks(3)
+        check(not runtime.mouse_look._cursor_free and (not root.has_focus() or Input.mouse_mode==Input.MOUSE_MODE_CAPTURED),id+" returns to automatic mouse look when window is focused")
         await shot(id+"_06_gameplay")
         check(is_equal_approx(actor.visual.VICTORY_DURATION,4.5),id+" continuous dance set to 4.5 seconds")
-        var before: float=elapsed
         await key(KEY_ESCAPE)
         check(paused and runtime.hud.overlay=="debug",id+" ESC tools still open")
+        var before: float=level.race.elapsed if id=="maze03" else runtime.clock.elapsed
         await ticks(8)
         var frozen: float=level.race.elapsed if id=="maze03" else runtime.clock.elapsed
         check(is_equal_approx(before,frozen) or absf(before-frozen)<0.05,id+" pause stops timer")
@@ -190,7 +210,7 @@ func exploration_and_reset() -> void:
     await ticks(6)
     bind()
     check(level.race.current_mode=="Explore" and level.race.mouse==null,"explicit Explore mode is retained on restart")
-    await ticks(310)
+    await ticks(ceili(intro.duration_seconds*60.0)+10)
     check(not intro.active and actor.controls_enabled and runtime.clock.elapsed>0.0,"Maze03 Explore starts after intro without race countdown")
     check(not is_instance_valid(level.race.hud),"Explore still has no race UI/opponent")
     level.reset_walk()
@@ -204,7 +224,7 @@ func exploration_and_reset() -> void:
     bind()
     check(not is_instance_valid(saved),"leaving during intro releases previous controller")
     check(actor.get_viewport().get_camera_3d()==intro.camera,"next maze owns its own temporary camera")
-    await ticks(510)
+    await ticks(ceili((intro.duration_seconds+3.2)*60.0))
     check(actor.controls_enabled and not intro.active,"scene change cannot leave controls locked")
 func asset_checks() -> void:
     var art=load("res://assets/UI/HUD/hand_cursor/regions.gd")

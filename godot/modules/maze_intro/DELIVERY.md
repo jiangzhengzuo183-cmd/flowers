@@ -1,93 +1,69 @@
-# 三个迷宫统一入场动画（2026-11-18）
+# 三个迷宫统一镜头入场（2026-11-18）
 
-正式工程：D:/ChatGPT/献给阿尔吉侬的花束/godot/project.godot。仅在此工程内修改，原有未提交内容保留。
+正式工程：D:/ChatGPT/献给阿尔吉侬的花束/godot/project.godot。
 
-## 交付行为
+## 当前入场流程
 
-Maze01、Maze02、Maze03 统一实例化 modules/maze_intro/MazeIntroController.tscn。俯视采用当前真实 3D 迷宫，临时相机放在玩家所属的同一个 3D 世界中，俯视构图由实际地图尺寸、视口比例与 FOV 自动计算，不使用静态地图。
+三个迷宫共用 MazeIntroController.tscn。按最新要求，已取消测试字幕与屏幕云雾遮盖，画面从真实 3D 迷宫全貌自然推进到查理。保留玩家输入锁定、HUD 渐显、相机交接和计时保护。
 
-| 时段（秒） | 表现 |
+| 时段 | 表现 |
 | --- | --- |
-| 0–0.45 | 展示完整迷宫俯视，HUD 隐藏，锁定操作 |
-| 0.45–1.35 | 四个方向不同速度的奶白云雾逐渐合拢 |
-| 1.15–1.55 | 深褐色测试标题轻微缩放、淡入 |
-| 1.55–2.55 | 标题稳定保持约 1 秒 |
-| 2.55–4.8 | 不规则云窗从中央打开，云层退向边缘 |
-| 2.65–4.95 | 镜头沿平滑曲线下降，推进到原游戏相机位置和角度 |
-| 4.65–5.0 | HUD 淡入，完成精确相机交接，清除临时相机与输入遮挡 |
+| 0–0.8 秒 | 稳定展示完整俯视图 |
+| 0.8–5.85 秒 | 镜头缓慢起步，中段顺畅滑行，下降穿过对应场景的空气层，靠近查理时减速 |
+| 5.64–6 秒 | HUD 渐显，镜头停稳并精确交回原跟随相机 |
+| 6 秒后 | Maze01/02 和 Maze03 比赛模式继续原有准备/321GO；Maze03 探索模式直接开始 |
 
-标题分别为「第一次测试」「第二次测试」「第三次测试」。Maze03 比赛模式显示小号「竞速模式」。使用项目已有中文手写字体，云雾为程序 Shader，无新增下载素材、黑屏、扫描线或科技网格。
+采用连续曲线与五次缓动，起止速度、加速度均归零；原游戏相机的距离、俯角、FOV 和滚轮缩放保留。
 
-Maze01/02：5 秒过场后继续原有 3、2、1、GO，GO 后恢复操作并启动计时。Maze03 比赛模式：过场结束后才进入原有准备和 3、2、1、GO；阿尔吉侬路线、犹豫点、变速、55.5 秒目标和计时结算规则保持。Maze03 探索模式：过场结束即可操作和计时，不生成比赛专用倒数或老鼠。
+## 穿过迷雾、风沙与风流
 
-入场期间屏蔽移动、冲刺开关、跳跃、道具使用、交互及相机输入；角色保持原位置。独立暂停竞速准备阶段，未使用 Engine.time_scale，也未修改移动、体力、屏障、蛋糕或圣堂机制。临时相机交接后恢复原跟随与鼠标转向；保留滚轮缩放与现有菜单。
+空气层位于真实三维世界中，沿镜头路径的三个深度位置分布，位置固定在场景内，不随镜头贴屏移动。镜头实际走进、穿出这些区域，形成前景掠过、透视放大和近中远遮挡差异。
 
-## 本次同时调整
+- Maze01：轻暖偏粉白的薄雾团与缓慢流动的雾丝，沿用场景原有色调；穿入时局部对比降低，穿出后恢复清晰。
+- Maze02：暖黄沙尘层与三维沙粒；沙粒横向流动，并因离镜头远近而呈现不同尺寸和速度感。
+- Maze03：清淡冷白空气与较近的笔直风丝，直接复用已有风丝 Shader、风向和流速设定。
 
-- 查理从原始长舞蹈连续播放前 4.5 秒，1 倍速、非循环，不重复短动作。完成或胜负结算仍在动作结束后出现。
-- 手绘鼠标按最新反馈进一步放大至可见高度 84px（比上一版 52px 增大约 62%），帧画布 80×92；三帧抽帧抖动保持，点击热点 (7,6) 随新尺寸重新计算并在各帧中固定。原 PNG 未改。
-- 计时数字和冒号只去除白边，字重使用原深褐字形的范围，不将原白边补成棕色，不额外加粗。所有非透明像素保持统一 #4C3D2F；只闭合一像素的内部细小接缝。原始 PNG、画布比例、固定显示槽与 HUD 布局保留。timer_bold 目录名仅沿用历史引用，不代表继续加粗。
-- 新进入 Maze03 默认 Race；ESC 仍可选择 Explore，显式选择后重开保留该模式。返回选择页重新进入 Maze03 则默认 Race。
+场景原有雾、沙、风、灯光、天空和阴影持续运作。额外空气层仅服务镜头路径，颜色参照各场景与太阳色，接近镜头时柔化消失；抵达后全部释放，不改变正式游玩中的美术参数、碰撞或玩法。没有屏幕云雾贴层或字幕。
 
-## 配置与接口
+## 保护与复用
 
-controller.gd 的 Inspector 参数：duration_seconds（默认 5）、overview_padding（默认 1.16）、overview_height（0 为自动）、overview_center（INF 为地图中心）。install(adapter, information) 可接收 maze_number、title、game_mode、game_camera、overview_height、overview_center。默认读取共享 HUD 适配器提供的真实场景、玩家出生位置与当前游戏相机。
+入场期间禁止移动、冲刺开关、跳跃、道具使用、机关交互和相机输入，计时保持为零。Maze03 的老鼠准备和倒数等待入场完成，正式 55.5 秒竞速规则、独立圣堂减速、体力与加速规则均不变。
 
-started / completed 信号用于观察入场生命周期；active 表示输入锁定阶段。重复重开在同一控制器上重置，不生成多套系统。离开场景释放世界中的临时相机和整套云雾节点；临时相机异常丢失时恢复原相机、HUD 和操作。快速切换场景时，已离开的旧场景不会继续执行延迟的鼠标捕获。
+重开在同一控制器上重置；中途离开释放临时相机与空气层。临时相机异常丢失时恢复原相机、HUD 和操作。已离开的旧场景不会继续处理鼠标焦点通知。
 
-Race 新增 set_entrance_active(bool)，只延后准备/倒数，不改变正式比赛的推进和计时。PlayFlow 新增 hold_for_intro / begin_gameplay，原有正常入场倒数和完成结算继续由 PlayFlow 负责。
+可调整参数：duration_seconds（默认 6 秒）、overview_hold_seconds（默认 0.8 秒）、overview_padding（默认 1.16）、overview_height（0 自动）、overview_center（INF 为地图中心）。install(adapter, information) 可传入相机和俯视构图参数；started/completed 信号与 active 状态保持。
 
-## 文件清单
+## 本轮文件
 
-新增：
+- modules/maze_intro/controller.gd：纯镜头流程、缓动节奏、临时空气层生命周期。
+- modules/maze_intro/air_passage.gd：世界坐标中的雾、沙粒与近处风流。
+- modules/maze_intro/air_mist.gdshader：柔和雾层、深度接触和镜头近处淡化。
+- modules/maze_intro/air_grain.gdshader：柔边沙粒及透视尺寸。
+- modules/game_hud/mouse_look.gd：离开场景后的焦点通知保护。
+- tests/maze_intro/check_intro.gd、check_edges.gd：更新入场时序、穿越检测与清理检查。
+- 本交付说明。
 
-- modules/maze_intro/MazeIntroController.tscn
-- modules/maze_intro/controller.gd
-- modules/maze_intro/clouds.gdshader
-- tests/maze_intro/check_intro.gd、check_edges.gd
-- 本交付说明
+删除已停用的 modules/maze_intro/clouds.gdshader 及 UID。共用 MazeIntroController.tscn 保留；三个关卡的建筑、路线、模型、HUD 布局、环境资源和玩法参数均未改。
 
-修改：
+## 当前已保留的相关设置
 
-- modules/game_hud/runtime.gd：统一挂载、默认 Race、入场输入屏蔽和交互提示同步。
-- modules/game_hud/play_flow.gd：过场结束后启动原有倒数，异常时释放操作。
-- modules/game_hud/mouse_look.gd：过场期间屏蔽视角输入，结束恢复捕获，退出保护。
-- modules/maze03_race/controller.gd：竞速准备等待过场，保留原规则。
-- scripts/maze/maze_scene.gd：入场期间不转发相机输入。
-- scripts/characters/charlie_visual.gd：连续舞蹈 4.5 秒。
-- tools/import-hand-cursor.ps1、assets/UI/HUD/hand_cursor/regions.gd 与三张派生帧。
-- tools/import-bold-timer.ps1、assets/UI/HUD/timer_bold/ 的 11 张派生字形。
-- modules/game_hud/CURSOR_TIMER_DELIVERY.md：追加当前更新说明。
+查理连续播放原舞蹈前 4.5 秒；鼠标可见高度 84px（三帧 80×92，热点 7,6）；计时数字按原字形去白边，不额外加粗；新进入 Maze03 默认 Race，明确选 Explore 后重开保留 Explore。
 
-三个迷宫关卡场景、建筑、路线、原始模型、相机默认参数、体力数值、HUD 排列和玩法资源均未修改。
+## 运行验收
 
-## 实际运行验证
+环境：Godot 4.7.2 Compatibility，RTX4060 Laptop，原生 1920×1080 图形窗口。
 
-Godot 4.7.2、Compatibility、RTX4060 Laptop 原生图形窗口，1920×1080。当前验收入口为 tests/maze_intro 下的测试；旧 HUD 测试记录针对当时无过场/7.2 秒舞蹈流程。
+最终完整流程 113 项、边界回归 24 项，均通过，日志无脚本异常。验证三个迷宫及 Maze03 两种模式、0.8 秒俯视停留、真实穿入三维空气层、原环境持续运行、空气层清理、镜头交接误差为 0、控制/暂停/计时、圣堂和加速、重开与 F5/F6 入口。阿尔吉侬完整实跑仍为 55.4999977 秒；结算通过真实终点触发器验证，未当作人工通关成绩。
 
-完整流程检查 check_intro.gd：95 项通过、0 失败，实际启动 Maze01、Maze02、Maze03，并检查 Maze03 Explore。
+当前验收记录见 .verification/maze-intro/final-passage.log 与 final-passage-edges.log。旧带字幕/云雾的截图与日志仅为历史版本。
 
-- 所有地图四个角完整进入俯视构图；标题正确；云雾、HUD 和倒数阶段衔接正常。
-- 入场期间 E、Shift、空格、滚轮和鼠标运动不会开始交互或改动默认相机；计时始终为零。
-- 三条相机路径均未穿越实际实体碰撞，最终相机交接位置误差均为 0；原距离 7、俯角 0.45、FOV 48 保留。
-- 三个迷宫的控制、鼠标转向、ESC 暂停和正向计时恢复正常。
-- Maze01/02 原始连续舞蹈到 4.5 秒结束；Maze03 比赛完成流程同样等待 4.5 秒再结算。
-- 阿尔吉侬实跑两次均为 55.4999977 秒；老鼠先到后计时继续，结算用例在 56.6333333 秒把查理送入实际终点触发区，届时才判负并停止计时。
-- 探索模式、同场景重开、中途切换场景、单一控制器与素材字形/鼠标热点检查通过。
+实际截图每个迷宫包含：01_overview、02_departure、03_glide、04_approach、05_countdown、06_gameplay。路径为 D:/ChatGPT/献给阿尔吉侬的花束/.verification/maze-intro/，截图未提交至 Git。
 
-边界检查 check_edges.gd：22 项通过、0 失败，且日志无脚本异常。验证相机 0.16m 近裁剪净空、圣堂透视/时间凝滞及真实计时、蛋糕和屏障原有加速、比赛中延后切换模式、确认重开、过场中再次重开、临时相机丢失恢复、设置关闭自动鼠标转向，以及 F5/F6 选择迷宫三默认比赛。
-
-舞蹈与结算使用现有完成标志/真实终点触发器验证，未将自动化结算用例当作人工通关成绩。
-
-截图和详细断言：D:/ChatGPT/献给阿尔吉侬的花束/.verification/maze-intro/（未纳入 Git，避免提交大量验收图片）。每个迷宫包含 overview、clouds、title、descent、countdown、gameplay 六张实际运行截图。
-
-运行命令（工程根目录）：
+运行方式（工程根目录）：
 
 ```powershell
 & './.tools/godot/Godot_v4.7.2-stable_win64_console.exe' --path godot --rendering-method gl_compatibility --fixed-fps 60 --disable-vsync --script res://tests/maze_intro/check_intro.gd
 & './.tools/godot/Godot_v4.7.2-stable_win64_console.exe' --path godot --rendering-method gl_compatibility --fixed-fps 60 --disable-vsync --script res://tests/maze_intro/check_edges.gd
 ```
 
-本轮验收使用原生图形窗口，未重新导出或发布 Web。云雾由实时 Shader 绘制，其他显卡/浏览器的性能仍需对应平台实测。
-
-最新鼠标尺寸复核：84px 可见高度、80×92 三帧导入、固定尖端及实际原生鼠标动画检查，共 9 项通过、0 失败；日志 .verification/cursor-enlarged-verified.log。
+本轮未重新导出 Web。Compatibility 中空气体积由多层三维软雾和粒子表现，其他设备与浏览器性能尚需对应平台实测。

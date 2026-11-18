@@ -23,6 +23,7 @@ func _resume_gameplay() -> void:
     if not OS.has_feature("web") and DisplayServer.get_name()!="headless":get_window().grab_focus()
     capture_cursor()
 func wants_capture() -> bool:
+    if not is_inside_tree():return false
     return is_instance_valid(runtime) and not runtime._changing and runtime.scene.walk_mode and runtime.hud.overlay.is_empty() and not get_tree().paused and not _cursor_free and _focused
 func release_cursor() -> void:
     _cursor_free=true
@@ -31,6 +32,7 @@ func capture_cursor() -> void:
     _cursor_free=false
     sync(true)
 func sync(force: bool = false) -> void:
+    if not is_inside_tree():return
     var desired:=Input.MOUSE_MODE_CAPTURED if wants_capture() else Input.MOUSE_MODE_VISIBLE
     if force or desired!=_requested_mode or (not OS.has_feature("web") and Input.mouse_mode!=desired):
         if desired==Input.MOUSE_MODE_CAPTURED and Input.mouse_mode!=desired:_skip_capture_warp=true

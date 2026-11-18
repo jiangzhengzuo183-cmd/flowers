@@ -27,6 +27,7 @@ func run() -> void:
             for hit: Dictionary in actor.get_world_3d().direct_space_state.intersect_shape(q):hits.append(str(hit.collider.get_path()))
         await process_frame
     check(hits.is_empty(),"temporary camera near-plane clearance avoids walls and roofs")
+    check(actor.get_parent().get_node_or_null("EntranceAirPassage")==null,"arrival releases every temporary air node")
     await ticks(225)
     check(level.race.state=="RACING","Race is available after intro and GO")
     var sanctuary: Node=level.race.sanctuary
@@ -48,7 +49,7 @@ func run() -> void:
     await ticks(7)
     bind()
     check(level.race.current_mode=="Explore" and intro.active and intro.plays==1,"confirmed restart keeps explicitly selected Explore")
-    await ticks(310)
+    await ticks(ceili(intro.duration_seconds*60.0)+10)
     check(actor.controls_enabled and runtime.clock.elapsed>0.0 and level.race.mouse==null,"Explore controls and clock restored without opponent")
     var cakes: Array=level._items.effects.pickups
     actor.global_position=cakes[0].global_position+Vector3.UP*0.03
@@ -67,12 +68,13 @@ func run() -> void:
     await ticks(5)
     check(intro.active and intro.age<0.15 and intro.plays==3,"mid-intro restart resets the same controller cleanly")
     check(level.find_children("MazeIntroController","Node",false,false).size()==1,"one controller after repeated resets")
+    check(actor.get_parent().find_children("EntranceAirPassage","Node3D",false,false).size()==1,"repeated resets retain only one air passage")
     # A lost temporary camera must hand back ownership and unlock, rather than strand input.
     intro.camera.free()
     await ticks(3)
     check(not intro.active and actor.controls_enabled,"missing temporary camera fails open")
     check(actor.get_viewport().get_camera_3d()==intro.game_camera,"failed intro still hands control to original camera")
-    check(not intro.blocker.visible and runtime.hud.get_node("HUDRoot").modulate.a==1.0,"failure removes blocker/clouds and restores HUD")
+    check(not intro.blocker.visible and runtime.hud.get_node("HUDRoot").modulate.a==1.0,"failure removes blocker and restores HUD")
     runtime.hud.open_overlay("settings")
     check(paused,"settings remains functional")
     runtime.hud.close_overlay()
