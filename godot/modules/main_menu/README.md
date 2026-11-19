@@ -1,43 +1,70 @@
-# 主界面与正式剧情入口
+# 主菜单与正式剧情入口
 
-Godot 4.7.2 / Compatibility。F5 打开 `MainMenu.tscn`。主界面固定 1920×1080、16:9，完整显示原纸张底图；不扩展背景纹理、不拉伸，不同屏幕等比显示。
+Godot 4.7.2 / Compatibility。工程 F5 进入 MainMenu.tscn。菜单固定 1920×1080、16:9；完整等比显示用户纸张底图，不自动延展，不拉伸。其他屏幕比例保持 16:9。
 
-## 当前效果
+## 当前表现
 
-- 18 个原分段字形，以独立 AtlasTexture 播放入场；三行按不同节奏落下，带轻微回弹、压缩恢复。落定后每字保留约 ±1.8° 的倾斜、上下错落和错相三帧抖动（8fps）。
-- 用户后续明确授权重新生成标题：当前 `assets/title_handdrawn_v2.png` 使用褐色手绘轮廓、暖黄色纸笔肌理。透明背景及镂空保留。使用内置图像生成工具制作；完整提示词同目录 `title_handdrawn_v2.prompt.txt`。
-- 开始游戏、制作名单及返回：新纸先从底部露出，再向上抽出覆盖旧页、轻轻落稳，约 1.32 秒。转场期间拦截输入，结束释放画面纹理。
-- 开始游戏直接进入 `res://modules/visual_novel/VisualNovel.tscn`，不打开迷宫选择，不使用旧三句占位序章。
-- 制作名单沿用原底图，含用户提供的完整说明及返回按钮。
-- 回到桌面调用正常退出；鼠标复用原有三帧手绘指针。
-- 当前游戏老鼠使用用户后续选定的俯视卡通 PNG（assets/mouse_cartoon.png）。260px 图集设计高度，实际可见鼠身与尾巴约 225px；平滑导航配合 10fps 的保持帧位姿，步伐轻微收放起伏，静止仍有 8fps 三帧手绘抖动；转向、减速、避让、观察、点击反应和待机啃纸；所有交互均穿透到菜单按钮。
-- 接触效果沿老鼠 Alpha 形成细窄、低透明度的暖褐接触阴影和微弱亮边，没有独立椭圆投影。
-- 鼠标停留 5 秒后啃纸，四口逐渐形成小的不规则纸洞；移动即停止；制作名单与标题入场期间停用；重新进入场景清空。
+- 英文标题保留已确认的分段字形、褐色手绘边和暖黄填充。18 字分行按节奏落下、轻微回弹；落定后各字倾斜错落，持续 8fps 错相抖动。
+- 中文菜单和制作名单使用项目现有 YeLiHangJiuLinKaTong 手写字体，深褐 #705039，7fps 小幅手绘抖动。英文标题不随中文换字体。
+- 两条半透明胶带位于纸张左上角、右下角。当前不显示查理插画。
+- 纸面上方是一层统一侧光：左上暖亮、右下柔影，标题、菜单文字和老鼠均处于同一光场，便利贴位于其上。保留原背景纹理和纸叠阴影。
+- 开始游戏短暂淡出，进入正式视觉小说 res://modules/visual_novel/VisualNovel.tscn。
+- 制作名单是中央奶黄色便利贴：约 0.34 秒轻贴落稳，主菜单在后面变暗。右下角带轻微翘起的折角和浅色纸背；文字轻抖动；返回、Esc 或点击空白遮罩会在约 0.30 秒内从顶部揭开退场。打开时停用老鼠跟随、啃纸与脚步声。
+- 回到桌面先显示“是否确认退出游戏？”；复用迷宫 HUD 的纸张样式，取消返回，确认后正常退出。没有抽纸、翻页或旧画面截屏转场。
+- 复用迷宫现有三帧黄色自定义指针，保持实际热点和点击位置一致。
 
-## 已接入的卡通老鼠
+## 老鼠与纸面互动
 
-用户最终提供的 PNG 原样复制为 `assets/mouse_cartoon.png`，SHA256 与附件一致；无重绘、无毛发处理。`mouse_cartoon_layout.gd` 记录图集、鼻尖和完整轮廓，导航与显示分别检查纸边和文字保护区。跟随距离约 180px。`previews/cartoon_mouse_smooth_v2.png` 与原线稿保留作来源／回退，不参与实际显示。
+用户选定的 assets/mouse_cartoon.png 原样复制，未经重绘。260px 图集设计高度，实际可见鼠身与尾巴约 225px；10fps 保持帧位姿和轻微步伐收放，静止仍有 8fps 手绘抖动。
+
+导航包括转向、延迟追赶、减速、观察、点击反应；全身和尾巴检查纸边及标题／菜单保护区，所有插画均不截获菜单点击。停留约 5 秒后，四口形成小纸洞；移动立即停止，离开并重入菜单清空。
+
+接触阴影沿 PNG Alpha 轮廓柔化，移动时略散、停下时略收；极轻的边缘亮暗模拟纸面受压。它是二维视觉模拟，没有给鼠标跟随附加物理碰撞。
+
+移动时播放项目已有的 CC0 纸张录音短片段，经带通处理、轻微变调及淡入淡出匹配小步摩擦；待机、弹窗、失焦时停止。素材为纸张拟音，不宣称是真实动物脚步录音。
+
+## 文件职责
+
+| 文件 | 职责 |
+|---|---|
+| MainMenu.tscn / main_menu.gd | 布局、菜单状态与入口信号 |
+| title_animation.gd / title_ink.gdshader | 18 字入场及常态手绘抖动 |
+| menu_typography.gd / hand_wobble.gdshader | 中文字体、配色与轻抖动 |
+| note_modal.gd / credits_panel.gd | 中央便利贴、揭开退场及退出确认 |
+| sticky_corner.gd / paper_fold.gdshader | 透明裁角、纸背及贴边阴影 |
+| menu_decor.gd / paper_surface.gdshader | 对角胶带、统一纸面侧光 |
+| mouse_companion.gd / companion_path.gd | 老鼠跟随、保持帧和保护区 |
+| contact_shadow.gdshader / paper_interaction.gd | 接触边缘、压痕及纸洞 |
+| paper_foley.gd | 短纸张摩擦声；退出清理专用音频总线 |
 
 ## 素材映射
 
-| 文件 | 来源／用途 |
+| 资源 | 来源／用途 |
 |---|---|
-| assets/background.png | 用户 8000×4500 底图，字节原样复制 |
-| assets/originals/ | 用户原参考、底图、标题、老鼠，未覆盖；不导出 |
-| assets/letters/ | 原标题无损切片，保留作回退资源 |
-| assets/title_handdrawn_v2.png | 后续授权生成的褐边暖黄标题；1672×941，RGBA |
-| assets/layout_handdrawn.gd | 18 个图集区域，原 PNG 不重新编码 |
-| assets/menu_0～2.png | 从原参考图与底图差分提取的原中文菜单字形 |
-| assets/mouse.png | 原几何线稿老鼠，仅裁去空白边界，留作回退 |
-| assets/mouse_cartoon.png | 用户最终选定的卡通原图，未经重绘 |
-| assets/mouse_cartoon_layout.gd | 非破坏性图集与全身轮廓，支持显示避让 |
+| assets/background.png | 用户 8000×4500 底图，字节原样保留 |
+| assets/originals/ | 用户原参考、底图、标题、老鼠；不参与导出 |
+| assets/title_handdrawn_v2.png | 后续授权生成的褐边暖黄标题，1672×941 RGBA；提示词同目录 |
+| assets/layout_handdrawn.gd | 18 个 AtlasTexture 区域；原 PNG 不重新编码 |
+| assets/mouse_cartoon.png / mouse_cartoon_layout.gd | 用户最终卡通老鼠原图、鼻尖与轮廓数据 |
+| visual_novel/assets/fonts/YeLiHangJiuLinKaTong.ttf | 复用项目中文字库，缺字仅本模块回退思源字体 |
+| visual_novel/assets/audio/paper.mp3 | Luckius，Various Paper Sound Effects，CC0 |
+| game_hud/hand_cursor.gd | 复用既有指针及三帧抖动 |
+| assets/letters、menu_0～2.png、mouse.png | 原始标题切片、菜单字形与几何老鼠，保留作来源／回退 |
 
-`main_menu.gd` 管菜单状态；`title_animation.gd` 管字母；`mouse_companion.gd` 与 `companion_path.gd` 管跟随与保护区；`paper_interaction.gd` 管非破坏性纸洞；`paper_transition.gd` 管抽纸；`credits_panel.gd` 管制作名单。
+胶带和光影以引擎绘制，不修改底图。旧抽页脚本及其阴影 Shader 已移除。
 
-## 接口与验证
+## 运行和接口
 
-`game_entry` 可配置正式入口；连接 `start_requested` 时由接入方负责导航。菜单临时设置自身设计画布，离开时恢复原显示设置，不改动迷宫 HUD 布局或移动、体力、道具、竞速规则。
+game_entry 可配置正式入口；连接 start_requested 时由接入方导航。菜单离开时恢复进入前的显示设置。迷宫仍使用原相机、HUD 和玩法。
 
-实际运行检查：`tests/main_menu/check_main_menu.gd`，原生 Compatibility 图形界面。当前 134 项通过，含 18 字落定后真实帧差、16:9 构图、四种输出尺寸、避让、啃纸、制作名单抽纸返回、真实剧情入口及三个原迷宫适配。截图在仓库 `.verification/main-menu/`。16:10 分辨率只验证保持 16:9，不再做额外排版。
+原生图形检查：tests/main_menu/check_main_menu.gd。当前 169 项通过，包含四种物理输出尺寸下的 16:9 构图、字母真实帧差、光影明度差、对角胶带、避让、啃纸、便利贴反复开关、退出框完整尺寸、真实剧情开场与三个迷宫适配。
 
-`check_quit.gd` 验证缩放窗口下点击退出；`check_startup.gd` 验证工程全屏默认入口。`check_story_integration.gd` 沿用朋友的 24 场剧情走查，迷宫使用明确标记、无计分的开发完成回调；不把跳过当作实际通关成绩。
+check_quit.gd 在 1280×720 窗口真实点击“回到桌面→取消→回到桌面→确认退出”；check_startup.gd 验证工程默认入口与全屏。check_story_integration.gd 保留朋友的 24 场剧情走查，开发跳过迷宫不生成计分成绩。
+
+## 参考与限制
+
+- [Godot 2D 灯光和阴影](https://docs.godotengine.org/en/stable/tutorials/2d/2d_lights_and_shadows.html)：轮廓遮挡、阴影柔化与法线光照的参考；本模块使用适合二维纸面 UI 的 Alpha 接触模拟。
+- [Godot CanvasTexture](https://docs.godotengine.org/en/stable/classes/class_canvastexture.html)：二维材质光照参考，未引入额外三维场景。
+- [纸张拟音原发布页](https://opengameart.org/content/various-paper-sound-effects)：Luckius，CC0。项目授权记录见 visual_novel/assets/audio/LICENSE-SOURCES.md。
+
+本轮未重新导出 Web 包。24 场完整剧情的无画面走查已通过；原生图形验证覆盖真实开场、外景及三个迷宫接入，未把完整 24 场原生走查记为通过。图形关闭时仍偶见现有自定义指针的两条 OpenGL 纹理释放提示，不影响运行期显示和点击。

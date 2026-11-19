@@ -78,7 +78,7 @@ func configure(paper: Rect2, protected_ink: Array[Rect2], menus: Array[Rect2], l
 	protected_radius = 108.0 * unit
 	ink_rects = protected_ink
 	paper_surface = Rect2(paper.position+Vector2(76,42)*unit,paper.size-Vector2(144,90)*unit)
-	var inset := Vector2(190.0, 158.0) * unit
+	var inset := Vector2(190.0, 148.0) * unit
 	safe_bounds = Rect2(paper.position + inset, paper.size - inset * 2.0)
 	menu_rects = menus
 	obstacles.clear()

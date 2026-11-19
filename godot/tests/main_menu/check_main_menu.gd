@@ -95,7 +95,16 @@ func run() -> void:
 		check(menu.companion.sprite.texture is AtlasTexture and menu.companion.sprite.texture.atlas.resource_path.ends_with("mouse_cartoon.png"), "uses the user-selected cartoon PNG")
 		check(menu.extension is ColorRect and menu.extension.scale == Vector2.ONE, "solid cream margin; no auto-extended background artwork")
 		await shot("menu-%dx%d" % [physical.x,physical.y])
-		if physical == Vector2i(1920,1080): await check_title_motion()
+		check(menu.icons[0] is Label and menu.icons[0].get_theme_color("font_color")==Color("705039"), "Chinese menu uses deep brown hand lettering")
+		check(menu.icons[0].material.shader.resource_path.ends_with("hand_wobble.gdshader"), "Chinese labels have independent hand wobble")
+		check(menu.decor.tapes.size()==2 and menu.decor.get_child_count()==4, "only two tape strips and their contact shadows; no Charlie portrait")
+		var tape_left: Vector2 = menu.decor.tapes[0].polygon[0]
+		var tape_right: Vector2 = menu.decor.tapes[1].polygon[0]
+		check(tape_left.x < 250 and tape_left.y < 150 and tape_right.x > 1600 and tape_right.y > 900, "tape sits at upper-left and lower-right paper corners")
+		check(menu.paper_light.get_index()>menu.companion.get_index() and menu.paper_light.get_index()<menu.credits.get_index(), "one paper light field covers ink and mouse, below modal notes")
+		if physical == Vector2i(1920,1080):
+			await check_title_motion()
+			await check_paper_lighting()
 		snapshots.append({"physical": [physical.x,physical.y], "logical": [view.x,view.y],"paper": str(menu.paper_rect),"first_menu_y": menu.menu_rects[0].get_center().y,"last_menu_y": menu.menu_rects[2].get_center().y})
 		# Compare source-space route visibility on both sides, around the protected title/menu.
 		var from: Vector2 = menu.paper_rect.position + menu.paper_rect.size * Vector2(0.16,0.73)
@@ -116,10 +125,10 @@ func run() -> void:
 	await new_menu()
 	await frames(250)
 	await click(menu.buttons[0].get_global_rect().get_center())
-	await frames(24)
-	check(root.get_node_or_null("MenuPaperTransition") != null, "Start uses the shared paper-stack overlay across scenes")
-	await shot("start-paper-stack")
-	await frames(70)
+	await frames(6)
+	check(root.get_node_or_null("MenuPaperTransition") == null, "Start uses a short fade without an extracted sheet")
+	await shot("start-fade")
+	await frames(55)
 	var novel: Control = current_scene
 	check(is_instance_valid(novel) and novel.scene_file_path == "res://modules/visual_novel/VisualNovel.tscn", "Start opens the real visual novel")
 	check(root.content_scale_size == Vector2i(1600,900) and root.content_scale_aspect == Window.CONTENT_SCALE_ASPECT_KEEP, "story retains original 1600x900 16:9 composition")
@@ -166,6 +175,7 @@ func run() -> void:
 	quit(1 if failures else 0)
 func interactions() -> void:
 	var c: Node2D = menu.companion
+	menu.foley.mute_when_unfocused = false
 	# Keep the native window test independent of desktop mouse movement outside the game.
 	c.set_process_input(false)
 	await check_mouse_animation(c)
@@ -191,19 +201,26 @@ func interactions() -> void:
 	var retained: int = menu.paper.holes.size()
 	var center: Vector2 = menu.buttons[1].get_global_rect().get_center()
 	await click(center)
-	await frames(24)
-	check(menu.paper_transition.active, "Credits uses new sheet drawn over the old page instead of a fade")
-	await shot("credits-paper-stack")
-	await frames(82)
-	check(menu.credits_open and menu.credits.visible and not c.enabled, "native Credits hit target opens credits and stops companion")
-	check(not menu.paper.visible, "credits do not show mouse tears behind text")
+	await frames(5)
+	check(menu.credits.opening and menu.credits.active, "Credits is attached as a central sticky note")
+	await shot("credits-note-arriving")
+	await frames(30)
+	check(menu.credits_open and menu.credits.visible and not c.enabled, "native Credits hit target opens note and stops companion")
+	check(menu.menus.visible and menu.title.visible and menu.credits.dim.color.a>0.3, "original menu remains behind the dimmed sticky note")
+	check(menu.credits.note.get_theme_stylebox("panel").bg_color==Color("fff0b4"), "Credits uses a creamy yellow note surface")
+	check(menu.credits.corner!=null and menu.credits.note.material.shader.resource_path.ends_with("paper_fold.gdshader"), "sticky note has a transparent cut-out and a folded paper back at its lower corner")
+	check(not menu.foley.voice.playing, "paper steps stop while a note is open")
 	await frames(340)
 	check(menu.paper.holes.size() == retained, "no gnaw or extra holes during credits")
-	await shot("credits-final-1920x1080")
+	await shot("credits-sticky-1920x1080")
 	menu.credits.back.pressed.emit()
-	await frames(105)
+	await frames(5)
+	check(menu.credits.closing,"Return peels the note off the page")
+	await shot("credits-note-peeling")
+	await frames(30)
 	check(not menu.credits_open and c.enabled and menu.paper.visible, "Return restores menu, companion and current tears")
 	check(menu.paper.holes.size() == retained, "existing tears persist on returning from credits")
+	await check_exit_note()
 	# External story modules can take the entry signal without loading the maze host.
 	var started := [false]
 	menu.start_requested.connect(func(): started[0] = true)
@@ -236,6 +253,7 @@ func check_mouse_animation(c: Node2D) -> void:
 	var updates := 0
 	var held := 0
 	var travelled := 0.0
+	var steps_before: int = menu.foley.steps
 	var prior: Vector2 = c.sprite.global_position
 	var safe := true
 	for i in 60:
@@ -250,5 +268,45 @@ func check_mouse_animation(c: Node2D) -> void:
 	check(updates >= 9 and updates <= 11,"companion shows ten held animation poses per second")
 	check(held >= 40,"drawing holds between frames instead of sliding every rendered frame")
 	check(travelled > 20.0,"rendered mouse actually follows the pointer rather than remaining frozen")
+	check(menu.foley.steps>steps_before,"moving companion produces short paper rustle grains")
 	check(safe,"body and tail stay inside paper and outside protected lettering")
 	await shot("cartoon-mouse-follow")
+
+func check_exit_note() -> void:
+	await click(menu.buttons[2].get_global_rect().get_center())
+	await frames(26)
+	check(menu.exit_open and menu.exit_note.active and current_scene==menu,"Desktop opens a confirmation instead of quitting immediately")
+	var surface: StyleBoxFlat = menu.exit_note.note.get_theme_stylebox("panel")
+	check(surface.bg_color==Color("fff5dffb") and surface.corner_radius_top_left==16,"exit confirmation reuses the maze note surface")
+	check(menu.exit_note.note.size.is_equal_approx(menu.exit_note.dimensions), "exit note keeps its intended compact size after wrapping text")
+	check(menu.exit_note.note.get_global_rect().end.y<root.get_visible_rect().size.y-100, "exit note and actions remain fully inside the screen")
+	await shot("exit-confirmation")
+	menu.exit_note.cancel_button.pressed.emit()
+	await frames(30)
+	check(not menu.exit_open and menu.companion.enabled and current_scene==menu,"Cancel returns to the same menu")
+	menu.open_credits()
+	await frames(3)
+	var escape := InputEventKey.new()
+	escape.pressed = true
+	escape.keycode = KEY_ESCAPE
+	Input.parse_input_event(escape)
+	await frames(30)
+	check(not menu.credits_open and not menu.credits.active and menu.companion.enabled,"Escape during note arrival safely peels and restores input")
+
+func check_paper_lighting() -> void:
+	menu.paper_light.hide()
+	await frames(1)
+	RenderingServer.force_draw(false)
+	var unlit := root.get_texture().get_image()
+	unlit.save_png(output+"paper-lighting-off.png")
+	menu.paper_light.show()
+	await frames(1)
+	RenderingServer.force_draw(false)
+	var lit := root.get_texture().get_image()
+	lit.save_png(output+"paper-lighting-on.png")
+	var shade_at := Vector2i(1630,740)
+	var sun_at := Vector2i(330,480)
+	var dimming: float = unlit.get_pixelv(shade_at).get_luminance()-lit.get_pixelv(shade_at).get_luminance()
+	var sunshine: float = absf(unlit.get_pixelv(sun_at).get_luminance()-lit.get_pixelv(sun_at).get_luminance())
+	check(dimming>0.055, "paper side shadow produces a visible luminance difference")
+	check(dimming>sunshine+0.04, "upper-left light and lower-right shadow remain directional")

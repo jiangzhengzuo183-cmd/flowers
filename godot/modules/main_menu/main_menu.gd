@@ -6,21 +6,28 @@ const Companion := preload("res://modules/main_menu/mouse_companion.gd")
 const Paper := preload("res://modules/main_menu/paper_interaction.gd")
 const Credits := preload("res://modules/main_menu/credits_panel.gd")
 const Cursor := preload("res://modules/game_hud/hand_cursor.gd")
-const PaperTransition := preload("res://modules/main_menu/paper_transition.gd")
+const Note := preload("res://modules/main_menu/note_modal.gd")
+const Type := preload("res://modules/main_menu/menu_typography.gd")
+const Decor := preload("res://modules/main_menu/menu_decor.gd")
+const Foley := preload("res://modules/main_menu/paper_foley.gd")
 const ASSETS := "res://modules/main_menu/assets/"
 @export_file("*.tscn") var game_entry := "res://modules/visual_novel/VisualNovel.tscn"
 var metadata: Dictionary
 var background: TextureRect
+var paper_light: ColorRect
 var extension: ColorRect
 var title: Control
 var menus: Control
 var buttons: Array[Button] = []
-var icons: Array[TextureRect] = []
+var icons: Array[Label] = []
 var companion: Node2D
 var paper: Node2D
 var credits: Control
 var fade: ColorRect
-var paper_transition: CanvasLayer
+var exit_note: Control
+var exit_open := false
+var decor: Control
+var foley: Node
 var paper_rect := Rect2()
 var ink_rects: Array[Rect2] = []
 var menu_rects: Array[Rect2] = []
@@ -60,6 +67,8 @@ func _build() -> void:
 	background.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(background)
+	decor = Decor.new()
+	add_child(decor)
 	paper = Paper.new()
 	add_child(paper)
 	title = Title.new()
@@ -81,11 +90,11 @@ func _build() -> void:
 			button.add_theme_stylebox_override(style, StyleBoxEmpty.new())
 		menus.add_child(button)
 		buttons.append(button)
-		var image := TextureRect.new()
-		image.texture = load(ASSETS + str(metadata.menus[i].file))
-		image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		image.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		var image := Label.new()
+		image.text = str(metadata.menus[i].label)
+		image.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		image.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		Type.apply(image,48,float(i)*3.0)
 		image.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		button.add_child(image)
 		icons.append(image)
@@ -99,9 +108,21 @@ func _build() -> void:
 	companion.gnaw_started.connect(paper.begin_gnaw)
 	companion.gnaw_bite.connect(paper.bite)
 	companion.gnaw_stopped.connect(paper.stop_gnaw)
+	foley = Foley.new()
+	add_child(foley)
+	foley.install(companion)
+	paper_light = ColorRect.new()
+	paper_light.name = "PaperLighting"
+	paper_light.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var lighting := ShaderMaterial.new()
+	lighting.shader = preload("res://modules/main_menu/paper_surface.gdshader")
+	paper_light.material = lighting
+	add_child(paper_light)
 	credits = Credits.new()
 	add_child(credits)
 	credits.back_requested.connect(close_credits)
+	credits.closed.connect(_credits_closed)
+	_build_exit_note()
 	fade = ColorRect.new()
 	fade.color = Color("fff6e9")
 	fade.modulate.a = 0.0
@@ -116,6 +137,8 @@ func _layout() -> void:
 	paper_rect = Rect2((viewport - Vector2(width, height)) * 0.5, Vector2(width, height))
 	background.position = paper_rect.position
 	background.size = paper_rect.size
+	paper_light.position = paper_rect.position
+	paper_light.size = paper_rect.size
 	var source_scale := width / 8000.0
 	var unit := width / 1920.0
 	extension.size = viewport
@@ -128,19 +151,21 @@ func _layout() -> void:
 	menu_rects.clear()
 	for i in 3:
 		var rect: Array = metadata.menus[i].rect
-		var image_size := Vector2(rect[2], rect[3]) * source_scale
 		var center := paper_rect.position + (Vector2(rect[0], rect[1]) + Vector2(rect[2], rect[3]) * 0.5) * source_scale
 		buttons[i].size = Vector2(275, 72) * unit
 		buttons[i].position = center - buttons[i].size * 0.5
 		buttons[i].pivot_offset = buttons[i].size * 0.5
-		icons[i].size = image_size
-		icons[i].position = (buttons[i].size - image_size) * 0.5
-		var protected := Rect2(center - image_size * 0.5, image_size)
+		icons[i].size = buttons[i].size
+		icons[i].position = Vector2.ZERO
+		var text_ink := Vector2(230,55)*unit
+		var protected := Rect2(center-text_ink*0.5,text_ink)
 		menu_rects.append(protected)
 		ink_rects.append(protected)
 	companion.configure(paper_rect, ink_rects, menu_rects, unit, tall)
 	paper.place(paper_rect)
 	credits.place(paper_rect)
+	exit_note.place(paper_rect)
+	decor.place(paper_rect)
 	fade.size = viewport
 
 func _on_title_finished() -> void:
@@ -153,7 +178,7 @@ func _on_title_finished() -> void:
 	)
 
 func _hover(index: int, hovered: bool) -> void:
-	if not title_complete or transitioning: return
+	if not title_complete or transitioning or credits_open or exit_open: return
 	var button := buttons[index]
 	var tween: Tween = button.get_meta("hover_tween") if button.has_meta("hover_tween") else null
 	if tween and tween.is_valid(): tween.kill()
@@ -161,90 +186,90 @@ func _hover(index: int, hovered: bool) -> void:
 	button.set_meta("hover_tween", tween)
 	tween.tween_property(button, "scale", Vector2.ONE * (1.025 if hovered else 1.0), 0.16).set_trans(Tween.TRANS_SINE)
 
-func _turn() -> CanvasLayer:
-	if not is_instance_valid(paper_transition):
-		paper_transition = PaperTransition.new()
-		paper_transition.name = "MenuPaperTransition"
-		get_window().add_child(paper_transition)
-	return paper_transition
+func _build_exit_note() -> void:
+	exit_note = Note.new()
+	exit_note.dimensions = Vector2(580,340)
+	exit_note.creamy = false
+	add_child(exit_note)
+	exit_note.label("是否确认退出游戏？",32)
+	exit_note.label("将关闭游戏并回到桌面。",24)
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation",24)
+	exit_note.content.add_child(row)
+	exit_note.cancel_button = exit_note.action(row,"取消",exit_note.peel)
+	exit_note.confirm_button = exit_note.action(row,"确认退出",_confirm_desktop,true)
+	exit_note.closed.connect(_exit_closed)
+
+func _lock_menu(locked: bool) -> void:
+	for button in buttons: button.disabled = locked
+	companion.set_enabled(not locked)
+	if locked: companion.visible = true
 
 func _activate(index: int) -> void:
-	if transitioning or not title_complete: return
+	if transitioning or not title_complete or credits_open or exit_open: return
 	if index == 1:
 		open_credits()
-		return
-	transitioning = true
-	companion.set_enabled(false)
-	for button in buttons: button.disabled = true
-	fade.mouse_filter = Control.MOUSE_FILTER_STOP
-	if index == 2:
+	elif index == 2:
+		exit_open = true
+		_lock_menu(true)
+		exit_note.open()
+	else:
+		transitioning = true
+		_lock_menu(true)
+		fade.mouse_filter = Control.MOUSE_FILTER_STOP
 		var tween := create_tween()
-		tween.tween_property(fade, "modulate:a", 1.0, 0.3)
-		tween.tween_callback(func(): get_tree().quit())
-		return
-	var turn := _turn()
-	turn.completed.connect(turn.queue_free, CONNECT_ONE_SHOT)
-	turn.play(func():
-		if start_requested.get_connections().is_empty():
-			var error := get_tree().change_scene_to_file(game_entry)
-			if error != OK: _entry_failed(error)
-		else:
-			start_requested.emit()
-	)
+		tween.tween_property(fade,"modulate:a",1.0,0.30)
+		tween.tween_callback(func():
+			if start_requested.get_connections().is_empty():
+				var error := get_tree().change_scene_to_file(game_entry)
+				if error != OK: _entry_failed(error)
+			else: start_requested.emit()
+		)
 
 func _entry_failed(error: Error) -> void:
-	push_error("Main menu entry could not open %s (%s)" % [game_entry, error])
+	push_error("Main menu entry could not open %s (%s)" % [game_entry,error])
 	transitioning = false
 	fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var tween := create_tween()
-	tween.tween_property(fade, "modulate:a", 0.0, 0.25)
-	for button in buttons: button.disabled = false
-	companion.set_enabled(true)
+	create_tween().tween_property(fade,"modulate:a",0.0,0.25)
+	_lock_menu(false)
 
 func open_credits() -> void:
-	if transitioning or credits_open: return
-	transitioning = true
-	companion.set_enabled(false)
-	for button in buttons: button.disabled = true
-	var turn := _turn()
-	turn.play(func():
-		credits_open = true
-		menus.hide()
-		title.hide()
-		paper.hide()
-		credits.modulate.a = 1.0
-		credits.show()
-	)
-	await turn.completed
-	transitioning = false
-	credits.back.grab_focus()
+	if transitioning or credits_open or exit_open: return
+	credits_open = true
+	_lock_menu(true)
+	credits.open()
 
 func close_credits() -> void:
-	if transitioning or not credits_open: return
+	if credits_open: credits.peel()
+
+func _credits_closed() -> void:
+	credits_open = false
+	_lock_menu(false)
+
+func _exit_closed() -> void:
+	exit_open = false
+	_lock_menu(false)
+
+func _confirm_desktop() -> void:
+	if not exit_open or transitioning: return
 	transitioning = true
-	var turn := _turn()
-	turn.play(func():
-		credits.hide()
-		credits_open = false
-		paper.show()
-		menus.show()
-		title.show()
-	, true)
-	await turn.completed
-	transitioning = false
-	for button in buttons: button.disabled = false
-	companion.set_enabled(true)
+	fade.mouse_filter = Control.MOUSE_FILTER_STOP
+	var tween := create_tween()
+	tween.tween_property(fade,"modulate:a",1.0,0.18)
+	tween.tween_callback(func():get_tree().quit())
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:
 		companion.click_reaction()
-	if event.is_action_pressed("ui_cancel") and credits_open:
-		close_credits()
+	if event.is_action_pressed("ui_cancel"):
+		if credits_open: close_credits()
+		elif exit_open: exit_note.peel()
+		else: return
 		get_viewport().set_input_as_handled()
 
 func _exit_tree() -> void:
 	if resized.is_connected(_layout): resized.disconnect(_layout)
-	if is_instance_valid(paper_transition) and not paper_transition.active: paper_transition.queue_free()
 	var window := get_window()
 	if is_instance_valid(window):
 		window.content_scale_size = _previous_scale
