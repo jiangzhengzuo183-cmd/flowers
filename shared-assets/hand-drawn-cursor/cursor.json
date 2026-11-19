@@ -1,0 +1,38 @@
+{
+  "name": "hand-drawn-yellow-cursor",
+  "frame_size": [
+    80,
+    92
+  ],
+  "visible_height_px": 84,
+  "hotspot_px": [
+    7,
+    6
+  ],
+  "frames_per_second": 8,
+  "frame_order": [
+    0,
+    1,
+    2
+  ],
+  "frame_duration_ms": 125,
+  "loop": true,
+  "frames": [
+    {
+      "path": "cursor/frames/frame_0.png",
+      "sha256": "1867002dc5313116e5be0846b66b12b677baf157080e0f83a5a74d9a8d4978c7"
+    },
+    {
+      "path": "cursor/frames/frame_1.png",
+      "sha256": "eb93108f5fffcd5cc907b761750a4b7f428fe30624c0f19327820785a0f055e7"
+    },
+    {
+      "path": "cursor/frames/frame_2.png",
+      "sha256": "fafbd318af988ffbea3aa75e30d3dacc792e29fb4d7a971b2ef7181a28a4414a"
+    }
+  ],
+  "original": {
+    "path": "source/original.png",
+    "sha256": "90464e79b2244c490f04a4d21a42177ece8435f6099d46392bff271b5d3eb824"
+  }
+}
