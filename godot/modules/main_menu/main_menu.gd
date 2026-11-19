@@ -14,7 +14,7 @@ const ASSETS := "res://modules/main_menu/assets/"
 @export_file("*.tscn") var game_entry := "res://modules/visual_novel/VisualNovel.tscn"
 var metadata: Dictionary
 var background: TextureRect
-var paper_light: ColorRect
+var paper_stack: Control
 var extension: ColorRect
 var title: Control
 var menus: Control
@@ -34,6 +34,8 @@ var menu_rects: Array[Rect2] = []
 var title_complete := false
 var credits_open := false
 var transitioning := false
+var _last_paw:=Vector2.INF
+var _last_paw_enabled:=false
 var _menu_tween: Tween
 var _previous_scale := Vector2i.ZERO
 var _previous_aspect := Window.CONTENT_SCALE_ASPECT_KEEP
@@ -66,7 +68,13 @@ func _build() -> void:
 	background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	background.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var paper_ink:=ShaderMaterial.new()
+	paper_ink.shader=preload("res://modules/main_menu/paper_ink.gdshader")
+	paper_ink.set_shader_parameter("clean_paper",preload("res://modules/main_menu/assets/background_clean_v2.png"))
+	background.material=paper_ink
 	add_child(background)
+	paper_stack=preload("res://modules/main_menu/paper_stack.gd").new()
+	add_child(paper_stack)
 	decor = Decor.new()
 	add_child(decor)
 	paper = Paper.new()
@@ -111,13 +119,6 @@ func _build() -> void:
 	foley = Foley.new()
 	add_child(foley)
 	foley.install(companion)
-	paper_light = ColorRect.new()
-	paper_light.name = "PaperLighting"
-	paper_light.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var lighting := ShaderMaterial.new()
-	lighting.shader = preload("res://modules/main_menu/paper_surface.gdshader")
-	paper_light.material = lighting
-	add_child(paper_light)
 	credits = Credits.new()
 	add_child(credits)
 	credits.back_requested.connect(close_credits)
@@ -137,8 +138,7 @@ func _layout() -> void:
 	paper_rect = Rect2((viewport - Vector2(width, height)) * 0.5, Vector2(width, height))
 	background.position = paper_rect.position
 	background.size = paper_rect.size
-	paper_light.position = paper_rect.position
-	paper_light.size = paper_rect.size
+	paper_stack.place(paper_rect)
 	var source_scale := width / 8000.0
 	var unit := width / 1920.0
 	extension.size = viewport
@@ -275,3 +275,18 @@ func _exit_tree() -> void:
 		window.content_scale_size = _previous_scale
 		window.content_scale_aspect = _previous_aspect
 		window.content_scale_mode = _previous_mode
+
+func _process(_delta: float) -> void:
+	if not is_instance_valid(companion) or not title_complete: return
+	var active: bool=companion.enabled
+	var at: Vector2=companion._display_world
+	if active==_last_paw_enabled and at.distance_squared_to(_last_paw)<0.06: return
+	_last_paw=at
+	_last_paw_enabled=active
+	var artwork: Array=[]
+	artwork.append_array(title.letters)
+	artwork.append_array(icons)
+	for item: Control in artwork:
+		var local:=item.get_global_transform().affine_inverse()*at
+		item.material.set_shader_parameter("paw_position",local)
+		item.material.set_shader_parameter("paw_strength",1.0 if active else 0.0)

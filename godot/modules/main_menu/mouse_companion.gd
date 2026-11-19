@@ -2,9 +2,11 @@ extends Node2D
 signal gnaw_started(at: Vector2)
 signal gnaw_bite
 signal gnaw_stopped
-const Planner := preload("res://modules/main_menu/companion_path.gd")
 const LAYOUT := preload("res://modules/main_menu/assets/mouse_cartoon_layout.gd")
 const POSE_FPS := 10.0
+const IDLE_GNAW_SECONDS := 3.0
+const FOLLOW_DISTANCE := 132.0
+const MAX_SPEED := 420.0
 enum State { IDLE, FOLLOW, INSPECT, CLICK_REACTION, GNAW }
 var state := State.IDLE
 var enabled := false
@@ -14,7 +16,6 @@ var last_mouse_position := Vector2.ZERO
 var motion_direction := Vector2.RIGHT
 var still_time := 0.0
 var total_time := 0.0
-var response_delay := 0.0
 var reaction_time := 0.0
 var gnaw_time := 0.0
 var bites := 0
@@ -22,8 +23,6 @@ var gnaw_completed := false
 var safe_bounds := Rect2()
 var obstacles: Array[Rect2] = []
 var menu_rects: Array[Rect2] = []
-var path := PackedVector2Array()
-var replan_time := 0.0
 var unit := 1.0
 var sprite: Sprite2D
 var shadow: Sprite2D
@@ -31,6 +30,7 @@ var body_pivot := Vector2.ZERO
 var nose_local := Vector2.ZERO
 var base_scale := 1.0
 var body_angle := 0.0
+var turn_speed := 0.0
 var protected_radius := 86.0
 var _placed := false
 var ink_rects: Array[Rect2] = []
@@ -75,33 +75,18 @@ func _ready() -> void:
 
 func configure(paper: Rect2, protected_ink: Array[Rect2], menus: Array[Rect2], logical_scale: float, _tall: float) -> void:
 	unit = logical_scale
-	protected_radius = 108.0 * unit
 	ink_rects = protected_ink
 	paper_surface = Rect2(paper.position+Vector2(76,42)*unit,paper.size-Vector2(144,90)*unit)
-	var inset := Vector2(190.0, 148.0) * unit
-	safe_bounds = Rect2(paper.position + inset, paper.size - inset * 2.0)
-	menu_rects = menus
+	# A conservative silhouette radius keeps every turn on the sheet, without text obstacles.
+	var radius := 0.0
+	for point in outline: radius=maxf(radius,point.length()*base_scale*unit)
+	safe_bounds=paper_surface.grow(-(radius*1.035+4.0*unit))
+	menu_rects=menus
 	obstacles.clear()
-	for rect in protected_ink:
-		obstacles.append(rect.grow(protected_radius))
-	# Merge only overlapping exclusion rectangles, so graph corners remain reachable.
-	var merged := true
-	while merged:
-		merged = false
-		for i in obstacles.size():
-			for j in range(i + 1, obstacles.size()):
-				if obstacles[i].intersects(obstacles[j]):
-					obstacles[i] = obstacles[i].merge(obstacles[j])
-					obstacles.remove_at(j)
-					merged = true
-					break
-			if merged: break
 	if not _placed:
 		position = paper.position + paper.size * Vector2(0.24, 0.78)
 		_placed = true
-	position = Planner.nearest_free(position, safe_bounds, obstacles)
-	path.clear()
-	replan_time = 0.0
+	position = position.clamp(safe_bounds.position,safe_bounds.end)
 	_display_world = position
 	_pose_age = 1.0
 
@@ -109,6 +94,7 @@ func set_enabled(value: bool) -> void:
 	enabled = value
 	visible = value
 	velocity = Vector2.ZERO
+	turn_speed = 0.0
 	still_time = 0.0
 	mouse_position = get_viewport().get_mouse_position()
 	last_mouse_position = mouse_position
@@ -130,10 +116,8 @@ func _stop_gnaw() -> void:
 func _process(delta: float) -> void:
 	if not enabled: return
 	total_time += delta
-	replan_time -= delta
 	var difference := mouse_position - last_mouse_position
 	if difference.length() > 2.0 * unit:
-		if still_time > 0.25 and velocity.length() < 4.0: response_delay = 0.10
 		motion_direction = difference.normalized()
 		last_mouse_position = mouse_position
 		still_time = 0.0
@@ -149,50 +133,44 @@ func _process(delta: float) -> void:
 		_update_gnaw(delta)
 	else:
 		_update_follow(delta)
-		if still_time >= 5.0 and velocity.length() < 4.0 * unit and not gnaw_completed:
+		if still_time >= IDLE_GNAW_SECONDS and velocity.length() < 4.0 * unit and not gnaw_completed:
 			_start_gnaw()
 	_update_art(delta)
 
 func _update_follow(delta: float) -> void:
-	if replan_time <= 0.0:
-		var target := mouse_position - motion_direction * 180.0 * unit
-		path = Planner.route(position, target, safe_bounds, obstacles)
-		replan_time = 0.14
-	if response_delay > 0.0 and not path.is_empty():
-		var look := path[0]-position
-		body_angle = lerp_angle(body_angle,look.angle()+PI/2.0,1.0-exp(-delta*8.0))
-	response_delay = maxf(0.0, response_delay - delta)
-	var desired := Vector2.ZERO
-	if not path.is_empty() and response_delay <= 0.0:
-		var to_goal := path[0] - position
-		if to_goal.length() < 6.0 * unit:
-			path.remove_at(0)
-		elif to_goal.length() > 1.5 * unit:
-			desired = to_goal.normalized() * minf(270.0 * unit, to_goal.length() * 5.0)
-	velocity = velocity.move_toward(desired, 850.0 * unit * delta)
-	var next := position + velocity * delta
-	if Planner.segment_clear(position, next, obstacles):
-		position = next.clamp(safe_bounds.position, safe_bounds.end)
-	else:
-		velocity = Vector2.ZERO
-		replan_time = 0.0
-	state = State.FOLLOW if velocity.length() > 8.0 * unit else State.IDLE
-	if state == State.IDLE:
-		for rect in menu_rects:
-			if rect.grow(145.0 * unit).has_point(mouse_position) and position.distance_to(rect.get_center()) < 320.0 * unit:
-				state = State.INSPECT
-				var look := rect.get_center() - position
-				body_angle = lerp_angle(body_angle, look.angle() + PI / 2.0, 1.0 - exp(-delta * 4.0))
-				break
-	if velocity.length() > 12.0 * unit:
-		body_angle = lerp_angle(body_angle, velocity.angle() + PI / 2.0, 1.0 - exp(-delta * 6.0))
+	var to_pointer:=mouse_position-position
+	var distance:=to_pointer.length()
+	var wanted_speed:=0.0
+	if distance>FOLLOW_DISTANCE*unit:
+		wanted_speed=minf(MAX_SPEED*unit,(distance-FOLLOW_DISTANCE*unit)*5.2)
+	if distance>8.0*unit:
+		var target_angle:=to_pointer.angle()+PI/2.0
+		var error:=angle_difference(body_angle,target_angle)
+		var wanted_turn:=clampf(error*18.0,-10.5,10.5)
+		turn_speed=lerpf(turn_speed,wanted_turn,1.0-exp(-delta*22.0))
+		var turn:=turn_speed*delta
+		if absf(turn)>absf(error):
+			body_angle=target_angle
+			turn_speed=0.0
+		else: body_angle+=turn
+	# Heading steers locomotion, so a changing target produces a continuous arc.
+	var forward:=Vector2.UP.rotated(body_angle)
+	var alignment:=maxf(0.0,forward.dot(to_pointer.normalized())) if distance>0.1 else 1.0
+	var desired:=forward*wanted_speed*lerpf(0.20,1.0,alignment)
+	velocity=velocity.lerp(desired,1.0-exp(-delta*14.0))
+	if wanted_speed<0.5*unit and velocity.length()<0.7*unit: velocity=Vector2.ZERO
+	var next:=position+velocity*delta
+	position=next.clamp(safe_bounds.position,safe_bounds.end)
+	if position.x!=next.x: velocity.x=0.0
+	if position.y!=next.y: velocity.y=0.0
+	state=State.FOLLOW if velocity.length()>8.0*unit else State.IDLE
 
 func _start_gnaw() -> void:
 	state = State.GNAW
 	gnaw_time = 0.0
 	bites = 0
 	velocity = Vector2.ZERO
-	# The nose already points into a protected blank region, away from readable ink.
+	# Anchor the bite to the actual continuously drawn nose position.
 	gnaw_started.emit(_display_world + (nose_local * unit * _display_scale).rotated(_display_angle))
 
 func _update_gnaw(delta: float) -> void:
@@ -207,45 +185,33 @@ func _update_gnaw(delta: float) -> void:
 		gnaw_completed = true
 
 func _update_art(delta: float) -> void:
-	_pose_age += delta
-	var moving := clampf(velocity.length()/(270.0*unit),0.0,1.0)
-	if _pose_age >= 1.0/POSE_FPS:
-		_pose_age = fmod(_pose_age,1.0/POSE_FPS)
-		pose_frame += 1
-		var step := pose_frame % 4
-		var pulse := [0.0,1.0,0.0,-0.7][step] as float
-		var squash := Vector2(1.0+0.014*pulse*moving,1.0-0.012*pulse*moving)
-		var tilt := deg_to_rad([0.0,-0.8,0.0,0.65][step])*moving
-		var bob := -1.1*pulse*moving*unit
-		if reaction_time > 0.0:
-			var surprise := sin(reaction_time/0.23*PI)
-			squash *= Vector2(1.0+surprise*0.025,1.0-surprise*0.035)
-		if state == State.GNAW:
-			tilt = [0.0,-0.018,0.007,0.015][step]
-			bob = [0.0,-0.6,0.2,0.5][step]*unit
-		var candidate := position+Vector2(0,bob)
-		var angle := body_angle+tilt
-		# Check the whole silhouette, including tail, before showing a new held frame.
-		if _art_clear(candidate,angle,squash):
-			_display_world = candidate
-			_display_angle = angle
-			_display_scale = squash
-		else:
-			for turn: float in [0.0,0.26,-0.26,0.52,-0.52,0.78,-0.78]:
-				if _art_clear(position,body_angle+turn,Vector2.ONE):
-					_display_world = position
-					_display_angle = body_angle+turn
-					_display_scale = Vector2.ONE
-					break
-		sprite.rotation = _display_angle
-		sprite.scale = Vector2.ONE*base_scale*unit*_display_scale
-		shadow.rotation = sprite.rotation
-		shadow.scale = sprite.scale
-		shadow.material.set_shader_parameter("movement",moving)
-		shadow.material.set_shader_parameter("indentation",1.0-moving)
-	# Compensate the smooth navigation root so the artwork itself advances at 10 fps.
-	sprite.position = _display_world-position
-	shadow.position = sprite.position+Vector2(0.4,0.55)*unit
+	_pose_age+=delta
+	var moving:=clampf(velocity.length()/(MAX_SPEED*unit),0.0,1.0)
+	if _pose_age>=1.0/POSE_FPS:
+		_pose_age=fmod(_pose_age,1.0/POSE_FPS)
+		pose_frame+=1
+	var step:=pose_frame%4
+	var pulse: float=[0.0,1.0,0.0,-0.7][step]
+	var squash:=Vector2(1.0+0.007*pulse*moving,1.0-0.006*pulse*moving)
+	var tilt:=deg_to_rad([0.0,-0.28,0.0,0.22][step])*moving
+	var bob: float=-0.45*pulse*moving*unit
+	if reaction_time>0.0:
+		var surprise:=sin(reaction_time/0.23*PI)
+		squash*=Vector2(1.0+surprise*0.025,1.0-surprise*0.035)
+	if state==State.GNAW:
+		tilt=[0.0,-0.012,0.005,0.010][step]
+		bob=[0.0,-0.7,0.2,0.6][step]*unit
+	_display_world=position+Vector2(0,bob)
+	_display_angle=body_angle+tilt
+	_display_scale=squash
+	sprite.position=Vector2(0,bob)
+	sprite.rotation=_display_angle
+	sprite.scale=Vector2.ONE*base_scale*unit*squash
+	shadow.position=sprite.position+Vector2(0.4,0.55)*unit
+	shadow.rotation=sprite.rotation
+	shadow.scale=sprite.scale
+	shadow.material.set_shader_parameter("movement",moving)
+	shadow.material.set_shader_parameter("indentation",1.0-moving)
 
 func display_polygon(at: Vector2,angle: float,squash: Vector2) -> PackedVector2Array:
 	var polygon := PackedVector2Array()
@@ -258,10 +224,6 @@ func _art_clear(at: Vector2,angle: float,squash: Vector2) -> bool:
 	var safe := paper_surface.grow(-2.5*unit)
 	for point in polygon:
 		if not safe.has_point(point): return false
-	for rect in ink_rects:
-		var r := rect.grow(3.0*unit)
-		var box := PackedVector2Array([r.position,Vector2(r.end.x,r.position.y),r.end,Vector2(r.position.x,r.end.y)])
-		if not Geometry2D.intersect_polygons(polygon,box).is_empty(): return false
 	return true
 
 func display_is_safe() -> bool:

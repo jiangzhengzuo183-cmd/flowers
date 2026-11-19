@@ -70,12 +70,21 @@ func run() -> void:
 		await new_menu()
 		check(Input.mouse_mode == Input.MOUSE_MODE_VISIBLE, str(physical) + " independent visible custom cursor")
 		check(root.get_node_or_null("HandDrawnCursor") != null, "reuses existing cursor singleton")
-		check(not menu.title_complete and menu.buttons[0].disabled, "menu waits for falling letters")
+		check(not menu.title_complete and menu.buttons[0].disabled, "menu waits for the typewriter title")
 		await frames(40)
 		check(not menu.title_complete and menu.paper.holes.is_empty(), "no gnaw during title entrance")
-		if physical == Vector2i(1920,1080): await shot("title-entering")
+		if physical == Vector2i(1920,1080):
+			var shown:=0
+			var still:=true
+			for i in 18:
+				var glyph: TextureRect=menu.title.letters[i]
+				if glyph.visible: shown+=1
+				var resting: Vector2=menu.title.origin+menu.title.source_rects[i].position*menu.title.art_scale+menu.title.rest_offset(i)
+				still=still and glyph.position.is_equal_approx(resting) and glyph.scale==Vector2.ONE
+			check(shown>0 and shown<18 and still,"typewriter reveals letters in place without a downward fall or bounce")
+			await shot("title-entering")
 		await frames(205)
-		check(menu.title_complete and not menu.buttons[0].disabled, "all eighteen letters settle before menu activation")
+		check(menu.title_complete and not menu.buttons[0].disabled, "all eighteen letters appear before menu activation")
 		var view: Vector2 = root.get_visible_rect().size
 		check(is_equal_approx(view.x/view.y, 16.0/9.0), "single 16:9 composition on every monitor")
 		check(is_equal_approx(menu.paper_rect.size.x/menu.paper_rect.size.y, 16.0/9.0), "paper keeps exact source aspect")
@@ -101,10 +110,11 @@ func run() -> void:
 		var tape_left: Vector2 = menu.decor.tapes[0].polygon[0]
 		var tape_right: Vector2 = menu.decor.tapes[1].polygon[0]
 		check(tape_left.x < 250 and tape_left.y < 150 and tape_right.x > 1600 and tape_right.y > 900, "tape sits at upper-left and lower-right paper corners")
-		check(menu.paper_light.get_index()>menu.companion.get_index() and menu.paper_light.get_index()<menu.credits.get_index(), "one paper light field covers ink and mouse, below modal notes")
+		check(menu.paper_stack.sheets.size()==3 and menu.paper_stack.get_index()<menu.title.get_index(), "three independent paper layers sit below the title")
+		check(menu.get_node_or_null("PaperLighting")==null, "no sunlight patches or half-screen shade overlay")
 		if physical == Vector2i(1920,1080):
 			await check_title_motion()
-			await check_paper_lighting()
+			await check_paper_layers()
 		snapshots.append({"physical": [physical.x,physical.y], "logical": [view.x,view.y],"paper": str(menu.paper_rect),"first_menu_y": menu.menu_rects[0].get_center().y,"last_menu_y": menu.menu_rects[2].get_center().y})
 		# Compare source-space route visibility on both sides, around the protected title/menu.
 		var from: Vector2 = menu.paper_rect.position + menu.paper_rect.size * Vector2(0.16,0.73)
@@ -115,7 +125,7 @@ func run() -> void:
 		for waypoint in route:
 			all_clear = all_clear and Planner.segment_clear(previous,waypoint,menu.companion.obstacles)
 			previous = waypoint
-		check(all_clear, "mouse can route around protected ink without crossing it")
+		check(all_clear, "mouse takes a direct route across typography with no text obstacles")
 		if physical == Vector2i(1920,1080):
 			await interactions()
 		await remove_menu()
@@ -179,6 +189,8 @@ func interactions() -> void:
 	# Keep the native window test independent of desktop mouse movement outside the game.
 	c.set_process_input(false)
 	await check_mouse_animation(c)
+	await check_text_crossing(c)
+	await check_full_turn(c)
 	# Use real pointer motion through the native viewport, including a route around the menu.
 	for point in [Vector2(330,820),Vector2(1550,830),Vector2(1800,1050),Vector2(900,760),Vector2(270,320)]:
 		await pointer(point)
@@ -186,13 +198,13 @@ func interactions() -> void:
 		for i in 120:
 			await frames(1)
 			all_safe = all_safe and safe_mouse()
-		check(all_safe, "live mouse stays on paper and outside text on path to " + str(point))
+		check(all_safe, "live mouse stays on paper while freely crossing text toward " + str(point))
 	await pointer(Vector2(345,840))
 	await frames(150)
 	check(c.state != c.State.GNAW, "mouse waits before idle Easter egg")
 	var holes_before: int = menu.paper.holes.size()
-	await frames(170)
-	check(c.state == c.State.GNAW, "five seconds of stationary pointer starts gnaw; state=%s still=%.2f" % [c.state,c.still_time])
+	await frames(70)
+	check(c.state == c.State.GNAW, "three seconds of stationary pointer starts gnaw; state=%s still=%.2f" % [c.state,c.still_time])
 	await frames(170)
 	check(menu.paper.holes.size() > holes_before and int(menu.paper.holes.back().bites) == 4, "four bites grow a retained irregular paper tear")
 	await shot("gnaw-four-bites")
@@ -221,6 +233,7 @@ func interactions() -> void:
 	check(not menu.credits_open and c.enabled and menu.paper.visible, "Return restores menu, companion and current tears")
 	check(menu.paper.holes.size() == retained, "existing tears persist on returning from credits")
 	await check_exit_note()
+	await check_random_tears()
 	# External story modules can take the entry signal without loading the maze host.
 	var started := [false]
 	menu.start_requested.connect(func(): started[0] = true)
@@ -247,30 +260,57 @@ func color_distance(a: Color,b: Color) -> float:
 	return absf(a.r-b.r)+absf(a.g-b.g)+absf(a.b-b.b)
 
 func check_mouse_animation(c: Node2D) -> void:
-	await pointer(Vector2(280,700))
-	await frames(60)
-	var last: int = c.pose_frame
-	var updates := 0
-	var held := 0
-	var travelled := 0.0
-	var steps_before: int = menu.foley.steps
-	var prior: Vector2 = c.sprite.global_position
-	var safe := true
+	c.position=Vector2(350,780)
+	c.velocity=Vector2.ZERO
+	await pointer(Vector2(1550,780))
+	await frames(5)
+	var last: int=c.pose_frame
+	var updates:=0
+	var smooth:=0
+	var travelled:=0.0
+	var steps_before: int=menu.foley.steps
+	var prior: Vector2=c.sprite.global_position
+	var safe:=true
 	for i in 60:
 		await frames(1)
-		if c.pose_frame != last:
-			updates += 1
-			last = c.pose_frame
-		travelled += c.sprite.global_position.distance_to(prior)
-		if c.sprite.global_position.distance_to(prior) < 0.001: held += 1
-		prior = c.sprite.global_position
-		safe = safe and c.display_is_safe()
-	check(updates >= 9 and updates <= 11,"companion shows ten held animation poses per second")
-	check(held >= 40,"drawing holds between frames instead of sliding every rendered frame")
-	check(travelled > 20.0,"rendered mouse actually follows the pointer rather than remaining frozen")
+		if c.pose_frame!=last:
+			updates+=1
+			last=c.pose_frame
+		var movement: float=c.sprite.global_position.distance_to(prior)
+		travelled+=movement
+		if movement>0.1: smooth+=1
+		prior=c.sprite.global_position
+		safe=safe and c.display_is_safe()
+	check(updates>=9 and updates<=11,"small body poses retain ten hand-drawn beats per second")
+	check(smooth>=55,"world movement updates smoothly every frame rather than holding ten poses")
+	check(travelled>250.0 and travelled<460.0,"mouse keeps a responsive continuous following speed")
 	check(menu.foley.steps>steps_before,"moving companion produces short paper rustle grains")
-	check(safe,"body and tail stay inside paper and outside protected lettering")
+	check(safe,"body and tail remain on the paper through movement")
 	await shot("cartoon-mouse-follow")
+	await pointer(Vector2(250,300))
+	var last_angle: float=c.sprite.rotation
+	var largest_turn:=0.0
+	for i in 30:
+		await frames(1)
+		largest_turn=maxf(largest_turn,absf(angle_difference(last_angle,c.sprite.rotation)))
+		last_angle=c.sprite.rotation
+	check(largest_turn<0.55,"reversing pointer direction turns smoothly without held-angle snaps")
+
+func check_text_crossing(c: Node2D) -> void:
+	c.position=Vector2(940,860)
+	c.velocity=Vector2.ZERO
+	await pointer(Vector2(940,160))
+	var text_frames:=0
+	for i in 125:
+		await frames(1)
+		for rect in menu.ink_rects:
+			if rect.has_point(c.sprite.global_position):
+				text_frames+=1
+				break
+	check(c.obstacles.is_empty() and text_frames>20,"mouse actually crosses title and menu ink instead of diverting around it")
+	check(menu.companion.get_index()>menu.title.get_index(),"mouse is drawn above the title it walks across")
+	check(float(menu.title.letters[0].material.get_shader_parameter("paw_strength"))>0.9,"active companion provides live pressure to title and handwritten ink")
+	await shot("mouse-on-title")
 
 func check_exit_note() -> void:
 	await click(menu.buttons[2].get_global_rect().get_center())
@@ -293,20 +333,99 @@ func check_exit_note() -> void:
 	await frames(30)
 	check(not menu.credits_open and not menu.credits.active and menu.companion.enabled,"Escape during note arrival safely peels and restores input")
 
-func check_paper_lighting() -> void:
-	menu.paper_light.hide()
+func check_paper_layers() -> void:
+	var all_layers: Array=[menu.background]
+	all_layers.append_array(menu.paper_stack.sheets)
+	for layer in all_layers: layer.material.set_shader_parameter("clean_paper",menu.background.texture)
 	await frames(1)
 	RenderingServer.force_draw(false)
-	var unlit := root.get_texture().get_image()
-	unlit.save_png(output+"paper-lighting-off.png")
-	menu.paper_light.show()
+	var dirty:=root.get_texture().get_image()
+	for layer in all_layers: layer.material.set_shader_parameter("clean_paper",load("res://modules/main_menu/assets/background_clean_v2.png"))
 	await frames(1)
 	RenderingServer.force_draw(false)
-	var lit := root.get_texture().get_image()
-	lit.save_png(output+"paper-lighting-on.png")
-	var shade_at := Vector2i(1630,740)
-	var sun_at := Vector2i(330,480)
-	var dimming: float = unlit.get_pixelv(shade_at).get_luminance()-lit.get_pixelv(shade_at).get_luminance()
-	var sunshine: float = absf(unlit.get_pixelv(sun_at).get_luminance()-lit.get_pixelv(sun_at).get_luminance())
-	check(dimming>0.055, "paper side shadow produces a visible luminance difference")
-	check(dimming>sunshine+0.04, "upper-left light and lower-right shadow remain directional")
+	var clean:=root.get_texture().get_image()
+	var dirty_grain:=0.0
+	var clean_grain:=0.0
+	for y in range(420,560,2):
+		for x in range(1570,1740,2):
+			dirty_grain+=absf(dirty.get_pixel(x,y).get_luminance()-dirty.get_pixel(x+2,y).get_luminance())
+			clean_grain+=absf(clean.get_pixel(x,y).get_luminance()-clean.get_pixel(x+2,y).get_luminance())
+	check(clean_grain<dirty_grain*0.85,"right paper surface has visibly less dirty high-frequency grain")
+	print("PAPER_MEASUREMENTS cleaned_grain_ratio=",clean_grain/maxf(dirty_grain,0.0001))
+	var base_at: Vector2=menu.background.position
+	var regions: Array[Rect2i]=[Rect2i(16,100,45,180),Rect2i(1820,95,85,180),Rect2i(60,500,35,160)]
+	menu.background.hide()
+	for sheet in menu.paper_stack.sheets: sheet.hide()
+	for layer in 3:
+		menu.paper_stack.sheets[layer].show()
+		var samples: Array[Image]=[]
+		for phase in 3:
+			await frames(9)
+			RenderingServer.force_draw(false)
+			samples.append(root.get_texture().get_image())
+		var changed:=0
+		var area: Rect2i=regions[layer]
+		for y in range(area.position.y,area.end.y):
+			for x in range(area.position.x,area.end.x):
+				if color_distance(samples[0].get_pixel(x,y),samples[1].get_pixel(x,y))>0.012 or color_distance(samples[1].get_pixel(x,y),samples[2].get_pixel(x,y))>0.012: changed+=1
+		check(changed>40,"paper sheet %d has its own real held-frame edge movement"%layer)
+		menu.paper_stack.sheets[layer].hide()
+	menu.background.show()
+	for sheet in menu.paper_stack.sheets: sheet.show()
+	check(menu.background.position==base_at and menu.paper_stack.sheets[0].material!=menu.paper_stack.sheets[1].material,"background framing stays fixed while individual sheets animate independently")
+
+func check_random_tears() -> void:
+	menu.companion.set_enabled(false)
+	menu.companion.visible=true
+	var p: Node2D=menu.paper
+	p.holes.clear()
+	for at in [Vector2(1470,470),Vector2(1630,610),Vector2(1450,740)]:
+		p.begin_gnaw(at)
+		for i in 4: p.bite()
+		await frames(60)
+		p.stop_gnaw()
+	check(p.holes[0].seed!=p.holes[1].seed and p.holes[0].profile!=p.holes[1].profile,"each gnaw site gets an independent random outline")
+	check(p.holes[0].radius!=p.holes[1].radius and p.holes[1].angle!=p.holes[2].angle,"tear size, aspect and rotation vary between bites")
+	var enlarged:=true
+	for hole in p.holes: enlarged=enlarged and float(hole.radius)>=23.0 and float(hole.radius)<=35.0 and is_equal_approx(float(hole.growth),4.0)
+	check(enlarged,"full tears are larger, continuous, and show a white torn-paper rim")
+	await shot("random-white-tears")
+	for i in 8: p.begin_gnaw(Vector2(1500,500))
+	var old_seed: float=p.holes.back().seed
+	p.begin_gnaw(Vector2(1500,500))
+	check(p.holes.size()==8 and float(p.holes.back().seed)!=old_seed,"tear limit cannot repeat the same shape when older holes are removed")
+	p.stop_gnaw()
+	menu.companion.set_enabled(true)
+	menu.companion.set_process_input(false)
+
+
+func check_full_turn(c: Node2D) -> void:
+	c.position=Vector2(940,540)
+	c.velocity=Vector2.ZERO
+	c.body_angle=0.0
+	c.turn_speed=0.0
+	var previous: float=c.body_angle
+	var total_turn:=0.0
+	var headings: Dictionary={}
+	for i in 300:
+		var angle:=TAU*float(i)/270.0
+		c.mouse_position=Vector2(940,540)+Vector2(cos(angle)*390.0,sin(angle)*230.0)
+		await frames(1)
+		if i>25: total_turn+=angle_difference(previous,c.body_angle)
+		previous=c.body_angle
+		headings[int(fposmod(c.body_angle,TAU)/(PI/4.0))]=true
+	check(headings.size()==8 and absf(total_turn)>TAU*0.90,"orbiting pointer makes the mouse turn continuously through a full 360 degrees")
+	c.position=Vector2(800,720)
+	c.velocity=Vector2.RIGHT*200.0
+	c.body_angle=PI/2.0
+	c.turn_speed=0.0
+	c.mouse_position=Vector2(800,220)
+	c.last_mouse_position=c.mouse_position
+	c.still_time=0.0
+	var arc_x:=c.position.x
+	var widest_arc:=0.0
+	for i in 30:
+		await frames(1)
+		widest_arc=maxf(widest_arc,absf(c.position.x-arc_x))
+	check(widest_arc>6.0,"a right-angle target change produces a curved body-led turn instead of straight-line strafing")
+	await shot("mouse-free-turn")
