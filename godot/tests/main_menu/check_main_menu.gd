@@ -57,7 +57,7 @@ func safe_mouse() -> bool:
 	if not companion.safe_bounds.grow(0.5).has_point(companion.position): return false
 	for rect: Rect2 in companion.obstacles:
 		if rect.grow(-0.5).has_point(companion.position): return false
-	return true
+	return companion.display_is_safe()
 func run() -> void:
 	DirAccess.make_dir_recursive_absolute(output)
 	Input.use_accumulated_input = false
@@ -91,7 +91,8 @@ func run() -> void:
 			if glyph.position.distance_to(expected) > 0.01: final_positions = false
 		check(final_positions, "title settles at its intentional hand-set offsets")
 		var companion_height: float = menu.companion.sprite.texture.get_height() * menu.companion.base_scale
-		check(is_equal_approx(companion_height, 190.0), "mouse legibility updated to 190 logical pixels, stable across ratios")
+		check(is_equal_approx(companion_height, 260.0), "mouse legibility updated to 260 logical pixels, stable across ratios")
+		check(menu.companion.sprite.texture is AtlasTexture and menu.companion.sprite.texture.atlas.resource_path.ends_with("mouse_cartoon.png"), "uses the user-selected cartoon PNG")
 		check(menu.extension is ColorRect and menu.extension.scale == Vector2.ONE, "solid cream margin; no auto-extended background artwork")
 		await shot("menu-%dx%d" % [physical.x,physical.y])
 		if physical == Vector2i(1920,1080): await check_title_motion()
@@ -167,6 +168,7 @@ func interactions() -> void:
 	var c: Node2D = menu.companion
 	# Keep the native window test independent of desktop mouse movement outside the game.
 	c.set_process_input(false)
+	await check_mouse_animation(c)
 	# Use real pointer motion through the native viewport, including a route around the menu.
 	for point in [Vector2(330,820),Vector2(1550,830),Vector2(1800,1050),Vector2(900,760),Vector2(270,320)]:
 		await pointer(point)
@@ -226,3 +228,27 @@ func check_title_motion() -> void:
 
 func color_distance(a: Color,b: Color) -> float:
 	return absf(a.r-b.r)+absf(a.g-b.g)+absf(a.b-b.b)
+
+func check_mouse_animation(c: Node2D) -> void:
+	await pointer(Vector2(280,700))
+	await frames(60)
+	var last: int = c.pose_frame
+	var updates := 0
+	var held := 0
+	var travelled := 0.0
+	var prior: Vector2 = c.sprite.global_position
+	var safe := true
+	for i in 60:
+		await frames(1)
+		if c.pose_frame != last:
+			updates += 1
+			last = c.pose_frame
+		travelled += c.sprite.global_position.distance_to(prior)
+		if c.sprite.global_position.distance_to(prior) < 0.001: held += 1
+		prior = c.sprite.global_position
+		safe = safe and c.display_is_safe()
+	check(updates >= 9 and updates <= 11,"companion shows ten held animation poses per second")
+	check(held >= 40,"drawing holds between frames instead of sliding every rendered frame")
+	check(travelled > 20.0,"rendered mouse actually follows the pointer rather than remaining frozen")
+	check(safe,"body and tail stay inside paper and outside protected lettering")
+	await shot("cartoon-mouse-follow")

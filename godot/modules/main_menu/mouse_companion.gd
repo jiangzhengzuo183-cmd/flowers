@@ -3,7 +3,8 @@ signal gnaw_started(at: Vector2)
 signal gnaw_bite
 signal gnaw_stopped
 const Planner := preload("res://modules/main_menu/companion_path.gd")
-const LAYOUT := preload("res://modules/main_menu/assets/layout.gd")
+const LAYOUT := preload("res://modules/main_menu/assets/mouse_cartoon_layout.gd")
+const POSE_FPS := 10.0
 enum State { IDLE, FOLLOW, INSPECT, CLICK_REACTION, GNAW }
 var state := State.IDLE
 var enabled := false
@@ -32,13 +33,26 @@ var base_scale := 1.0
 var body_angle := 0.0
 var protected_radius := 86.0
 var _placed := false
+var ink_rects: Array[Rect2] = []
+var paper_surface := Rect2()
+var outline := PackedVector2Array()
+var pose_frame := 0
+var _pose_age := 1.0
+var _display_world := Vector2.ZERO
+var _display_angle := 0.0
+var _display_scale := Vector2.ONE
 
 func _ready() -> void:
 	var data: Dictionary = LAYOUT.DATA
-	body_pivot = Vector2(data.mouse_body[0], data.mouse_body[1])
-	var nose := Vector2(data.mouse_nose[0], data.mouse_nose[1])
-	var texture: Texture2D = load("res://modules/main_menu/assets/mouse.png")
-	base_scale = 190.0 / texture.get_height()
+	body_pivot = Vector2(data.pivot[0], data.pivot[1])
+	var nose := Vector2(data.nose[0], data.nose[1])
+	var texture := AtlasTexture.new()
+	texture.atlas = preload("res://modules/main_menu/assets/mouse_cartoon.png")
+	var region: Array = data.rect
+	texture.region = Rect2(region[0],region[1],region[2],region[3])
+	texture.filter_clip = true
+	base_scale = float(data.height) / texture.get_height()
+	for point: Array in data.outline: outline.append(Vector2(point[0],point[1]))
 	nose_local = (nose - body_pivot) * base_scale
 	shadow = Sprite2D.new()
 	shadow.texture = texture
@@ -59,10 +73,12 @@ func _ready() -> void:
 	add_child(sprite)
 	visible = false
 
-func configure(paper: Rect2, protected_ink: Array[Rect2], menus: Array[Rect2], logical_scale: float, tall: float) -> void:
+func configure(paper: Rect2, protected_ink: Array[Rect2], menus: Array[Rect2], logical_scale: float, _tall: float) -> void:
 	unit = logical_scale
-	protected_radius = 104.0 * unit
-	var inset := Vector2(180.0, lerpf(154.0, 153.0, tall)) * unit
+	protected_radius = 108.0 * unit
+	ink_rects = protected_ink
+	paper_surface = Rect2(paper.position+Vector2(76,42)*unit,paper.size-Vector2(144,90)*unit)
+	var inset := Vector2(190.0, 158.0) * unit
 	safe_bounds = Rect2(paper.position + inset, paper.size - inset * 2.0)
 	menu_rects = menus
 	obstacles.clear()
@@ -86,6 +102,8 @@ func configure(paper: Rect2, protected_ink: Array[Rect2], menus: Array[Rect2], l
 	position = Planner.nearest_free(position, safe_bounds, obstacles)
 	path.clear()
 	replan_time = 0.0
+	_display_world = position
+	_pose_age = 1.0
 
 func set_enabled(value: bool) -> void:
 	enabled = value
@@ -94,6 +112,7 @@ func set_enabled(value: bool) -> void:
 	still_time = 0.0
 	mouse_position = get_viewport().get_mouse_position()
 	last_mouse_position = mouse_position
+	_pose_age = 1.0
 	if not value: _stop_gnaw()
 
 func click_reaction() -> void:
@@ -136,9 +155,12 @@ func _process(delta: float) -> void:
 
 func _update_follow(delta: float) -> void:
 	if replan_time <= 0.0:
-		var target := mouse_position - motion_direction * 100.0 * unit
+		var target := mouse_position - motion_direction * 180.0 * unit
 		path = Planner.route(position, target, safe_bounds, obstacles)
 		replan_time = 0.14
+	if response_delay > 0.0 and not path.is_empty():
+		var look := path[0]-position
+		body_angle = lerp_angle(body_angle,look.angle()+PI/2.0,1.0-exp(-delta*8.0))
 	response_delay = maxf(0.0, response_delay - delta)
 	var desired := Vector2.ZERO
 	if not path.is_empty() and response_delay <= 0.0:
@@ -171,7 +193,7 @@ func _start_gnaw() -> void:
 	bites = 0
 	velocity = Vector2.ZERO
 	# The nose already points into a protected blank region, away from readable ink.
-	gnaw_started.emit(position + (nose_local * unit).rotated(body_angle))
+	gnaw_started.emit(_display_world + (nose_local * unit * _display_scale).rotated(_display_angle))
 
 func _update_gnaw(delta: float) -> void:
 	gnaw_time += delta
@@ -184,27 +206,66 @@ func _update_gnaw(delta: float) -> void:
 		state = State.IDLE
 		gnaw_completed = true
 
-func _update_art(_delta: float) -> void:
-	var moving := clampf(velocity.length() / (270.0 * unit), 0.0, 1.0)
-	var breathing := (sin(total_time * 1.7) + sin(total_time * 2.31) * 0.28) * 0.003
-	var tilt := 0.0
-	var squash := Vector2.ONE * (1.0 + breathing)
-	var bob := sin(total_time * 15.0) * 0.9 * moving
-	if reaction_time > 0.0:
-		var pulse := sin(reaction_time / 0.23 * PI)
-		squash *= Vector2(1.0 + pulse * 0.035, 1.0 - pulse * 0.04)
-	if state == State.GNAW:
-		tilt = sin(gnaw_time * 19.0) * 0.018 * (0.7 + sin(gnaw_time * 2.0) * 0.3)
-		bob = sin(gnaw_time * 19.0) * 0.7
-		squash.y *= 0.99
-	sprite.rotation = body_angle + tilt
-	sprite.scale = Vector2.ONE * base_scale * unit * squash
-	sprite.position = Vector2(0, bob * unit)
-	shadow.position = sprite.position + Vector2(0.45 + moving * 0.12, 0.65) * unit
-	shadow.rotation = sprite.rotation
-	shadow.scale = sprite.scale
-	shadow.material.set_shader_parameter("movement", moving)
-	shadow.material.set_shader_parameter("indentation", 1.0 - moving)
+func _update_art(delta: float) -> void:
+	_pose_age += delta
+	var moving := clampf(velocity.length()/(270.0*unit),0.0,1.0)
+	if _pose_age >= 1.0/POSE_FPS:
+		_pose_age = fmod(_pose_age,1.0/POSE_FPS)
+		pose_frame += 1
+		var step := pose_frame % 4
+		var pulse := [0.0,1.0,0.0,-0.7][step] as float
+		var squash := Vector2(1.0+0.014*pulse*moving,1.0-0.012*pulse*moving)
+		var tilt := deg_to_rad([0.0,-0.8,0.0,0.65][step])*moving
+		var bob := -1.1*pulse*moving*unit
+		if reaction_time > 0.0:
+			var surprise := sin(reaction_time/0.23*PI)
+			squash *= Vector2(1.0+surprise*0.025,1.0-surprise*0.035)
+		if state == State.GNAW:
+			tilt = [0.0,-0.018,0.007,0.015][step]
+			bob = [0.0,-0.6,0.2,0.5][step]*unit
+		var candidate := position+Vector2(0,bob)
+		var angle := body_angle+tilt
+		# Check the whole silhouette, including tail, before showing a new held frame.
+		if _art_clear(candidate,angle,squash):
+			_display_world = candidate
+			_display_angle = angle
+			_display_scale = squash
+		else:
+			for turn: float in [0.0,0.26,-0.26,0.52,-0.52,0.78,-0.78]:
+				if _art_clear(position,body_angle+turn,Vector2.ONE):
+					_display_world = position
+					_display_angle = body_angle+turn
+					_display_scale = Vector2.ONE
+					break
+		sprite.rotation = _display_angle
+		sprite.scale = Vector2.ONE*base_scale*unit*_display_scale
+		shadow.rotation = sprite.rotation
+		shadow.scale = sprite.scale
+		shadow.material.set_shader_parameter("movement",moving)
+		shadow.material.set_shader_parameter("indentation",1.0-moving)
+	# Compensate the smooth navigation root so the artwork itself advances at 10 fps.
+	sprite.position = _display_world-position
+	shadow.position = sprite.position+Vector2(0.4,0.55)*unit
+
+func display_polygon(at: Vector2,angle: float,squash: Vector2) -> PackedVector2Array:
+	var polygon := PackedVector2Array()
+	for point in outline:
+		polygon.append(at+(point*base_scale*unit*squash).rotated(angle))
+	return polygon
+
+func _art_clear(at: Vector2,angle: float,squash: Vector2) -> bool:
+	var polygon := display_polygon(at,angle,squash)
+	var safe := paper_surface.grow(-2.5*unit)
+	for point in polygon:
+		if not safe.has_point(point): return false
+	for rect in ink_rects:
+		var r := rect.grow(3.0*unit)
+		var box := PackedVector2Array([r.position,Vector2(r.end.x,r.position.y),r.end,Vector2(r.position.x,r.end.y)])
+		if not Geometry2D.intersect_polygons(polygon,box).is_empty(): return false
+	return true
+
+func display_is_safe() -> bool:
+	return _art_clear(_display_world,_display_angle,_display_scale)
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
