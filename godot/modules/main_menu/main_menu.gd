@@ -52,7 +52,11 @@ func _ready() -> void:
 	window.content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
 	window.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_KEEP
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	Cursor.install(window)
+	_initialize_menu.call_deferred()
+
+func _initialize_menu() -> void:
+	# The initial scene readies while the root Window is still setting up children.
+	Cursor.install(get_window())
 	metadata = preload("res://modules/main_menu/assets/layout_handdrawn.gd").DATA
 	_build()
 	menu_cursor=preload("res://modules/main_menu/menu_cursor.gd").new()
