@@ -1,0 +1,642 @@
+{
+  "repository": "jiangzhengzuo183-cmd/flowers",
+  "ref": "origin/feature/chapter1-interaction",
+  "commit": "b00e20c0221ae8cf48d30a48908e0f3802caffcc",
+  "files": [
+    {
+      "source": "godot/assets/audio/CC0-1.0.txt",
+      "local": "res://modules/visual_novel/assets/audio/CC0-1.0.txt",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/audio/LICENSE-SOURCES.md",
+      "local": "res://modules/visual_novel/assets/audio/LICENSE-SOURCES.md",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/audio/bakery.ogg",
+      "local": "res://modules/visual_novel/assets/audio/bakery.ogg",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/audio/door.wav",
+      "local": "res://modules/visual_novel/assets/audio/door.wav",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/audio/lab-calm.mp3",
+      "local": "res://modules/visual_novel/assets/audio/lab-calm.mp3",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/audio/night.mp3",
+      "local": "res://modules/visual_novel/assets/audio/night.mp3",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/audio/paper.mp3",
+      "local": "res://modules/visual_novel/assets/audio/paper.mp3",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/audio/step.ogg",
+      "local": "res://modules/visual_novel/assets/audio/step.ogg",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/alice-new.png",
+      "local": "res://modules/visual_novel/assets/bakery/alice-new.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/alice.png",
+      "local": "res://modules/visual_novel/assets/bakery/alice.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/charlie-facing-right.png",
+      "local": "res://modules/visual_novel/assets/bakery/charlie-facing-right.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/charlie-reference.webp",
+      "local": "res://modules/visual_novel/assets/bakery/charlie-reference.webp",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/charlie-scene.png",
+      "local": "res://modules/visual_novel/assets/bakery/charlie-scene.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/charlie-walk.png",
+      "local": "res://modules/visual_novel/assets/bakery/charlie-walk.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/charlie.png",
+      "local": "res://modules/visual_novel/assets/bakery/charlie.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/donner-reference.webp",
+      "local": "res://modules/visual_novel/assets/bakery/donner-reference.webp",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/donner-scene.png",
+      "local": "res://modules/visual_novel/assets/bakery/donner-scene.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/donner.png",
+      "local": "res://modules/visual_novel/assets/bakery/donner.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/exterior.png",
+      "local": "res://modules/visual_novel/assets/bakery/exterior.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/gimpy-reference.webp",
+      "local": "res://modules/visual_novel/assets/bakery/gimpy-reference.webp",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/gimpy-scene.png",
+      "local": "res://modules/visual_novel/assets/bakery/gimpy-scene.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/gimpy.png",
+      "local": "res://modules/visual_novel/assets/bakery/gimpy.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/interior-night.png",
+      "local": "res://modules/visual_novel/assets/bakery/interior-night.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/interior.png",
+      "local": "res://modules/visual_novel/assets/bakery/interior.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/karp-cutout.png",
+      "local": "res://modules/visual_novel/assets/bakery/karp-cutout.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/karp.png",
+      "local": "res://modules/visual_novel/assets/bakery/karp.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/paper-panel.png",
+      "local": "res://modules/visual_novel/assets/bakery/paper-panel.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/people-scene.png",
+      "local": "res://modules/visual_novel/assets/bakery/people-scene.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/school-empty.png",
+      "local": "res://modules/visual_novel/assets/bakery/school-empty.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/school-scene.png",
+      "local": "res://modules/visual_novel/assets/bakery/school-scene.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/street-night.png",
+      "local": "res://modules/visual_novel/assets/bakery/street-night.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/ui-binder-clip.png",
+      "local": "res://modules/visual_novel/assets/bakery/ui-binder-clip.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/ui-continue.png",
+      "local": "res://modules/visual_novel/assets/bakery/ui-continue.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/ui-interact.png",
+      "local": "res://modules/visual_novel/assets/bakery/ui-interact.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/bakery/ui-paperclip.svg",
+      "local": "res://modules/visual_novel/assets/bakery/ui-paperclip.svg",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/assets/continuation/bar.png",
+      "local": "res://modules/visual_novel/assets/continuation/bar.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/bert.png",
+      "local": "res://modules/visual_novel/assets/continuation/bert.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/book-footprints-v1.png",
+      "local": "res://modules/visual_novel/assets/continuation/book-footprints-v1.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/cafeteria.png",
+      "local": "res://modules/visual_novel/assets/continuation/cafeteria.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/cake.png",
+      "local": "res://modules/visual_novel/assets/continuation/cake.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/charlie-casual-v1.png",
+      "local": "res://modules/visual_novel/assets/continuation/charlie-casual-v1.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/home-day.png",
+      "local": "res://modules/visual_novel/assets/continuation/home-day.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/home-night.png",
+      "local": "res://modules/visual_novel/assets/continuation/home-night.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/hospital.png",
+      "local": "res://modules/visual_novel/assets/continuation/hospital.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/ink-1.png",
+      "local": "res://modules/visual_novel/assets/continuation/ink-1.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/ink-2.png",
+      "local": "res://modules/visual_novel/assets/continuation/ink-2.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/ink-3.png",
+      "local": "res://modules/visual_novel/assets/continuation/ink-3.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/ink-4.png",
+      "local": "res://modules/visual_novel/assets/continuation/ink-4.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/ink-bg.png",
+      "local": "res://modules/visual_novel/assets/continuation/ink-bg.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/ink-blank.png",
+      "local": "res://modules/visual_novel/assets/continuation/ink-blank.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/lab.png",
+      "local": "res://modules/visual_novel/assets/continuation/lab.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/magazine-v1.png",
+      "local": "res://modules/visual_novel/assets/continuation/magazine-v1.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/maze-diagram-v1.png",
+      "local": "res://modules/visual_novel/assets/continuation/maze-diagram-v1.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/motivation-v1.png",
+      "local": "res://modules/visual_novel/assets/continuation/motivation-v1.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/mouse.png",
+      "local": "res://modules/visual_novel/assets/continuation/mouse.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/nemur.png",
+      "local": "res://modules/visual_novel/assets/continuation/nemur.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/office-outside.png",
+      "local": "res://modules/visual_novel/assets/continuation/office-outside.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/office.png",
+      "local": "res://modules/visual_novel/assets/continuation/office.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/rabbit.png",
+      "local": "res://modules/visual_novel/assets/continuation/rabbit.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/record-paper-v1.png",
+      "local": "res://modules/visual_novel/assets/continuation/record-paper-v1.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/strauss.png",
+      "local": "res://modules/visual_novel/assets/continuation/strauss.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/television-front-v1.png",
+      "local": "res://modules/visual_novel/assets/continuation/television-front-v1.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/television.png",
+      "local": "res://modules/visual_novel/assets/continuation/television.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/continuation/volume-knob-v1.png",
+      "local": "res://modules/visual_novel/assets/continuation/volume-knob-v1.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/experience/algernon.png",
+      "local": "res://modules/visual_novel/assets/experience/algernon.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/experience/alice-book.png",
+      "local": "res://modules/visual_novel/assets/experience/alice-book.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/experience/bakery-explore.png",
+      "local": "res://modules/visual_novel/assets/experience/bakery-explore.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/experience/charlie-empty.png",
+      "local": "res://modules/visual_novel/assets/experience/charlie-empty.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/experience/charlie-lucky.png",
+      "local": "res://modules/visual_novel/assets/experience/charlie-lucky.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/experience/help.svg",
+      "local": "res://modules/visual_novel/assets/experience/help.svg",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/assets/experience/history.svg",
+      "local": "res://modules/visual_novel/assets/experience/history.svg",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/assets/experience/menu.svg",
+      "local": "res://modules/visual_novel/assets/experience/menu.svg",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/assets/experience/notebook.png",
+      "local": "res://modules/visual_novel/assets/experience/notebook.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/experience/orders.png",
+      "local": "res://modules/visual_novel/assets/experience/orders.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/experience/rabbit-hand.png",
+      "local": "res://modules/visual_novel/assets/experience/rabbit-hand.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/experience/television.png",
+      "local": "res://modules/visual_novel/assets/experience/television.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/fonts/REPORT-FONT-LICENSE.md",
+      "local": "res://modules/visual_novel/assets/fonts/REPORT-FONT-LICENSE.md",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/fonts/YeLiHangJiuLinKaTong.ttf",
+      "local": "res://modules/visual_novel/assets/fonts/YeLiHangJiuLinKaTong.ttf",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/report/bread-strip.svg",
+      "local": "res://modules/visual_novel/assets/report/bread-strip.svg",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/assets/report/ink-wood.png",
+      "local": "res://modules/visual_novel/assets/report/ink-wood.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/report/march6-cartoon.png",
+      "local": "res://modules/visual_novel/assets/report/march6-cartoon.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/report/march6-real.png",
+      "local": "res://modules/visual_novel/assets/report/march6-real.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/report/march8-reference.png",
+      "local": "res://modules/visual_novel/assets/report/march8-reference.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/report/paper-grain.svg",
+      "local": "res://modules/visual_novel/assets/report/paper-grain.svg",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/assets/report/report-march4-paper.png",
+      "local": "res://modules/visual_novel/assets/report/report-march4-paper.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/report/report-march6-paper.png",
+      "local": "res://modules/visual_novel/assets/report/report-march6-paper.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/report/report-march8-paper.png",
+      "local": "res://modules/visual_novel/assets/report/report-march8-paper.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/assets/report/report1-paper.png",
+      "local": "res://modules/visual_novel/assets/report/report1-paper.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/data/bakery.json",
+      "local": "res://modules/visual_novel/data/bakery.json",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/data/bakery_flow.json",
+      "local": "res://modules/visual_novel/data/bakery_flow.json",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/data/chapter4.json",
+      "local": "res://modules/visual_novel/data/chapter4.json",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/data/continuation.json",
+      "local": "res://modules/visual_novel/data/continuation.json",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/data/day01_extension.json",
+      "local": "res://modules/visual_novel/data/day01_extension.json",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/data/experience.json",
+      "local": "res://modules/visual_novel/data/experience.json",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/data/prologue.json",
+      "local": "res://modules/visual_novel/data/prologue.json",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/data/report-march4-layout.json",
+      "local": "res://modules/visual_novel/data/report-march4-layout.json",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/data/report-march6-layout.json",
+      "local": "res://modules/visual_novel/data/report-march6-layout.json",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/data/report-march8-layout.json",
+      "local": "res://modules/visual_novel/data/report-march8-layout.json",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/data/report1_layout.json",
+      "local": "res://modules/visual_novel/data/report1_layout.json",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/data/report2-march8-preview.json",
+      "local": "res://modules/visual_novel/data/report2-march8-preview.json",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/scenes/bakery.tscn",
+      "local": "res://modules/visual_novel/scenes/bakery.tscn",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/scenes/report1.tscn",
+      "local": "res://modules/visual_novel/scenes/report1.tscn",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/scenes/story.tscn",
+      "local": "res://modules/visual_novel/scenes/story.tscn",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/scripts/story/bakery_chapter.gd",
+      "local": "res://modules/visual_novel/scripts/story/bakery_chapter.gd",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/scripts/story/bakery_flow.gd",
+      "local": "res://modules/visual_novel/scripts/story/bakery_flow.gd",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/scripts/story/continuation_chapter.gd",
+      "local": "res://modules/visual_novel/scripts/story/continuation_chapter.gd",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/scripts/story/continuation_flow.gd",
+      "local": "res://modules/visual_novel/scripts/story/continuation_flow.gd",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/scripts/story/day01_scene_view.gd",
+      "local": "res://modules/visual_novel/scripts/story/day01_scene_view.gd",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/scripts/story/designed_report.gd",
+      "local": "res://modules/visual_novel/scripts/story/designed_report.gd",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/scripts/story/dialogue_cast.gd",
+      "local": "res://modules/visual_novel/scripts/story/dialogue_cast.gd",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/scripts/story/experience_audio.gd",
+      "local": "res://modules/visual_novel/scripts/story/experience_audio.gd",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/scripts/story/experience_runtime.gd",
+      "local": "res://modules/visual_novel/scripts/story/experience_runtime.gd",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/scripts/story/ink_field.gd",
+      "local": "res://modules/visual_novel/scripts/story/ink_field.gd",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/scripts/story/ink_flow.gdshader",
+      "local": "res://modules/visual_novel/scripts/story/ink_flow.gdshader",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/scripts/story/ink_observation.gd",
+      "local": "res://modules/visual_novel/scripts/story/ink_observation.gd",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/scripts/story/report1_page.gd",
+      "local": "res://modules/visual_novel/scripts/story/report1_page.gd",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/scripts/story/scene_hotspot.gd",
+      "local": "res://modules/visual_novel/scripts/story/scene_hotspot.gd",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/scripts/story/story_scene.gd",
+      "local": "res://modules/visual_novel/scripts/story/story_scene.gd",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/ui/chapter1_theme.tres",
+      "local": "res://modules/visual_novel/ui/chapter1_theme.tres",
+      "paths_rebased": true
+    },
+    {
+      "source": "godot/web/ink-observation/assets/FONT-LICENSE.txt",
+      "local": "res://modules/visual_novel/web/ink-observation/assets/FONT-LICENSE.txt",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/web/ink-observation/assets/ink-I.png",
+      "local": "res://modules/visual_novel/web/ink-observation/assets/ink-I.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/web/ink-observation/assets/ink-IV.png",
+      "local": "res://modules/visual_novel/web/ink-observation/assets/ink-IV.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/web/ink-observation/assets/ink-IX.png",
+      "local": "res://modules/visual_novel/web/ink-observation/assets/ink-IX.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/web/ink-observation/assets/ink-V.png",
+      "local": "res://modules/visual_novel/web/ink-observation/assets/ink-V.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/web/ink-observation/assets/paper.png",
+      "local": "res://modules/visual_novel/web/ink-observation/assets/paper.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/web/ink-observation/assets/wood.png",
+      "local": "res://modules/visual_novel/web/ink-observation/assets/wood.png",
+      "paths_rebased": false
+    },
+    {
+      "source": "godot/web/ink-observation/assets/素材说明.md",
+      "local": "res://modules/visual_novel/web/ink-observation/assets/素材说明.md",
+      "paths_rebased": false
+    }
+  ]
+}

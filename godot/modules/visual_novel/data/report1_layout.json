@@ -1,0 +1,159 @@
+{
+  "design_size": [
+    1920,
+    1080
+  ],
+  "source": "font-preview.html, report1; native text reads data/day01_extension.json",
+  "sections": [
+    {
+      "id": "title",
+      "rect": [
+        184,
+        119,
+        224.296875,
+        64
+      ],
+      "font_size": 44,
+      "baseline": 46,
+      "angle": 0,
+      "letter_spacing": 0,
+      "center": false,
+      "line_lengths": []
+    },
+    {
+      "id": "date",
+      "rect": [
+        184,
+        191,
+        92.96875,
+        48
+      ],
+      "font_size": 34,
+      "baseline": 35,
+      "angle": 0,
+      "letter_spacing": 0,
+      "center": false,
+      "line_lengths": []
+    },
+    {
+      "id": "opening",
+      "rect": [
+        184,
+        294,
+        682,
+        144
+      ],
+      "font_size": 30,
+      "baseline": 33,
+      "angle": 0,
+      "letter_spacing": 0,
+      "center": false,
+      "line_lengths": [
+        20,
+        20,
+        20
+      ]
+    },
+    {
+      "id": "work",
+      "rect": [
+        1024,
+        270,
+        748,
+        240
+      ],
+      "font_size": 30,
+      "baseline": 33,
+      "angle": 0,
+      "letter_spacing": 0,
+      "center": false,
+      "line_lengths": [
+        21,
+        20,
+        20,
+        21,
+        20
+      ]
+    },
+    {
+      "id": "school",
+      "rect": [
+        1024,
+        558,
+        748,
+        192
+      ],
+      "font_size": 30,
+      "baseline": 33,
+      "angle": 0,
+      "letter_spacing": 0,
+      "center": false,
+      "line_lengths": [
+        21,
+        21,
+        22,
+        22
+      ]
+    },
+    {
+      "id": "signature",
+      "rect": [
+        1511.328125,
+        846,
+        263.671875,
+        48
+      ],
+      "font_size": 30,
+      "baseline": 33,
+      "angle": 0,
+      "letter_spacing": 0,
+      "center": false,
+      "line_lengths": []
+    },
+    {
+      "id": "photo-label",
+      "rect": [
+        207,
+        901,
+        143.890625,
+        53
+      ],
+      "font_size": 30,
+      "baseline": 36,
+      "angle": -7,
+      "letter_spacing": 0,
+      "center": false,
+      "line_lengths": []
+    },
+    {
+      "id": "word-strip",
+      "rect": [
+        976,
+        925,
+        285,
+        72
+      ],
+      "font_size": 37,
+      "baseline": 48,
+      "angle": -5,
+      "letter_spacing": 3,
+      "center": true,
+      "line_lengths": []
+    },
+    {
+      "id": "page-number",
+      "rect": [
+        1789.84375,
+        984,
+        5.15625,
+        27
+      ],
+      "font_size": 24,
+      "baseline": 21,
+      "angle": 0,
+      "letter_spacing": 0,
+      "center": false,
+      "line_lengths": []
+    }
+  ]
+}
