@@ -26,12 +26,13 @@ func _ready() -> void:
 		blooms.append(flower)
 func place(paper: Rect2) -> void:
 	var unit:=paper.size.x/1920.0
-	var centers: Array[Vector2]=[Vector2(1635,345),Vector2(1750,470),Vector2(1585,590),Vector2(230,450),Vector2(355,580),Vector2(1490,850),Vector2(1645,945),Vector2(1395,968)]
-	var sizes: Array[float]=[210.0,175.0,155.0,190.0,155.0,190.0,145.0,130.0]
+	var centers: Array[Vector2]=[Vector2(1635,345),Vector2(1750,470),Vector2(1585,590),Vector2(230,450),Vector2(345,884),Vector2(1490,850),Vector2(1645,945),Vector2(1395,968)]
+	var sizes: Array[float]=[210.0,175.0,155.0,190.0,350.0,190.0,145.0,130.0]
 	for i in blooms.size():
 		var bloom:=blooms[i]
-		bloom.size=Vector2.ONE*sizes[i]*unit
-		bloom.position=paper.position+centers[i]*unit-bloom.size*0.5
+		bloom.size=Vector2.ONE*sizes[i]*unit*1.12
+		var center:=Vector2(960,540)+(centers[i]-Vector2(960,540))*0.965
+		bloom.position=paper.position+center*unit-bloom.size*0.5
 		bloom.pivot_offset=bloom.size*0.5
 		bloom.rotation_degrees=[-12.0,16.0,7.0,15.0,-9.0,-8.0,18.0,-16.0][i]
 		bloom.material.set_shader_parameter("flower_size",bloom.size)

@@ -20,7 +20,6 @@ var title: Control
 var menus: Control
 var buttons: Array[Button] = []
 var icons: Array[Label] = []
-var pencil: Node2D
 var companion: Node2D
 var paper: Node2D
 var credits: Control
@@ -29,6 +28,8 @@ var exit_note: Control
 var exit_open := false
 var flowers: Control
 var foley: Node
+var audio: Node
+var vignette: ColorRect
 var paper_rect := Rect2()
 var ink_rects: Array[Rect2] = []
 var menu_rects: Array[Rect2] = []
@@ -116,18 +117,22 @@ func _build() -> void:
 		button.focus_entered.connect(_hover.bind(i, true))
 		button.focus_exited.connect(_hover.bind(i, false))
 		button.pressed.connect(_activate.bind(i))
-	pencil=preload("res://modules/main_menu/pencil_prop.gd").new()
-	pencil.name="PencilProp"
-	add_child(pencil)
 	companion = Companion.new()
 	add_child(companion)
-	companion.pencil=pencil
 	companion.gnaw_started.connect(paper.begin_gnaw)
 	companion.gnaw_bite.connect(paper.bite)
 	companion.gnaw_stopped.connect(paper.stop_gnaw)
 	foley = Foley.new()
 	add_child(foley)
 	foley.install(companion)
+	audio=preload("res://modules/main_menu/menu_audio.gd").new()
+	add_child(audio)
+	vignette=ColorRect.new()
+	vignette.name="MenuVignette"
+	vignette.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	vignette.material=ShaderMaterial.new()
+	vignette.material.shader=preload("res://modules/main_menu/menu_vignette.gdshader")
+	add_child(vignette)
 	credits = Credits.new()
 	add_child(credits)
 	credits.back_requested.connect(close_credits)
@@ -152,7 +157,8 @@ func _layout() -> void:
 	var unit := width / 1920.0
 	extension.size = viewport
 	var tall := 0.0
-	var title_origin := paper_rect.position + Vector2(metadata.title_reference_origin[0], metadata.title_reference_origin[1]) * source_scale
+	var content_offset:=Vector2(0,28)*unit
+	var title_origin := paper_rect.position + Vector2(metadata.title_reference_origin[0], metadata.title_reference_origin[1]) * source_scale + content_offset
 	var art_scale := source_scale * float(metadata.title_reference_scale)
 	title.place(title_origin, art_scale, unit)
 	var ink: Array = metadata.title_ink_rect
@@ -160,7 +166,7 @@ func _layout() -> void:
 	menu_rects.clear()
 	for i in 3:
 		var rect: Array = metadata.menus[i].rect
-		var center := paper_rect.position + (Vector2(rect[0], rect[1]) + Vector2(rect[2], rect[3]) * 0.5) * source_scale
+		var center := paper_rect.position + (Vector2(rect[0], rect[1]) + Vector2(rect[2], rect[3]) * 0.5) * source_scale + content_offset
 		buttons[i].size = Vector2(275, 72) * unit
 		buttons[i].position = center - buttons[i].size * 0.5
 		buttons[i].pivot_offset = buttons[i].size * 0.5
@@ -170,13 +176,17 @@ func _layout() -> void:
 		var protected := Rect2(center-text_ink*0.5,text_ink)
 		menu_rects.append(protected)
 		ink_rects.append(protected)
-	pencil.place(paper_rect)
-	companion.configure(paper_rect, ink_rects, menu_rects, unit, tall)
+	var walkable_paper:=Rect2(paper_rect.position+paper_rect.size*0.0175,paper_rect.size*0.965)
+	companion.configure(walkable_paper, ink_rects, menu_rects, unit, tall)
 	paper.place(paper_rect)
+	var lower_papers: Array[PackedVector2Array]=[paper_stack.quad(0),paper_stack.quad(1),paper_stack.quad(2)]
+	paper.configure_surface(paper_stack.quad(3),lower_papers)
 	credits.place(paper_rect)
 	exit_note.place(paper_rect)
 	flowers.place(paper_rect)
 	_bind_tear_mask()
+	vignette.position=paper_rect.position
+	vignette.size=paper_rect.size
 	fade.size = viewport
 
 func _on_title_finished() -> void:
@@ -223,10 +233,12 @@ func _activate(index: int) -> void:
 		open_credits()
 	elif index == 2:
 		exit_open = true
+		audio.duck(true)
 		_lock_menu(true)
 		exit_note.open()
 	else:
 		transitioning = true
+		audio.fade_out(0.30)
 		_lock_menu(true)
 		fade.mouse_filter = Control.MOUSE_FILTER_STOP
 		var tween := create_tween()
@@ -241,6 +253,7 @@ func _activate(index: int) -> void:
 func _entry_failed(error: Error) -> void:
 	push_error("Main menu entry could not open %s (%s)" % [game_entry,error])
 	transitioning = false
+	audio.duck(false)
 	fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	create_tween().tween_property(fade,"modulate:a",0.0,0.25)
 	_lock_menu(false)
@@ -249,6 +262,7 @@ func open_credits() -> void:
 	if transitioning or credits_open or exit_open: return
 	credits_open = true
 	_lock_menu(true)
+	audio.duck(true)
 	credits.open()
 
 func close_credits() -> void:
@@ -256,15 +270,18 @@ func close_credits() -> void:
 
 func _credits_closed() -> void:
 	credits_open = false
+	audio.duck(false)
 	_lock_menu(false)
 
 func _exit_closed() -> void:
 	exit_open = false
+	audio.duck(false)
 	_lock_menu(false)
 
 func _confirm_desktop() -> void:
 	if not exit_open or transitioning: return
 	transitioning = true
+	audio.fade_out(0.18)
 	fade.mouse_filter = Control.MOUSE_FILTER_STOP
 	var tween := create_tween()
 	tween.tween_property(fade,"modulate:a",1.0,0.18)
@@ -303,6 +320,7 @@ func _process(_delta: float) -> void:
 		item.material.set_shader_parameter("paw_strength",1.0 if active else 0.0)
 
 func _bind_tear_mask() -> void:
+	paper_stack.set_tear_mask(paper.mask_viewport.get_texture())
 	var artwork: Array=[]
 	artwork.append_array(title.letters)
 	artwork.append_array(icons)

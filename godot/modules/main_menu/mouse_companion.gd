@@ -4,7 +4,7 @@ signal gnaw_bite
 signal gnaw_stopped
 const LAYOUT := preload("res://modules/main_menu/assets/mouse_cartoon_layout.gd")
 const POSE_FPS := 10.0
-const IDLE_GNAW_SECONDS := 3.0
+const IDLE_GNAW_SECONDS := 1.5
 const FOLLOW_DISTANCE := 132.0
 const MAX_SPEED := 420.0
 enum State { IDLE, FOLLOW, INSPECT, CLICK_REACTION, GNAW, JUMP }
@@ -82,6 +82,8 @@ func _ready() -> void:
 	sprite.scale = Vector2.ONE * base_scale
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	add_child(sprite)
+	for drawing in [sprite,shadow]:
+		drawing.material.set_shader_parameter("pawless_art",preload("res://modules/main_menu/assets/mouse_cartoon_pawless.png"))
 	visible = false
 
 func configure(paper: Rect2, protected_ink: Array[Rect2], menus: Array[Rect2], logical_scale: float, _tall: float) -> void:
@@ -91,7 +93,7 @@ func configure(paper: Rect2, protected_ink: Array[Rect2], menus: Array[Rect2], l
 	# A conservative silhouette radius keeps every turn on the sheet, without text obstacles.
 	var radius := 0.0
 	for point in outline: radius=maxf(radius,point.length()*base_scale*unit)
-	safe_bounds=paper_surface.grow(-(radius*1.035+4.0*unit))
+	safe_bounds=paper_surface.grow(-(radius*1.035+12.0*unit))
 	menu_rects=menus
 	obstacles.clear()
 	if not _placed:
@@ -240,6 +242,7 @@ func _update_gnaw(delta: float) -> void:
 func _update_art(delta: float) -> void:
 	_pose_age+=delta
 	var moving:=clampf(velocity.length()/(MAX_SPEED*unit),0.0,1.0)
+	sprite.material.set_shader_parameter("movement",moving)
 	gait_time+=delta*(2.2+moving*2.6)*moving
 	if _pose_age>=1.0/POSE_FPS:
 		_pose_age=fmod(_pose_age,1.0/POSE_FPS)

@@ -198,12 +198,12 @@ func interactions() -> void:
 			all_safe = all_safe and safe_mouse()
 		check(all_safe, "live mouse stays on paper while freely crossing text toward " + str(point))
 	await pointer(Vector2(650,780))
-	await frames(150)
+	await frames(70)
 	check(c.state != c.State.GNAW, "mouse waits before idle Easter egg")
 	var holes_before: int = menu.paper.holes.size()
-	await frames(70)
-	check(c.state == c.State.GNAW, "three seconds of stationary pointer starts gnaw; state=%s still=%.2f" % [c.state,c.still_time])
-	await frames(170)
+	await frames(120)
+	check(c.state == c.State.GNAW, "1.5 seconds of stationary pointer starts gnaw; state=%s still=%.2f" % [c.state,c.still_time])
+	await frames(210)
 	check(menu.paper.holes.size() > holes_before and int(menu.paper.holes.back().bites) == 4, "four bites grow a retained irregular paper tear")
 	await shot("gnaw-four-bites")
 	await pointer(Vector2(420,850))
@@ -332,7 +332,7 @@ func check_exit_note() -> void:
 	check(not menu.credits_open and not menu.credits.active and menu.companion.enabled,"Escape during note arrival safely peels and restores input")
 
 func check_paper_layers() -> void:
-	var artwork: Array=[menu.title,menu.menus,menu.flowers,menu.pencil,menu.companion,menu.paper.reveal,menu.menu_cursor.sprite]
+	var artwork: Array=[menu.title,menu.menus,menu.flowers,menu.companion,menu.paper.reveal,menu.menu_cursor.sprite,menu.vignette]
 	var visibility: Array[bool]=[]
 	for item in artwork:
 		visibility.append(item.visible)
@@ -342,9 +342,15 @@ func check_paper_layers() -> void:
 	var rendered:=root.get_texture().get_image()
 	var paper: Image=menu.paper_stack.sheets[0].texture.get_image()
 	check(menu.background.texture.resource_path.ends_with("wood_desk.png") and paper.get_pixel(0,0).a<0.1,"transparent paper stack exposes a separate wooden desk")
-	var blue:=rendered.get_pixel(200,1073)
-	var yellow:=rendered.get_pixel(1780,1072)
-	check(blue.b>blue.r+0.025 and yellow.r>yellow.b+0.12,"the original yellow sheet remains distinct from the additional pale blue sheet")
+	var visible_blue:=false
+	var visible_yellow:=false
+	# Paper tilt moves exposed corners, so inspect their regions instead of one fixed pixel.
+	for y in range(1050,1080,2):
+		for x in range(40,1890,2):
+			var pixel:=rendered.get_pixel(x,y)
+			if x<480 and pixel.b>pixel.r+0.025 and pixel.g>0.6: visible_blue=true
+			if x>900 and pixel.r>0.8 and pixel.g>0.7 and pixel.r>pixel.b+0.12: visible_yellow=true
+	check(visible_blue and visible_yellow,"the original yellow sheet remains distinct from the additional pale blue sheet")
 	check(rendered.get_pixel(80,500).r>0.90 and rendered.get_pixel(1842,750).r>0.90 and rendered.get_pixel(960,1022).r>0.90,"front paper keeps the original large on-screen coverage")
 	var front: ShaderMaterial=menu.paper_stack.sheets[3].material
 	var scale: Vector2=front.get_shader_parameter("art_scale")

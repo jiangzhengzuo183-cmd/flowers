@@ -1,4 +1,6 @@
 shader_type canvas_item;
+#include "res://modules/main_menu/mouse_tail.gdshaderinc"
+#include "res://modules/main_menu/mouse_pawless.gdshaderinc"
 uniform float movement : hint_range(0.0,1.0)=0.0;
 uniform float indentation : hint_range(0.0,1.0)=1.0;
 uniform float airborne=0.0;
@@ -11,13 +13,14 @@ float paw(vec2 at,vec2 center) {
 	return exp(-dot(d,d)*1.5);
 }
 void fragment() {
+	vec2 shadow_uv=mouse_tail_uv(UV,movement);
 	float tight=0.0;
 	float soft=0.0;
 	for(int x=-1;x<=1;x++) {
 		for(int y=-1;y<=1;y++) {
 			vec2 direction=vec2(float(x),float(y));
-			tight+=smoothstep(0.035,0.35,texture(TEXTURE,UV+direction*TEXTURE_PIXEL_SIZE*8.0).a);
-			soft+=smoothstep(0.035,0.35,texture(TEXTURE,UV+direction*TEXTURE_PIXEL_SIZE*24.0).a);
+			tight+=smoothstep(0.035,0.35,mouse_without_paws(texture(TEXTURE,shadow_uv+direction*TEXTURE_PIXEL_SIZE*8.0),shadow_uv+direction*TEXTURE_PIXEL_SIZE*8.0).a);
+			soft+=smoothstep(0.035,0.35,mouse_without_paws(texture(TEXTURE,shadow_uv+direction*TEXTURE_PIXEL_SIZE*24.0),shadow_uv+direction*TEXTURE_PIXEL_SIZE*24.0).a);
 		}
 	}
 	tight/=9.0;
