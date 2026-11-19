@@ -8,10 +8,10 @@ const Credits := preload("res://modules/main_menu/credits_panel.gd")
 const Cursor := preload("res://modules/game_hud/hand_cursor.gd")
 const Note := preload("res://modules/main_menu/note_modal.gd")
 const Type := preload("res://modules/main_menu/menu_typography.gd")
-const Decor := preload("res://modules/main_menu/menu_decor.gd")
 const Foley := preload("res://modules/main_menu/paper_foley.gd")
 const ASSETS := "res://modules/main_menu/assets/"
 @export_file("*.tscn") var game_entry := "res://modules/visual_novel/VisualNovel.tscn"
+var menu_cursor: CanvasLayer
 var metadata: Dictionary
 var background: TextureRect
 var paper_stack: Control
@@ -20,13 +20,14 @@ var title: Control
 var menus: Control
 var buttons: Array[Button] = []
 var icons: Array[Label] = []
+var pencil: Node2D
 var companion: Node2D
 var paper: Node2D
 var credits: Control
 var fade: ColorRect
 var exit_note: Control
 var exit_open := false
-var decor: Control
+var flowers: Control
 var foley: Node
 var paper_rect := Rect2()
 var ink_rects: Array[Rect2] = []
@@ -54,6 +55,8 @@ func _ready() -> void:
 	Cursor.install(window)
 	metadata = preload("res://modules/main_menu/assets/layout_handdrawn.gd").DATA
 	_build()
+	menu_cursor=preload("res://modules/main_menu/menu_cursor.gd").new()
+	add_child(menu_cursor)
 	resized.connect(_layout)
 	_layout()
 	call_deferred("_layout")
@@ -64,19 +67,17 @@ func _build() -> void:
 	extension.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(extension)
 	background = TextureRect.new()
-	background.texture = load(ASSETS + "background.png")
+	background.texture = preload("res://modules/main_menu/assets/wood_desk.png")
+	background.modulate=Color(0.64,0.45,0.29)
+	background.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	background.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var paper_ink:=ShaderMaterial.new()
-	paper_ink.shader=preload("res://modules/main_menu/paper_ink.gdshader")
-	paper_ink.set_shader_parameter("clean_paper",preload("res://modules/main_menu/assets/background_clean_v2.png"))
-	background.material=paper_ink
 	add_child(background)
 	paper_stack=preload("res://modules/main_menu/paper_stack.gd").new()
 	add_child(paper_stack)
-	decor = Decor.new()
-	add_child(decor)
+	flowers=preload("res://modules/main_menu/flower_doodles.gd").new()
+	add_child(flowers)
 	paper = Paper.new()
 	add_child(paper)
 	title = Title.new()
@@ -111,8 +112,12 @@ func _build() -> void:
 		button.focus_entered.connect(_hover.bind(i, true))
 		button.focus_exited.connect(_hover.bind(i, false))
 		button.pressed.connect(_activate.bind(i))
+	pencil=preload("res://modules/main_menu/pencil_prop.gd").new()
+	pencil.name="PencilProp"
+	add_child(pencil)
 	companion = Companion.new()
 	add_child(companion)
+	companion.pencil=pencil
 	companion.gnaw_started.connect(paper.begin_gnaw)
 	companion.gnaw_bite.connect(paper.bite)
 	companion.gnaw_stopped.connect(paper.stop_gnaw)
@@ -161,11 +166,13 @@ func _layout() -> void:
 		var protected := Rect2(center-text_ink*0.5,text_ink)
 		menu_rects.append(protected)
 		ink_rects.append(protected)
+	pencil.place(paper_rect)
 	companion.configure(paper_rect, ink_rects, menu_rects, unit, tall)
 	paper.place(paper_rect)
 	credits.place(paper_rect)
 	exit_note.place(paper_rect)
-	decor.place(paper_rect)
+	flowers.place(paper_rect)
+	_bind_tear_mask()
 	fade.size = viewport
 
 func _on_title_finished() -> void:
@@ -278,7 +285,7 @@ func _exit_tree() -> void:
 
 func _process(_delta: float) -> void:
 	if not is_instance_valid(companion) or not title_complete: return
-	var active: bool=companion.enabled
+	var active: bool=companion.enabled and companion.jump_height<1.0*companion.unit
 	var at: Vector2=companion._display_world
 	if active==_last_paw_enabled and at.distance_squared_to(_last_paw)<0.06: return
 	_last_paw=at
@@ -290,3 +297,14 @@ func _process(_delta: float) -> void:
 		var local:=item.get_global_transform().affine_inverse()*at
 		item.material.set_shader_parameter("paw_position",local)
 		item.material.set_shader_parameter("paw_strength",1.0 if active else 0.0)
+
+func _bind_tear_mask() -> void:
+	var artwork: Array=[]
+	artwork.append_array(title.letters)
+	artwork.append_array(icons)
+	artwork.append_array(flowers.blooms)
+	for item: Control in artwork:
+		item.material.set_shader_parameter("tear_mask",paper.mask_viewport.get_texture())
+		item.material.set_shader_parameter("tear_enabled",true)
+		item.material.set_shader_parameter("paper_origin",paper_rect.position)
+		item.material.set_shader_parameter("paper_size",paper_rect.size)

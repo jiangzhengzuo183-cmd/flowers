@@ -41,7 +41,6 @@ func _ready() -> void:
 	surface.content_margin_top = 34.0 if creamy else 44.0
 	surface.content_margin_bottom = 30.0 if creamy else 36.0
 	note.add_theme_stylebox_override("panel",surface)
-	note.add_child(preload("res://modules/game_hud/note_decor.gd").new())
 	content = VBoxContainer.new()
 	content.alignment = BoxContainer.ALIGNMENT_CENTER
 	content.add_theme_constant_override("separation",14 if creamy else 20)

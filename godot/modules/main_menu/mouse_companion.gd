@@ -7,7 +7,17 @@ const POSE_FPS := 10.0
 const IDLE_GNAW_SECONDS := 3.0
 const FOLLOW_DISTANCE := 132.0
 const MAX_SPEED := 420.0
-enum State { IDLE, FOLLOW, INSPECT, CLICK_REACTION, GNAW }
+enum State { IDLE, FOLLOW, INSPECT, CLICK_REACTION, GNAW, JUMP }
+const PREPARE_DURATION := 0.08
+const FLIGHT_DURATION := 0.56
+const JUMP_DURATION := PREPARE_DURATION+FLIGHT_DURATION
+const JUMP_HEIGHT := 42.0
+var pencil: Node2D
+var jump_age := JUMP_DURATION
+var jump_height := 0.0
+var jump_armed := true
+var landing_age := 0.0
+var hops := 0
 var state := State.IDLE
 var enabled := false
 var velocity := Vector2.ZERO
@@ -16,6 +26,7 @@ var last_mouse_position := Vector2.ZERO
 var motion_direction := Vector2.RIGHT
 var still_time := 0.0
 var total_time := 0.0
+var gait_time := 0.0
 var reaction_time := 0.0
 var gnaw_time := 0.0
 var bites := 0
@@ -94,12 +105,18 @@ func set_enabled(value: bool) -> void:
 	enabled = value
 	visible = value
 	velocity = Vector2.ZERO
+	jump_age = JUMP_DURATION
+	jump_height = 0.0
+	landing_age = 0.0
+	jump_armed = true
 	turn_speed = 0.0
 	still_time = 0.0
 	mouse_position = get_viewport().get_mouse_position()
 	last_mouse_position = mouse_position
 	_pose_age = 1.0
-	if not value: _stop_gnaw()
+	if not value:
+		_stop_gnaw()
+		if is_instance_valid(sprite): _update_art(0.0)
 
 func click_reaction() -> void:
 	if not enabled: return
@@ -125,7 +142,11 @@ func _process(delta: float) -> void:
 		_stop_gnaw()
 	else:
 		still_time += delta
-	if reaction_time > 0.0:
+	landing_age=maxf(0.0,landing_age-delta)
+	if jump_age<JUMP_DURATION:
+		_update_follow(delta)
+		_advance_jump(delta)
+	elif reaction_time > 0.0:
 		reaction_time = maxf(0, reaction_time - delta)
 		state = State.CLICK_REACTION
 		velocity = velocity.move_toward(Vector2.ZERO, 1000.0 * unit * delta)
@@ -133,7 +154,8 @@ func _process(delta: float) -> void:
 		_update_gnaw(delta)
 	else:
 		_update_follow(delta)
-		if still_time >= IDLE_GNAW_SECONDS and velocity.length() < 4.0 * unit and not gnaw_completed:
+		_maybe_jump()
+		if jump_age>=JUMP_DURATION and still_time >= IDLE_GNAW_SECONDS and velocity.length() < 4.0 * unit and not gnaw_completed and _gnaw_clear():
 			_start_gnaw()
 	_update_art(delta)
 
@@ -165,7 +187,38 @@ func _update_follow(delta: float) -> void:
 	if position.y!=next.y: velocity.y=0.0
 	state=State.FOLLOW if velocity.length()>8.0*unit else State.IDLE
 
+func _maybe_jump() -> void:
+	if not is_instance_valid(pencil): return
+	if not jump_armed:
+		if not pencil.contains(position,100.0*unit): jump_armed=true
+		return
+	if not pencil.would_cross(position,velocity): return
+	jump_armed=false
+	jump_age=0.0
+	jump_height=0.0
+	hops+=1
+	_stop_gnaw()
+	state=State.JUMP
+
+func _advance_jump(delta: float) -> void:
+	jump_age=minf(JUMP_DURATION,jump_age+delta)
+	var flight:=clampf((jump_age-PREPARE_DURATION)/FLIGHT_DURATION,0.0,1.0)
+	jump_height=sin(flight*PI)*JUMP_HEIGHT*unit
+	state=State.JUMP
+	if jump_age>=JUMP_DURATION:
+		jump_height=0.0
+		landing_age=0.16
+		state=State.FOLLOW if velocity.length()>8.0*unit else State.IDLE
+
+func _gnaw_clear() -> bool:
+	if jump_age<JUMP_DURATION: return false
+	if not is_instance_valid(pencil): return true
+	var nose:=_display_world+(nose_local*unit*_display_scale).rotated(_display_angle)
+	# Include the largest torn-paper rim, so a nearby bite never cuts under the prop.
+	return not pencil.blocks_gnaw(position,18.0*unit) and not pencil.blocks_gnaw(nose,56.0*unit)
+
 func _start_gnaw() -> void:
+	if not _gnaw_clear(): return
 	state = State.GNAW
 	gnaw_time = 0.0
 	bites = 0
@@ -187,6 +240,7 @@ func _update_gnaw(delta: float) -> void:
 func _update_art(delta: float) -> void:
 	_pose_age+=delta
 	var moving:=clampf(velocity.length()/(MAX_SPEED*unit),0.0,1.0)
+	gait_time+=delta*(2.2+moving*2.6)*moving
 	if _pose_age>=1.0/POSE_FPS:
 		_pose_age=fmod(_pose_age,1.0/POSE_FPS)
 		pose_frame+=1
@@ -201,17 +255,30 @@ func _update_art(delta: float) -> void:
 	if state==State.GNAW:
 		tilt=[0.0,-0.012,0.005,0.010][step]
 		bob=[0.0,-0.7,0.2,0.6][step]*unit
-	_display_world=position+Vector2(0,bob)
+	if jump_age<JUMP_DURATION:
+		var flight:=clampf((jump_age-PREPARE_DURATION)/FLIGHT_DURATION,0.0,1.0)
+		var crouch:=sin(clampf(jump_age/PREPARE_DURATION,0.0,1.0)*PI*0.5)*(1.0-smoothstep(0.0,0.18,flight))
+		var stretch:=sin(flight*PI)
+		squash*=Vector2(1.0+crouch*0.055-stretch*0.025,1.0-crouch*0.060+stretch*0.035)
+	if landing_age>0.0:
+		var settle:=sin(landing_age/0.16*PI)
+		squash*=Vector2(1.0+settle*0.050,1.0-settle*0.040)
+	_display_world=position+Vector2(0,bob-jump_height)
 	_display_angle=body_angle+tilt
 	_display_scale=squash
-	sprite.position=Vector2(0,bob)
+	sprite.position=Vector2(0,bob-jump_height)
 	sprite.rotation=_display_angle
 	sprite.scale=Vector2.ONE*base_scale*unit*squash
-	shadow.position=sprite.position+Vector2(0.4,0.55)*unit
+	shadow.position=Vector2(0,bob)+Vector2(1.3,2.1)*unit
 	shadow.rotation=sprite.rotation
-	shadow.scale=sprite.scale
+	var turn_load:=clampf(absf(turn_speed)/10.5,0.0,1.0)
+	var airborne:=jump_height/(JUMP_HEIGHT*unit)
+	shadow.scale=Vector2.ONE*base_scale*unit*Vector2(1.020+moving*0.012+turn_load*0.010+airborne*0.10,1.012+moving*0.006+airborne*0.07)
+	shadow.material.set_shader_parameter("airborne",airborne)
 	shadow.material.set_shader_parameter("movement",moving)
 	shadow.material.set_shader_parameter("indentation",1.0-moving)
+	shadow.material.set_shader_parameter("step_cycle",gait_time*TAU)
+	shadow.material.set_shader_parameter("turn_load",turn_load)
 
 func display_polygon(at: Vector2,angle: float,squash: Vector2) -> PackedVector2Array:
 	var polygon := PackedVector2Array()

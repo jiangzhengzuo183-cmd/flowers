@@ -68,7 +68,7 @@ func run() -> void:
 	for physical: Vector2i in [Vector2i(1920,1080),Vector2i(1920,1200),Vector2i(2560,1440),Vector2i(2560,1600)]:
 		root.size = physical
 		await new_menu()
-		check(Input.mouse_mode == Input.MOUSE_MODE_VISIBLE, str(physical) + " independent visible custom cursor")
+		check(Input.mouse_mode == Input.MOUSE_MODE_HIDDEN and menu.menu_cursor.sprite.texture!=null, str(physical) + " menu draws the selected custom cursor from its first frame")
 		check(root.get_node_or_null("HandDrawnCursor") != null, "reuses existing cursor singleton")
 		check(not menu.title_complete and menu.buttons[0].disabled, "menu waits for the typewriter title")
 		await frames(40)
@@ -106,11 +106,8 @@ func run() -> void:
 		await shot("menu-%dx%d" % [physical.x,physical.y])
 		check(menu.icons[0] is Label and menu.icons[0].get_theme_color("font_color")==Color("705039"), "Chinese menu uses deep brown hand lettering")
 		check(menu.icons[0].material.shader.resource_path.ends_with("hand_wobble.gdshader"), "Chinese labels have independent hand wobble")
-		check(menu.decor.tapes.size()==2 and menu.decor.get_child_count()==4, "only two tape strips and their contact shadows; no Charlie portrait")
-		var tape_left: Vector2 = menu.decor.tapes[0].polygon[0]
-		var tape_right: Vector2 = menu.decor.tapes[1].polygon[0]
-		check(tape_left.x < 250 and tape_left.y < 150 and tape_right.x > 1600 and tape_right.y > 900, "tape sits at upper-left and lower-right paper corners")
-		check(menu.paper_stack.sheets.size()==3 and menu.paper_stack.get_index()<menu.title.get_index(), "three independent paper layers sit below the title")
+		check(menu.find_children("*","Polygon2D",true,false).is_empty(),"no decorative tape strips remain on the menu")
+		check(menu.paper_stack.sheets.size()==4 and menu.paper_stack.get_index()<menu.title.get_index(), "four independent paper layers include the original yellow and extra blue sheets")
 		check(menu.get_node_or_null("PaperLighting")==null, "no sunlight patches or half-screen shade overlay")
 		if physical == Vector2i(1920,1080):
 			await check_title_motion()
@@ -141,6 +138,7 @@ func run() -> void:
 	await frames(55)
 	var novel: Control = current_scene
 	check(is_instance_valid(novel) and novel.scene_file_path == "res://modules/visual_novel/VisualNovel.tscn", "Start opens the real visual novel")
+	check(Input.mouse_mode==Input.MOUSE_MODE_VISIBLE,"leaving the menu restores the existing native story cursor")
 	check(root.content_scale_size == Vector2i(1600,900) and root.content_scale_aspect == Window.CONTENT_SCALE_ASPECT_KEEP, "story retains original 1600x900 16:9 composition")
 	var day: Control = novel.story.bakery
 	check(day.flow.queue.size() == 1 and "三十二岁" in day.flow.current_line().text, "imported DAY01 opening is the friend's merged opening, not the three-line placeholder")
@@ -199,7 +197,7 @@ func interactions() -> void:
 			await frames(1)
 			all_safe = all_safe and safe_mouse()
 		check(all_safe, "live mouse stays on paper while freely crossing text toward " + str(point))
-	await pointer(Vector2(345,840))
+	await pointer(Vector2(650,780))
 	await frames(150)
 	check(c.state != c.State.GNAW, "mouse waits before idle Easter egg")
 	var holes_before: int = menu.paper.holes.size()
@@ -334,29 +332,82 @@ func check_exit_note() -> void:
 	check(not menu.credits_open and not menu.credits.active and menu.companion.enabled,"Escape during note arrival safely peels and restores input")
 
 func check_paper_layers() -> void:
-	var all_layers: Array=[menu.background]
-	all_layers.append_array(menu.paper_stack.sheets)
-	for layer in all_layers: layer.material.set_shader_parameter("clean_paper",menu.background.texture)
-	await frames(1)
+	var artwork: Array=[menu.title,menu.menus,menu.flowers,menu.pencil,menu.companion,menu.paper.reveal,menu.menu_cursor.sprite]
+	var visibility: Array[bool]=[]
+	for item in artwork:
+		visibility.append(item.visible)
+		item.hide()
+	await frames(2)
 	RenderingServer.force_draw(false)
-	var dirty:=root.get_texture().get_image()
-	for layer in all_layers: layer.material.set_shader_parameter("clean_paper",load("res://modules/main_menu/assets/background_clean_v2.png"))
-	await frames(1)
-	RenderingServer.force_draw(false)
-	var clean:=root.get_texture().get_image()
-	var dirty_grain:=0.0
-	var clean_grain:=0.0
-	for y in range(420,560,2):
-		for x in range(1570,1740,2):
-			dirty_grain+=absf(dirty.get_pixel(x,y).get_luminance()-dirty.get_pixel(x+2,y).get_luminance())
-			clean_grain+=absf(clean.get_pixel(x,y).get_luminance()-clean.get_pixel(x+2,y).get_luminance())
-	check(clean_grain<dirty_grain*0.85,"right paper surface has visibly less dirty high-frequency grain")
-	print("PAPER_MEASUREMENTS cleaned_grain_ratio=",clean_grain/maxf(dirty_grain,0.0001))
-	var base_at: Vector2=menu.background.position
-	var regions: Array[Rect2i]=[Rect2i(16,100,45,180),Rect2i(1820,95,85,180),Rect2i(60,500,35,160)]
-	menu.background.hide()
-	for sheet in menu.paper_stack.sheets: sheet.hide()
+	var rendered:=root.get_texture().get_image()
+	var paper: Image=menu.paper_stack.sheets[0].texture.get_image()
+	check(menu.background.texture.resource_path.ends_with("wood_desk.png") and paper.get_pixel(0,0).a<0.1,"transparent paper stack exposes a separate wooden desk")
+	var blue:=rendered.get_pixel(200,1073)
+	var yellow:=rendered.get_pixel(1780,1072)
+	check(blue.b>blue.r+0.025 and yellow.r>yellow.b+0.12,"the original yellow sheet remains distinct from the additional pale blue sheet")
+	check(rendered.get_pixel(80,500).r>0.90 and rendered.get_pixel(1842,750).r>0.90 and rendered.get_pixel(960,1022).r>0.90,"front paper keeps the original large on-screen coverage")
+	var front: ShaderMaterial=menu.paper_stack.sheets[3].material
+	var scale: Vector2=front.get_shader_parameter("art_scale")
+	var offset: Vector2=front.get_shader_parameter("art_offset")
+	var corner_a: Vector2=front.get_shader_parameter("corner_a")
+	var corner_c: Vector2=front.get_shader_parameter("corner_c")
+	var center: Vector2=(corner_a+corner_c)*0.5*menu.paper_rect.size*scale+offset
+	check(center.distance_to(menu.paper_rect.size*0.5)<0.5 and is_equal_approx(scale.x,scale.y),"paper enlarges evenly around its own visual center, with original title/menu sizing")
+	var stray_blue:=0
+	var corner_blue:=0
+	for y in range(0,1080,3):
+		for x in range(0,1920,3):
+			var pixel:=rendered.get_pixel(x,y)
+			if pixel.b>pixel.r+0.025:
+				if x<480 and y>1035: corner_blue+=1
+				else: stray_blue+=1
+	check(corner_blue>50 and stray_blue<25,"extra pale blue appears only as a small lower-left paper corner (corner=%d, stray=%d)"%[corner_blue,stray_blue])
+	var complete:=true
 	for layer in 3:
+		var image: Image=menu.paper_stack.sheets[layer].texture.get_image()
+		for y in range(1,10):
+			for x in range(1,10):
+				complete=complete and image.get_pixel(int(image.get_width()*float(x)/10.0),int(image.get_height()*float(y)/10.0)).a>0.98
+	check(complete,"all lower sheets have complete opaque interiors instead of clipped paper wedges")
+	var no_gaps:=true
+	for phase in 3:
+		await frames(9)
+		RenderingServer.force_draw(false)
+		var sample:=root.get_texture().get_image()
+		for x in range(80,1840,4):
+			var reached_desk:=false
+			for y in range(1000,1080):
+				var pixel:=sample.get_pixel(x,y)
+				var desk:=pixel.r<0.70 and pixel.g<0.50 and pixel.b<0.35
+				if desk: reached_desk=true
+				elif reached_desk and pixel.r>0.80: no_gaps=false
+	check(no_gaps,"all held paper frames keep continuous overlap without desk-colored holes along the lower edge")
+	RenderingServer.force_draw(false)
+	var shaded:=root.get_texture().get_image()
+	for shade in menu.paper_stack.shadows: shade.hide()
+	RenderingServer.force_draw(false)
+	var flat:=root.get_texture().get_image()
+	var shadow_pixels:=0
+	for y in range(0,1080,2):
+		for x in range(0,1920,2):
+			var base:=flat.get_pixel(x,y)
+			if base.r<0.70 and base.g<0.50 and base.b<0.35 and base.get_luminance()-shaded.get_pixel(x,y).get_luminance()>0.008: shadow_pixels+=1
+	check(shadow_pixels>100,"paper stack casts a real visible soft shadow onto the separate warm wooden desk")
+	for shade in menu.paper_stack.shadows: shade.show()
+	var minimum:=1.0
+	var maximum:=0.0
+	for y in range(630,730):
+		for x in range(1250,1400):
+			var value:=rendered.get_pixel(x,y).get_luminance()
+			minimum=minf(minimum,value)
+			maximum=maxf(maximum,value)
+	check(minimum>0.82 and maximum-minimum>0.008,"cream paper retains a faint dot-grid instead of a blank surface")
+	var base_at: Vector2=menu.background.position
+	var regions: Array[Rect2i]=[Rect2i(30,1055,310,25),Rect2i(0,400,55,200),Rect2i(500,1040,1200,40),Rect2i(4,450,45,160)]
+	menu.background.hide()
+	for shade in menu.paper_stack.shadows: shade.hide()
+	for sheet in menu.paper_stack.sheets: sheet.hide()
+	for layer in 4:
 		menu.paper_stack.sheets[layer].show()
 		var samples: Array[Image]=[]
 		for phase in 3:
@@ -371,8 +422,10 @@ func check_paper_layers() -> void:
 		check(changed>40,"paper sheet %d has its own real held-frame edge movement"%layer)
 		menu.paper_stack.sheets[layer].hide()
 	menu.background.show()
+	for shade in menu.paper_stack.shadows: shade.show()
 	for sheet in menu.paper_stack.sheets: sheet.show()
-	check(menu.background.position==base_at and menu.paper_stack.sheets[0].material!=menu.paper_stack.sheets[1].material,"background framing stays fixed while individual sheets animate independently")
+	check(menu.background.position==base_at and menu.paper_stack.sheets[0].material!=menu.paper_stack.sheets[1].material,"desk and layout stay fixed while individual sheets animate")
+	for i in artwork.size(): artwork[i].visible=visibility[i]
 
 func check_random_tears() -> void:
 	menu.companion.set_enabled(false)
