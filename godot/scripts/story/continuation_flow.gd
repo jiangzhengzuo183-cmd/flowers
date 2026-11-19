@@ -19,6 +19,7 @@ var ink_result: Dictionary = {}
 var report_cursor := 0
 var ink_observations: Dictionary = {}
 var last_report := ""
+var videos_seen: Dictionary = {}
 
 func _init() -> void:
 	# Append the supplied chapter without rewriting the confirmed earlier parts.
@@ -57,15 +58,28 @@ func current_line() -> Dictionary:
 
 func advance() -> void:
 	if phase != "reading": return
+	var video: Dictionary = scene().get("video",{})
+	if not video.is_empty() and active_item.is_empty() and index == int(video.after_line) and not videos_seen.has(scene().id):
+		phase = "video"
+		return
 	if index+1 < queue.size():
 		index += 1
 		_remember()
 	else:
 		phase = after
+		var completed_item := active_item
 		if after == "explore" and not active_item.is_empty():
 			completed[str(scene_index)+":"+active_item] = true
 			active_item = ""
 		if after == "finish_scene": finish_scene()
+		elif phase == "explore" and active_item.is_empty() and scene().get("auto_ink",false) and not ink_observations.has(scene().id) and (not scene().has("auto_ink_after_item") or completed_item == scene().auto_ink_after_item):
+			start_item("ink")
+
+func end_video() -> void:
+	if phase != "video": return
+	videos_seen[scene().id] = true
+	phase = "reading"
+	advance()
 
 func start_item(id: String) -> bool:
 	if phase != "explore": return false

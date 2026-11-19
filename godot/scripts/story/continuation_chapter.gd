@@ -22,6 +22,9 @@ var lab_audio: AudioStreamPlayer
 var loaded_scene := -1
 var designed_page: Control
 var room_machine: TextureRect
+var lab_professor: TextureRect
+var professor_shadow: Panel
+var story_video: Node
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -45,6 +48,18 @@ func _ready() -> void:
 	detail_return.position=Vector2(1270,810)
 
 	_build_extension_cast()
+	professor_shadow = Panel.new()
+	var shadow := StyleBoxFlat.new()
+	shadow.bg_color = Color(0.14,0.11,0.07,0.16)
+	shadow.set_corner_radius_all(8)
+	professor_shadow.add_theme_stylebox_override("panel",shadow)
+	professor_shadow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage.add_child(professor_shadow)
+	professor_shadow.position = Vector2(1125,788)
+	professor_shadow.size = Vector2(110,13)
+	professor_shadow.hide()
+	lab_professor = day01_view._texture(_asset("nemur.png"),stage,Rect2(1060,360,240,510))
+	lab_professor.hide()
 	_build_end_screen()
 	utility_window = AcceptDialog.new()
 	_style_dialog(utility_window)
@@ -70,6 +85,11 @@ func _ready() -> void:
 		# Preview starts here with no fabricated earlier completion or reports.
 		for number in range(narrative.data.scenes.size()):
 			if narrative.data.scenes[number].id == "p4-maze": narrative.enter_scene(number); break
+	if "--experience-qa" in OS.get_cmdline_user_args():
+		for argument: String in OS.get_cmdline_user_args():
+			if argument.begins_with("--preview-scene="):
+				for number in range(narrative.data.scenes.size()):
+					if narrative.data.scenes[number].id == argument.trim_prefix("--preview-scene="): narrative.enter_scene(number); break
 	_refresh()
 
 func _asset(value: String) -> Texture2D:
@@ -81,7 +101,7 @@ func _build_extension_cast() -> void:
 	var cast: RefCounted = day01_view.dialogue_cast
 	for id:String in ["charlie_left","charlie_right"]:
 		cast.portraits[id].texture=_asset("charlie-casual-v1.png")
-		cast.portraits[id].flip_h=id=="charlie_left"
+		cast.portraits[id].flip_h=id=="charlie_right"
 	for id: String in ["bert","strauss","nemur"]:
 		var texture := _asset(id+".png")
 		var width := 1320.0 * texture.get_width()/texture.get_height()
@@ -185,6 +205,10 @@ func _refresh() -> void:
 	# One list of compact actions; separate ink buttons would overlap people.
 	items_box.hide()
 	item_layer.visible = exploring
+	lab_professor.visible = exploring and scene_data.id == "d2-interview"
+	professor_shadow.visible = lab_professor.visible
+	# The sprite and its existing hotspot form one clickable character.
+	if lab_professor.visible: stage.move_child(item_layer,stage.get_child_count()-1)
 	if scene_data.has("after_maze") and not narrative.maze_results.has(str(int(scene_data.maze))): item_layer.hide()
 	task.visible = exploring
 	task.text = "点击人物或物件探索；点击右下角继续。" if not scene_data.get("missing_text",false) else ""
@@ -239,6 +263,33 @@ func _refresh() -> void:
 		race.finished.connect(_race_finished)
 	if OS.has_feature("web") and "--ink-qa" in OS.get_cmdline_user_args():
 		JavaScriptBridge.get_interface("window").flowerInkQA = JSON.stringify({"scene":scene_data.id,"phase":narrative.phase,"index":narrative.index,"history":narrative.history.size(),"completed":narrative.completed,"ink_observed":narrative.ink_observed,"ink_result":narrative.ink_result})
+	if narrative.phase == "ink_observation" and not is_instance_valid(ink_game): _open_ink.call_deferred()
+	if narrative.phase == "video" and not is_instance_valid(story_video): _open_video.call_deferred()
+
+func _open_ink() -> void:
+	if narrative.phase != "ink_observation" or is_instance_valid(ink_game): return
+	stage.hide()
+	runtime.hide()
+	ink_game = NativeInk.new()
+	add_child(ink_game)
+	ink_game.completed.connect(_ink_completed)
+
+func _open_video() -> void:
+	if narrative.phase != "video" or is_instance_valid(story_video): return
+	stage.hide()
+	runtime.hide()
+	lab_audio.stop()
+	machine_audio.stop()
+	runtime.audio.pause_story(true)
+	story_video = preload("res://scripts/story/story_video.gd").new()
+	add_child(story_video)
+	story_video.completed.connect(func() -> void:
+		runtime.audio.pause_story(false)
+		stage.show()
+		runtime.show()
+		narrative.end_video()
+		_refresh())
+	story_video.play(narrative.scene().video,runtime.audio.options)
 
 func _rebuild_items() -> void:
 	for child: Node in items_box.get_children():
@@ -254,6 +305,8 @@ func _rebuild_items() -> void:
 		button.set_meta("id",item.id)
 		items_box.add_child(button)
 		var r: Array = item.get("rect",[])
+		# Ink is an explicit action, even if its data contains a card rectangle.
+		if item.id == "ink": r=[]
 		if item.id=="television" and narrative.scene().bg in ["home","home-night"]:r=[1225,250,300,285]
 		if narrative.scene().bg == "hospital":
 			r = {"cake":[905,475,110,85],"magazine":[1065,505,165,85]}.get(item.id,r)
@@ -261,12 +314,12 @@ func _rebuild_items() -> void:
 			# No embedded person/object exists at this point: use an honest compact
 			# action rather than a hit area on unrelated background furniture.
 			var action := _button(item.label+" · "+("交谈" if item.get("kind","")=="person" else "查看"),start_object.bind(item.id))
+			if item.id == "ink": action.text = "罗夏测试 · 观察墨迹卡片"
 			action.custom_minimum_size=Vector2(220,40)
 			item_layer.add_child(action)
 			action.position=Vector2(64,190+(items_box.get_child_count()-1)*52)
 			action.add_theme_font_size_override("font_size",17)
 			for visual: String in ["normal","hover","pressed","focus"]: action.add_theme_stylebox_override(visual,StyleBoxEmpty.new())
-		if item.id == "ink": r=[]
 		if not r.is_empty():
 			var hot := Hotspot.new()
 			hot.configure(PackedVector2Array([Vector2(r[0],r[1]),Vector2(r[0]+r[2],r[1]),Vector2(r[0]+r[2],r[1]+r[3]),Vector2(r[0],r[1]+r[3])]),item.label+" · 查看")
@@ -296,12 +349,6 @@ func start_object(id: String) -> void:
 	if runtime.busy: return
 	if day01_view.has_modal() or not narrative.start_item(id): return
 	_refresh()
-	if narrative.phase == "ink_observation":
-		stage.hide()
-		runtime.hide()
-		ink_game = NativeInk.new()
-		add_child(ink_game)
-		ink_game.completed.connect(_ink_completed)
 	if narrative.phase in ["note","volume","words"]: _show_utility()
 	if narrative.phase == "archive":
 		runtime.reports()

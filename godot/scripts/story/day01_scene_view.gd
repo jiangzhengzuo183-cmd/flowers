@@ -1,5 +1,6 @@
 extends RefCounted
 ## 夜校、课堂演出、回家与章节结尾；同样使用1600×900设计坐标。
+const Layout := preload("res://scripts/story/ui_layout.gd")
 const Hotspot := preload("res://scripts/story/scene_hotspot.gd")
 const EXPLORE := preload("res://assets/experience/bakery-explore.png")
 const Hot := preload("res://scripts/story/scene_hotspot.gd")
@@ -186,7 +187,7 @@ func _build_end() -> void:
 
 func _apply_ui_assets() -> void:
 	var surface := StyleBoxFlat.new()
-	surface.bg_color = Color("fff5e8")
+	surface.bg_color = Color("fff6e8")
 	surface.border_color = Color("bea17a")
 	surface.set_border_width_all(1)
 	surface.set_corner_radius_all(20)
@@ -232,48 +233,50 @@ func _apply_ui_assets() -> void:
 	paper_inner.offset_right = -9
 	paper_inner.offset_top = 9
 	paper_inner.offset_bottom = -9
-	host.dialogue_text.add_theme_font_size_override("font_size", 23)
+	host.dialogue_text.add_theme_font_size_override("font_size", Layout.BODY_SIZE)
 	var content := host.dialogue_text.get_parent().get_parent() as MarginContainer
-	content.add_theme_constant_override("margin_left", 72)
-	content.add_theme_constant_override("margin_right", 42)
-	content.add_theme_constant_override("margin_top", 52)
-	content.add_theme_constant_override("margin_bottom", 18)
+	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	host.dialogue_text.reparent(host.dialogue_panel)
+	host.dialogue_text.add_theme_constant_override("line_spacing",5)
+	host.next_button.reparent(host.dialogue_panel)
 	name_tag = PanelContainer.new()
 	var tag_style := StyleBoxFlat.new()
 	tag_style.bg_color = Color("f5d583")
 	tag_style.border_color = Color("b59a6e")
 	tag_style.set_border_width_all(1)
 	tag_style.set_corner_radius_all(3)
-	tag_style.content_margin_left = 38
+	tag_style.content_margin_left = 16
 	tag_style.content_margin_right = 24
-	tag_style.content_margin_top = 10
-	tag_style.content_margin_bottom = 12
+	tag_style.content_margin_top = 8
+	tag_style.content_margin_bottom = 8
 	tag_style.shadow_color = Color(0.18,0.13,0.07,0.18)
 	tag_style.shadow_size = 3
 	tag_style.shadow_offset = Vector2(1,3)
 	name_tag.add_theme_stylebox_override("panel",tag_style)
 	name_tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	host.dialogue_panel.add_child(name_tag)
-	name_tag.position = Vector2(100,-34)
-	name_tag.rotation = deg_to_rad(-2.0)
+	name_tag.position = Vector2(32,-26)
+	name_tag.rotation = 0.0
 	name_tag.z_index = 1
 	name_tag.clip_contents = false
 	host.speaker.reparent(name_tag)
-	host.speaker.add_theme_font_size_override("font_size",24)
+	host.speaker.add_theme_font_size_override("font_size",20)
 	# 长尾夹跨住纸签左缘和纸张上沿，与纸签共用对话框坐标，不参与容器排版。
 	host.dialogue_panel.clip_contents = false
 	# PNG 已自带倾斜角度，整张等比缩小，保留透明留白，不再叠加旋转。
 	var clip_texture: Texture2D = preload("res://assets/bakery/ui-binder-clip.png")
 	var clip_size := Vector2(96,96.0 * clip_texture.get_height() / clip_texture.get_width())
-	var clip := _texture(clip_texture,host.dialogue_panel,Rect2(Vector2(70,-42),clip_size))
+	# The visible jaw sits below y=0; the handle remains outside the paper.
+	# Keep clear of the name tag (x=100) and the text inset (x=72).
+	var clip := _texture(clip_texture,host.dialogue_panel,Rect2(Vector2(-36,-49),clip_size))
 	clip.z_index = 2
 	clip.set_meta("paperclip",true)
 	host.progress.reparent(host.dialogue_panel)
 	host.progress.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	host.progress.add_theme_font_size_override("font_size",18)
+	host.progress.add_theme_font_size_override("font_size",13)
 	host.continue_button.reparent(host.stage)
-	host.continue_button.position = Vector2(1260,812)
-	host.continue_button.size = Vector2(276,58)
+	host.continue_button.position = Vector2(1270,808)
+	host.continue_button.size = Vector2(276,40)
 
 func _skin_next() -> void:
 	for state: String in ["normal", "hover", "pressed", "disabled"]:
@@ -302,18 +305,15 @@ func _skin_next() -> void:
 	host.next_button.add_theme_stylebox_override("focus",focus)
 
 func _layout_reference_dialogue() -> void:
-	# 纸张底边固定；长台词向上扩展，姓名和页码独立于正文排版。
-	var font: Font = host.dialogue_text.get_theme_font("font")
-	var rows := 0
-	for line: String in host.dialogue_text.text.split("\n"):
-		rows += maxi(1, ceili(font.get_string_size(line,HORIZONTAL_ALIGNMENT_LEFT,-1,23).x / 1358.0))
-	var height := 196.0 + maxi(0,rows-1) * 34.0
-	host.dialogue_panel.size = Vector2(1472,height)
-	host.dialogue_panel.position = Vector2(64,876-height)
+	host.dialogue_panel.size = Layout.DIALOGUE.size
+	host.dialogue_panel.position = Layout.DIALOGUE.position
+	host.dialogue_text.position = Vector2(Layout.SAFE,44)
+	host.dialogue_text.size = Vector2(Layout.BODY_WIDTH,112)
 	name_tag.reset_size()
-	name_tag.position = Vector2(100,-34)
-	host.progress.position = Vector2(1360,18)
-	host.progress.size = Vector2(72,28)
+	name_tag.custom_minimum_size = Vector2(150,48)
+	name_tag.position = Vector2(32,-26)
+	host.progress.position = Vector2(Layout.DIALOGUE.size.x-155,12)
+	host.progress.size = Vector2(125,24)
 	var decorated: bool = host.paper.visible
 	for item: CanvasItem in [paper_back,paper_grain,paper_inner,name_tag]:
 		item.visible = decorated
@@ -393,7 +393,12 @@ func _hide_hint(immediate: bool = false) -> void:
 func _position_hint() -> void:
 	var actor_rect := hover_target.get_global_rect()
 	var desired: Vector2 = actor_rect.position - host.stage.global_position + Vector2(actor_rect.size.x * 0.55 + 10,-hover_panel.size.y-12)
-	hover_panel.position = Vector2(clampf(desired.x,16,host.stage.size.x-hover_panel.size.x-16),clampf(desired.y,16,host.stage.size.y-hover_panel.size.y-16))
+	hover_panel.position = Vector2(clampf(desired.x,Layout.SAFE,host.stage.size.x-hover_panel.size.x-Layout.SAFE),clampf(desired.y,Layout.SAFE,host.stage.size.y-hover_panel.size.y-Layout.SAFE))
+	if is_instance_valid(host.runtime) and host.runtime.task_panel.visible:
+		var task_rect := Rect2(host.runtime.task_panel.position,host.runtime.task_panel.size*host.runtime.task_panel.scale)
+		if task_rect.intersects(hover_panel.get_rect()): hover_panel.position.y = task_rect.end.y+12
+	if host.dialogue_panel.visible and host.dialogue_panel.get_rect().intersects(hover_panel.get_rect()):
+		hover_panel.position.y = host.dialogue_panel.position.y-hover_panel.size.y-20
 
 func _sync_hover() -> void:
 	if hover_target == null: return

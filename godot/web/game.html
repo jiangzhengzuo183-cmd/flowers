@@ -44,6 +44,7 @@
   </div>
   <noscript>请启用 JavaScript 后重新打开游戏。</noscript>
   <script src="$GODOT_URL"></script>
+  <script src="story-video.js"></script>
   <script>
     const GODOT_CONFIG = $GODOT_CONFIG;
     (function () {
@@ -79,6 +80,8 @@
       if(new URL(location.href).searchParams.get('qa') === 'experience'){
         if(!args.length) args.push('--');
         args.push('--experience-qa');
+        const scene = new URL(location.href).searchParams.get('scene');
+        if (scene && /^[a-z0-9-]+$/.test(scene)) args.push('--preview-scene=' + scene);
       }
       engine.startGame({
         args,

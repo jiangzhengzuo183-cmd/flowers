@@ -18,6 +18,8 @@ var finish_button: Button
 var moving := false
 var tween: Tween
 var done := false
+var hovered := -1
+var hover_tweens: Dictionary = {}
 var settings: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/experience.json"))
 
 func texture(image: Texture2D, parent: Control, rect: Rect2) -> TextureRect:
@@ -90,6 +92,7 @@ func _fit() -> void:
 
 func select_card(i: int) -> void:
 	if moving or selected>=0 or done: return
+	_stop_hover(i)
 	selected = i
 	zoom = 1
 	if ids[i] not in viewed: viewed.append(ids[i])
@@ -153,6 +156,32 @@ func _input(event: InputEvent) -> void:
 
 func _process(dt: float) -> void:
 	if selected>=0 and not moving: field.step(dt)
+	elif selected < 0 and not moving and not done: _set_hover(_card_at_mouse())
+
+func _card_at_mouse() -> int:
+	# Use the resting, rotated footprint so the lift cannot cause hover flicker.
+	var pointer := frame.get_local_mouse_position()
+	for i in range(cards.size()-1,-1,-1):
+		var local := (pointer-homes[i].get_center()).rotated(-deg_to_rad(angles[i]))+homes[i].size/2
+		if Rect2(Vector2.ZERO,homes[i].size).has_point(local): return i
+	return -1
+
+func _set_hover(index: int) -> void:
+	if index == hovered: return
+	hovered = index
+	for i in range(cards.size()):
+		if hover_tweens.has(i): hover_tweens[i].kill()
+		var target := homes[i].position-Vector2(0,8) if i == index else homes[i].position
+		var motion := create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		motion.tween_property(cards[i],"position",target,0.18)
+		hover_tweens[i] = motion
+
+func _stop_hover(keep := -1) -> void:
+	for motion: Tween in hover_tweens.values(): motion.kill()
+	hover_tweens.clear()
+	hovered = -1
+	for i in range(cards.size()):
+		if i != keep: cards[i].position = homes[i].position
 
 func finish() -> void:
 	if selected>=0 or moving or done: return
@@ -162,5 +191,6 @@ func finish() -> void:
 
 func _exit_tree() -> void:
 	if tween: tween.kill()
+	for motion: Tween in hover_tweens.values(): motion.kill()
 	for ink: TextureRect in inks: ink.material = null
 	field = null

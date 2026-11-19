@@ -1,4 +1,5 @@
 extends RefCounted
+const Layout := preload("res://scripts/story/ui_layout.gd")
 ## 固定双人构图。台词切换只改变亮度，只有参与者变化才出入场。
 var host: Control
 var layer: Control
@@ -80,6 +81,14 @@ func refresh() -> void:
 	refresh_for(_participants(),host.flow.current_line().speaker)
 
 func refresh_for(desired: Array[String], speaker: String) -> void:
+	# A single Charlie is a monologue: center on the 1600px design canvas.
+	# Restore the original pair positions before the next conversation.
+	for id: String in desired:
+		var actor: TextureRect = portraits[id]
+		var center := Layout.CENTER_ACTOR if desired.size() == 1 else (Layout.LEFT_ACTOR if desired.find(id) == 0 else Layout.RIGHT_ACTOR)
+		actor.size = Vector2(1200.0*actor.texture.get_width()/actor.texture.get_height(),1200)
+		actor.position.x = center - actor.size.x / 2.0
+		actor.position.y = 140
 	# Hard cap includes outgoing portraits: a cross-fade must not briefly show 3–4 people.
 	if desired.size()>2:desired=desired.slice(0,2)
 	for id:String in portraits:
@@ -118,7 +127,7 @@ func refresh_for(desired: Array[String], speaker: String) -> void:
 	_hide_legacy()
 	for id: String in desired:
 		var speaking: bool = speaker.begins_with("查理") if id.begins_with("charlie") else speaker == speaker_names.get(id,"")
-		var tint := Color.WHITE if speaking or speaker == "旁白" else Color(0.54,0.58,0.60,1)
+		var tint := Color.WHITE if speaking or speaker == "旁白" else Color(0.80,0.82,0.81,1)
 		if targets.get(id) != tint:
 			targets[id] = tint
 			if lights.has(id): lights[id].kill()

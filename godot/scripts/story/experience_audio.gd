@@ -12,6 +12,7 @@ var footsteps: AudioStreamPlayer
 var step_timer := 0.0
 var step_age := -1.0
 var last_action := ""
+var story_paused := false
 var tuning: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/experience.json"))
 
 func _ready() -> void:
@@ -72,6 +73,12 @@ func choose(id:String) -> void:
 	if old>=0:
 		fade.tween_property(players[old],"volume_db",-80,float(tuning.music_fade_seconds))
 		fade.chain().tween_callback(players[old].stop)
+	for player: AudioStreamPlayer in players: player.stream_paused = story_paused
+
+func pause_story(value: bool) -> void:
+	story_paused = value
+	for player: AudioStreamPlayer in players: player.stream_paused = value
+	if is_instance_valid(footsteps): footsteps.stream_paused = value
 
 func effect(file:String,db:float=-10) -> void:
 	if DisplayServer.get_name()=="headless": return
