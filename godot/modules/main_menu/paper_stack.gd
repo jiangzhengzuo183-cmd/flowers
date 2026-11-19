@@ -12,8 +12,8 @@ func _ready() -> void:
 	atlas.atlas=SINGLE
 	atlas.region=Rect2(36,20,1600,900)
 	atlas.filter_clip=true
-	var scales: Array[float]=[0.90,1.005,0.985,1.075]
-	var centers: Array[Vector2]=[Vector2(945,550),Vector2(953,532),Vector2(983,548),Vector2(960,540)]
+	var scales: Array[float]=[0.90,1.0013,0.985,1.075]
+	var centers: Array[Vector2]=[Vector2(945,550),Vector2(953,534),Vector2(983,548),Vector2(960,540)]
 	var angles: Array[float]=[-4.0,-0.4,0.55,0.0]
 	for i in 4:
 		var ink:=ShaderMaterial.new()
