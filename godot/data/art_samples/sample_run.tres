@@ -1,0 +1,7 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/maze_runs/maze_run_config.gd" id="1_config"]
+[resource]
+script = ExtResource("1_config")
+run_id = "maze01_art_sample"
+display_name = "美术样板"
+show_debug_tools = false

@@ -1,0 +1,78 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://art/environments/sky_memories/distant_city.gd" id="1"]
+
+[node name="DistantCity" type="Node3D"]
+script = ExtResource("1")
+
+[node name="NearDistricts" type="Node3D" parent="."]
+
+[node name="WestBelfries" type="Marker3D" parent="NearDistricts"]
+position = Vector3(-99,0,-36)
+rotation_degrees = Vector3(0,68,0)
+
+[node name="SouthArcade" type="Marker3D" parent="NearDistricts"]
+position = Vector3(-22,0,112)
+rotation_degrees = Vector3(0,-168,0)
+
+[node name="EastSpire" type="Marker3D" parent="NearDistricts"]
+position = Vector3(109,0,15)
+rotation_degrees = Vector3(0,-101,0)
+
+[node name="NorthTerraces" type="Marker3D" parent="NearDistricts"]
+position = Vector3(45,0,-104)
+rotation_degrees = Vector3(0,-27,0)
+
+[node name="WestWatergate" type="Marker3D" parent="NearDistricts"]
+position = Vector3(-109,-3,26)
+rotation_degrees = Vector3(0,103,0)
+
+[node name="NorthwestLibrary" type="Marker3D" parent="NearDistricts"]
+position = Vector3(-67,-0.4,-83)
+rotation_degrees = Vector3(0,39,0)
+
+[node name="NortheastHalls" type="Marker3D" parent="NearDistricts"]
+position = Vector3(101,-1,-54)
+rotation_degrees = Vector3(0,-62,0)
+
+[node name="SoutheastCourt" type="Marker3D" parent="NearDistricts"]
+position = Vector3(67,-1,86)
+rotation_degrees = Vector3(0,-142,0)
+
+[node name="FarDistricts" type="Node3D" parent="."]
+
+[node name="WestHangingTowers" type="Marker3D" parent="FarDistricts"]
+position = Vector3(-139,1,-68)
+rotation_degrees = Vector3(0,55,0)
+
+[node name="SouthWestStair" type="Marker3D" parent="FarDistricts"]
+position = Vector3(-88,-2,116)
+rotation_degrees = Vector3(0,141,0)
+
+[node name="SouthEastCloister" type="Marker3D" parent="FarDistricts"]
+position = Vector3(97,0,112)
+rotation_degrees = Vector3(0,-141,0)
+
+[node name="NorthEastSteeples" type="Marker3D" parent="FarDistricts"]
+position = Vector3(122,1,-89)
+rotation_degrees = Vector3(0,-55,0)
+
+[node name="NorthWestArcade" type="Marker3D" parent="FarDistricts"]
+position = Vector3(-40,-2,-147)
+rotation_degrees = Vector3(0,14,0)
+
+[node name="WestLowerCity" type="Marker3D" parent="FarDistricts"]
+position = Vector3(-146,-5,48)
+rotation_degrees = Vector3(0,108,0)
+
+[node name="NorthBelltowers" type="Marker3D" parent="FarDistricts"]
+position = Vector3(53,-0.2,-144)
+rotation_degrees = Vector3(0,-21,0)
+
+[node name="EastOldMarket" type="Marker3D" parent="FarDistricts"]
+position = Vector3(153,-2,25)
+rotation_degrees = Vector3(0,-99,0)
+
+[node name="SouthLongCloister" type="Marker3D" parent="FarDistricts"]
+position = Vector3(27,-1.3,150)
+rotation_degrees = Vector3(0,-172,0)

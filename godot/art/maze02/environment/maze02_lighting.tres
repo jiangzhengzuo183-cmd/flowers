@@ -1,0 +1,422 @@
+[gd_resource type="Resource" format=3]
+
+[ext_resource type="Environment" path="res://art/maze02/environment/maze02_environment.tres" id="1_kk03n"]
+[ext_resource type="Script" path="res://art/maze02/environment/maze02_lighting.gd" id="2_8kusx"]
+[ext_resource type="Shader" path="res://art/maze02/environment/cloud_sea.gdshader" id="3_eyylv"]
+[ext_resource type="Shader" path="res://art/maze02/environment/sky_memories/distant_city.gdshader" id="4_15d0g"]
+[ext_resource type="Shader" path="res://art/maze02/environment/sky_memories/star_glow.gdshader" id="5_xqqy4"]
+[ext_resource type="Shader" path="res://art/maze02/environment/sky_memories/moon_disk.gdshader" id="6_4bd8x"]
+[ext_resource type="Shader" path="res://art/maze02/environment/meteor_trace.gdshader" id="7_miquk"]
+[ext_resource type="Shader" path="res://art/maze02/environment/path_breeze.gdshader" id="8_qvp1x"]
+
+[resource]
+script = ExtResource("2_8kusx")
+node_overrides = {
+NodePath("DreamAtmosphere/SouthEastWalkFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.16,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/PlazaWestFireflies"): {
+"bounce_energy": 0.54,
+"bounce_range": 2.58
+},
+NodePath("DreamAtmosphere/PlazaWestFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.58,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/PlazaEastFireflies"): {
+"bounce_energy": 0.58,
+"bounce_range": 2.58
+},
+NodePath("DreamAtmosphere/PlazaEastFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.58,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/WestMistFireflies"): {
+"bounce_energy": 0.24,
+"bounce_range": 2.16
+},
+NodePath("DreamAtmosphere/WestMistFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.16,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/RaisedEastMistFireflies"): {
+"bounce_energy": 0.23,
+"bounce_range": 2.22
+},
+NodePath("DreamAtmosphere/RaisedEastMistFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.22,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/EntryMistFireflies"): {
+"bounce_energy": 0.24,
+"bounce_range": 2.13
+},
+NodePath("DreamAtmosphere/EntryMistFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.13,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/NorthwestTrailFireflies"): {
+"bounce_energy": 0.23,
+"bounce_range": 2.15
+},
+NodePath("DreamAtmosphere/NorthwestTrailFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.15,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/NorthTrailFireflies"): {
+"bounce_energy": 0.23,
+"bounce_range": 2.15
+},
+NodePath("DreamAtmosphere/NorthTrailFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.15,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/NorthCourtTrailFireflies"): {
+"bounce_energy": 0.23,
+"bounce_range": 2.15
+},
+NodePath("DreamAtmosphere/EastTurnsTrailFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.15,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/EastTurnsTrailFireflies"): {
+"bounce_energy": 0.23,
+"bounce_range": 2.15
+},
+NodePath("DreamAtmosphere/SoutheastTrailFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.15,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/SoutheastTrailFireflies"): {
+"bounce_energy": 0.23,
+"bounce_range": 2.15
+},
+NodePath("DreamAtmosphere/SouthTurnsTrailFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.15,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/SouthTurnsTrailFireflies"): {
+"bounce_energy": 0.23,
+"bounce_range": 2.15
+},
+NodePath("DreamAtmosphere/SouthCourtTrailFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.15,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/SouthCourtTrailFireflies"): {
+"bounce_energy": 0.23,
+"bounce_range": 2.15
+},
+NodePath("DreamAtmosphere/SouthwestTrailFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.15,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/SouthwestTrailFireflies"): {
+"bounce_energy": 0.23,
+"bounce_range": 2.15
+},
+NodePath("DreamAtmosphere/WestTurnsTrailFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.15,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/WestTurnsTrailFireflies"): {
+"bounce_energy": 0.23,
+"bounce_range": 2.15
+},
+NodePath("DreamAtmosphere/LowerNichesTrailFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.15,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/LowerNichesTrailFireflies"): {
+"bounce_energy": 0.23,
+"bounce_range": 2.15
+},
+NodePath("DreamAtmosphere/NortheastTrailFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.15,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/NortheastTrailFireflies"): {
+"bounce_energy": 0.23,
+"bounce_range": 2.15
+},
+NodePath("DreamAtmosphere/NorthCourtTrailFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.15,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/EastTerraceFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 1.85,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/EastTerraceFireflies"): {
+"bounce_energy": 0.19,
+"bounce_range": 1.85
+},
+NodePath("DreamAtmosphere/PoolFirefliesSouth/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 1.85,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/PoolFirefliesSouth"): {
+"bounce_energy": 0.19,
+"bounce_range": 1.85
+},
+NodePath("DreamAtmosphere/PoolFirefliesWest/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 1.85,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/PoolFirefliesWest"): {
+"bounce_energy": 0.19,
+"bounce_range": 1.85
+},
+NodePath("DreamAtmosphere/PoolBottomLight"): {
+"light_color": Color(1, 0.8352941, 0.54509807, 1),
+"light_energy": 0.16,
+"light_specular": 0.025,
+"omni_range": 1.25,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.66, -0.4057, 11.1)
+},
+NodePath("DreamAtmosphere/TerraceTurnWarmPool"): {
+"light_color": Color(1, 0.8352941, 0.54509807, 1),
+"light_energy": 0.44,
+"light_specular": 0.16,
+"omni_range": 2.56,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.78, 2.11, 30.52)
+},
+NodePath("DreamAtmosphere/UnderpassWarmPool"): {
+"light_color": Color(1, 0.8352941, 0.54509807, 1),
+"light_energy": 0.56,
+"light_specular": 0.16,
+"omni_range": 2.48,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.01, 1.28, 15.6)
+},
+NodePath("GeneratedMaze/EarthBearer/WarmSculptureLight"): {
+"light_color": Color(1, 0.91, 0.79, 1),
+"light_energy": 0.72,
+"light_specular": 0.12,
+"spot_angle": 34.0,
+"spot_angle_attenuation": 1.7,
+"spot_attenuation": 1.25,
+"spot_range": 5.2,
+"transform": Transform3D(-0.8535508, -0.36322975, 0.37351733, 0, 0.7169106, 0.69716513, -0.5210096, 0.59506583, -0.6119196, 1.1, 3.65, -1.8)
+},
+NodePath("GeneratedMaze/LevelArchitecture/G1/EntryArchWarmPool"): {
+"light_color": Color(1, 0.8352941, 0.54509807, 1),
+"light_energy": 0.56,
+"light_specular": 0.16,
+"omni_range": 2.95,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.55, 0.04)
+},
+NodePath("GeneratedMaze/LevelArchitecture/CentralRoundHall/SouthArchWarmPool"): {
+"light_color": Color(1, 0.8352941, 0.54509807, 1),
+"light_energy": 0.67,
+"light_specular": 0.16,
+"omni_range": 3.2,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.2, 2.12, 25.94)
+},
+NodePath("GeneratedMaze/LevelArchitecture/CentralRoundHall/WestWindowSkylight"): {
+"light_color": Color(0.7607843, 0.84705883, 1, 1),
+"light_energy": 0.31,
+"spot_angle": 29.0,
+"spot_angle_attenuation": 1.3,
+"spot_range": 4.4,
+"transform": Transform3D(0.23464055, 0.7540318, -0.61349803, 0, 0.63111746, 0.7756873, 0.9720822, -0.18200769, 0.14808576, 21.06, 2.2, 23.6)
+},
+NodePath("GeneratedMaze/LevelArchitecture/CentralRoundHall/Roof/FloorBounce"): {
+"light_color": Color(1, 0.8862745, 0.7647059, 1),
+"light_energy": 0.21,
+"light_specular": 0.02,
+"omni_range": 3.75,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0.49, 22.8)
+},
+NodePath("GeneratedMaze/LevelArchitecture/CentralRoundHall/Roof/ChandelierFloorLight"): {
+"light_color": Color(1, 0.85490197, 0.6784314, 1),
+"light_energy": 1.69,
+"light_specular": 0.18,
+"spot_angle": 38.0,
+"spot_angle_attenuation": 1.22,
+"spot_attenuation": 1.08,
+"spot_range": 7.1,
+"transform": Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 24, 3.7999997, 22.8)
+},
+NodePath("GeneratedMaze/LevelArchitecture/CentralRoundHall/Roof/CrystalChandelier/WarmRoomLight"): {
+"light_color": Color(1, 0.8745098, 0.69411767, 1),
+"light_energy": 0.689,
+"omni_attenuation": 1.3,
+"omni_range": 3.5,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.86, 0),
+"visible": false
+},
+NodePath("GeneratedMaze/LevelArchitecture/CentralRoundHall/Roof/CrystalChandelier"): {
+"brightness": 1.06,
+"halo_strength": 0.22,
+"illuminate_surroundings": false,
+"light_color": Color(1, 0.8745098, 0.69411767, 1),
+"light_range": 3.5,
+"lit": true
+},
+NodePath("DreamAtmosphere/SouthEastWalkFireflies"): {
+"bounce_energy": 0.24,
+"bounce_range": 2.16
+},
+NodePath("DreamAtmosphere/EasternArchFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 1.85,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/EasternArchFireflies"): {
+"bounce_energy": 0.08,
+"bounce_range": 1.85
+},
+NodePath("DreamAtmosphere/NorthwestWalkFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.13,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/NorthwestWalkFireflies"): {
+"bounce_energy": 0.21,
+"bounce_range": 2.13
+},
+NodePath("DreamAtmosphere/SouthGateFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 1.85,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/SouthGateFireflies"): {
+"bounce_energy": 0.15,
+"bounce_range": 1.85
+},
+NodePath("DreamAtmosphere/ChapelTerraceFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.14,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/ChapelTerraceFireflies"): {
+"bounce_energy": 0.22,
+"bounce_range": 2.14
+},
+NodePath("DreamAtmosphere/WestGardenTurnFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.12,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/WestGardenTurnFireflies"): {
+"bounce_energy": 0.2,
+"bounce_range": 2.12
+},
+NodePath("DreamAtmosphere/ExitFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.1,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/ExitFireflies"): {
+"bounce_energy": 0.21,
+"bounce_range": 2.1
+},
+NodePath("DreamAtmosphere/NorthBridgeFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.19,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/NorthBridgeFireflies"): {
+"bounce_energy": 0.22,
+"bounce_range": 2.19
+},
+NodePath("DreamAtmosphere/SouthWalkFireflies/SoftAmberBounce"): {
+"light_color": Color(1, 0.80784315, 0.5019608, 1),
+"light_specular": 0.22,
+"omni_attenuation": 1.15,
+"omni_range": 2.28,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+},
+NodePath("DreamAtmosphere/SouthWalkFireflies"): {
+"bounce_energy": 0.23,
+"bounce_range": 2.28
+}
+}
+shader_overrides = {
+"res://art/environments/cloud_sea.gdshader": ExtResource("3_eyylv"),
+"res://art/environments/meteor_trace.gdshader": ExtResource("7_miquk"),
+"res://art/environments/sky_memories/distant_city.gdshader": ExtResource("4_15d0g"),
+"res://art/environments/sky_memories/moon_disk.gdshader": ExtResource("6_4bd8x"),
+"res://art/environments/sky_memories/star_glow.gdshader": ExtResource("5_xqqy4"),
+"res://art/maze01/path_breeze.gdshader": ExtResource("8_qvp1x")
+}
+environment = ExtResource("1_kk03n")
+sun_color = Color(1, 0.975, 0.925, 1)
+sun_energy = 0.22
+sun_rotation = Vector3(-42, -38, 0)
+shadow_opacity = 0.44

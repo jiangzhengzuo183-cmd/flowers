@@ -1,0 +1,123 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="PackedScene" path="res://art/maze02/memory_ghost/memory_ghost.tscn" id="1_ghost"]
+
+[sub_resource type="Gradient" id="Feather"]
+offsets = PackedFloat32Array(0, 0.36, 1)
+colors = PackedColorArray(0.76, 0.95, 1, 1, 0.37, 0.76, 1, 0.75, 0.18, 0.52, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="FeatherTexture"]
+gradient = SubResource("Feather")
+width = 32
+height = 32
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="MoteMaterial"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_texture = SubResource("FeatherTexture")
+billboard_mode = 1
+disable_receive_shadows = true
+
+[sub_resource type="QuadMesh" id="MoteQuad"]
+material = SubResource("MoteMaterial")
+size = Vector2(0.058, 0.058)
+
+[sub_resource type="Gradient" id="MoteLife"]
+offsets = PackedFloat32Array(0, 0.22, 0.67, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0.85, 1, 1, 1, 0.58, 1, 1, 1, 0)
+
+[node name="Maze02MemoryEchoes" type="Node3D"]
+
+[node name="ChapelEcho" type="Marker3D" parent="."]
+position = Vector3(22.72, 0.044, 22.05)
+
+[node name="Figure" parent="ChapelEcho" instance=ExtResource("1_ghost")]
+rotation_degrees = Vector3(0, 164, 0)
+scale = Vector3(0.0114, 0.0146, 0.0114)
+opacity = 0.64
+float_height_ratio = 0.010
+float_period = 4.4
+
+[node name="BlueMotes" type="CPUParticles3D" parent="ChapelEcho"]
+position = Vector3(0, 0.70, 0)
+cast_shadow = 0
+amount = 16
+lifetime = 3.8
+preprocess = 3.8
+randomness = 0.48
+local_coords = true
+mesh = SubResource("MoteQuad")
+emission_shape = 3
+emission_box_extents = Vector3(0.36, 0.47, 0.28)
+direction = Vector3(0.16, 1, 0.12)
+spread = 30.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 0.04
+initial_velocity_max = 0.15
+scale_amount_min = 0.55
+scale_amount_max = 1.34
+color_ramp = SubResource("MoteLife")
+
+[node name="BridgeEcho" type="Marker3D" parent="."]
+position = Vector3(40.04, 2.645, 18.02)
+
+[node name="Figure" parent="BridgeEcho" instance=ExtResource("1_ghost")]
+rotation_degrees = Vector3(0, -78, 0)
+scale = Vector3(0.0107, 0.0136, 0.0107)
+opacity = 0.54
+float_height_ratio = 0.013
+float_period = 5.3
+
+[node name="BlueMotes" type="CPUParticles3D" parent="BridgeEcho"]
+position = Vector3(-0.08, 0.65, 0)
+cast_shadow = 0
+amount = 10
+lifetime = 3.4
+preprocess = 3.4
+randomness = 0.56
+local_coords = true
+mesh = SubResource("MoteQuad")
+emission_shape = 3
+emission_box_extents = Vector3(0.22, 0.42, 0.33)
+direction = Vector3(-0.24, 1, 0.05)
+spread = 23.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 0.04
+initial_velocity_max = 0.13
+scale_amount_min = 0.47
+scale_amount_max = 1.1
+color_ramp = SubResource("MoteLife")
+
+[node name="CornerEcho" type="Marker3D" parent="."]
+position = Vector3(3.96, 0.043, 28.09)
+
+[node name="Figure" parent="CornerEcho" instance=ExtResource("1_ghost")]
+rotation_degrees = Vector3(0, -125, 0)
+scale = Vector3(0.0100, 0.0127, 0.0100)
+opacity = 0.46
+float_height_ratio = 0.010
+float_period = 5.9
+
+[node name="BlueMotes" type="CPUParticles3D" parent="CornerEcho"]
+position = Vector3(-0.04, 0.60, -0.06)
+cast_shadow = 0
+amount = 8
+lifetime = 3.5
+preprocess = 3.5
+randomness = 0.65
+local_coords = true
+mesh = SubResource("MoteQuad")
+emission_shape = 3
+emission_box_extents = Vector3(0.24, 0.39, 0.28)
+direction = Vector3(-0.10, 1, -0.12)
+spread = 22.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 0.03
+initial_velocity_max = 0.12
+scale_amount_min = 0.45
+scale_amount_max = 1.02
+color_ramp = SubResource("MoteLife")

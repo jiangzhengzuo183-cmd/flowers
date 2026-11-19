@@ -16,22 +16,22 @@ Godot 工程根目录是上面目录中的 `godot`，在 Godot 项目管理器�
 C:\Users\30968\Documents\ChatGPT\献给阿尔吉侬的花束\godot\project.godot
 ```
 
-- 开发游戏：双击根目录 `打开Godot工程.cmd`，或手动导入 `godot/project.godot`，按 F5 运行。
+- 开发游戏：双击根目录 `打开Godot工程.cmd`，或手动导入 `godot/project.godot`，按 F5 直接进入迷宫试玩。
 - 查看网页成品：本机已完成导出时，双击 `启动游戏.cmd`，在 `http://127.0.0.1:5180/` 预览。
 - 其他成员第一次克隆时，需要先安装 Godot 并导出网页；导出产物与引擎程序不提交到源码仓库。
 
 ## 当前能体验什么
 
-- 三段原创占位对话：继续、重读、进入迷宫。
+- 启动后直接进入查理迷宫试玩，不再经过开场剧情页；当前界面不显示“故事”入口。占位剧情源文件保留供叙事模块后续使用。
 - 原样读取 `godot/data/maze_01.json`，生成 19×19 迷宫、378 段墙与地面。
 - 入口、出口、三个检查点；路线 A（60 步）/B（92 步）显示开关，默认隐藏。
 - 对称等距正交镜头：固定俯仰角；左键旋转，松开后按 90 度对齐；滚轮缩放、右键平移、重置视角。
-- “柔和配色”可预览奶油色墙体与淡紫色背景，并返回灰盒；此功能仅示意美术方向。
+- “柔和配色”仅示意美术方向，当前墙体与地面对比不足，试玩建议保持默认灰盒配色；正式美术后续统一处理。
 - 已建立墙体和地面碰撞形状，供后续人物移动使用。
-- 已加入临时人物步行模式：WASD / 方向键移动，鼠标拖动观察，滚轮调整距离，镜头平滑跟随。可切回全图查看、回到入口。步行时使用矮墙显示以便看清人物，完整墙体碰撞与原地图保持不变。
+- 查理模型与骨骼动画已接入迷宫：WASD / 方向键走路，按住 Shift 跑步，松开或撞墙停止时恢复待机。鼠标拖动观察，滚轮调整距离，镜头平滑跟随；可切回全图查看、回到入口。步行时使用矮墙显示以便看清人物，完整墙体碰撞与原地图保持不变。
 - 滚轮支持大范围缩放：行走镜头距离 2.5–150，拉远后逐渐对准地图中心并提高俯视角。可一键“俯视全貌”，正交俯视自动容纳全图，拖动平移、滚轮细看；点击“亲自走迷宫”返回人物操作。
 
-正式角色建模与动画、阿尔吉侬 AI、计时、正式剧情、存档、报告与证据玩法仍待后续开发。当前人物为几何占位模型；跟随镜头与移动用于组员试玩，暂不支持跳跃，地图外边界限制在地面范围内。
+查理基础模型与待机、走路、跑步动画已可试玩。走路速度 1.6 米/秒，跑步 2.7 米/秒，步频随实际速度匹配。默认采用距离 2.8 米、48° 视野的近距离第三人称镜头，仍可拖动、缩放和重置；迷宫使用 AgX 色彩映射、较低对比度和补光，让角色更接近动画 GIF。跑步手臂已收拢，原版模型保留，游戏使用 `charlie_refined.glb` 修正版。阿尔吉侬 AI、计时、正式剧情、存档、报告与证据玩法仍待开发。迷宫暂不支持跳跃，地图外边界限制在地面范围内；Jump 动画保留在角色独立预览中。角色与测试细节见 [角色说明](art/characters/charlie/README.md)。
 
 ## 安装、检查与网页导出
 
@@ -53,6 +53,8 @@ node scripts/serve-godot.mjs
 ```powershell
 godot --headless --path godot --editor --import --quit
 godot --headless --path godot --script res://tests/check_project.gd
+godot --headless --path godot --fixed-fps 60 --script res://tests/characters/check_charlie.gd
+godot --headless --path godot --fixed-fps 60 --script res://tests/characters/check_maze_charlie.gd
 godot --headless --path godot --export-release Web exports/web/index.html
 node scripts/serve-godot.mjs
 ```
@@ -69,7 +71,7 @@ node scripts/serve-godot.mjs
 
 网页加载画面使用 `godot/web/game.html`，与游戏的奶油色和绿色界面保持一致，显示真实下载进度。默认 Godot 启动画面已关闭，未额外设置展示等待时间。下载和引擎初始化仍需时间；失败时显示重试提示。
 
-网页首次需要加载引擎与素材。本次导出的原始引擎 WASM 约 39.5 MB、资源包约 7.8 MB（未计网络压缩）。正式发布应启用服务端压缩与缓存，并继续控制纹理、模型和音频大小。
+网页首次需要加载引擎与素材。当前导出的原始引擎 WASM 约 39.5 MB、资源包约 16.7 MB（未计网络压缩，实际大小以本次导出为准）。正式发布应启用服务端压缩与缓存，并继续控制纹理、模型和音频大小。
 
 ## 分享给别人
 
@@ -109,7 +111,13 @@ scripts/serve-godot.mjs      本地网页预览服务
 
 旧 README 已完整保留为 [网页版原型说明](docs/README.web-prototype.md)，最初的仓库说明保存在 [初始化前 README](docs/README.before-initialization.md)。原始地图资料仍在 `D:\maze_01`，运行不再依赖这个目录。
 
-`main` 为稳定分支。迁移在 `feature/godot-migration` 开发，提交 Pull Request，由负责人审阅后合并。后续成员从最新主分支创建各自功能分支，避免同时编辑共享场景、主题和配置。
+`main` 为稳定分支，基础 Godot 迁移已合并。当前带查理、动画与近景镜头的试玩交付位于 `feature/charlie-rig`，待团队通过 Pull Request 审阅后再合并到 `main`。组员已有克隆时，在 GitHub Desktop 点击 Fetch origin，切换到 `feature/charlie-rig` 并按提示 Pull，然后用 Godot 打开同一个 `godot/project.godot`，按 F5 即可试玩。
+
+后续成员从最新主分支创建各自功能分支，避免同时编辑共享场景、主题和配置。新成员查看本次查理试玩可直接克隆该分支：
+
+```powershell
+git clone --branch feature/charlie-rig https://github.com/jiangzhengzuo183-cmd/flowers.git
+```
 
 - [团队协作流程](docs/TEAM_WORKFLOW.md)
 - [Codex 项目协作规则](AGENTS.md)

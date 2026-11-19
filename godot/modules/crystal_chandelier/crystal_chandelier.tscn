@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="crystal_chandelier.gd" id="1"]
+[ext_resource type="PackedScene" path="crystal_chandelier.glb" id="2"]
+
+[node name="CrystalChandelier" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Model" parent="." instance=ExtResource("2")]
+position = Vector3(0, -1.470164, 0)
+scale = Vector3(0.016, 0.016, 0.016)

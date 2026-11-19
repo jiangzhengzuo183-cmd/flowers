@@ -1,0 +1,49 @@
+[gd_scene load_steps=6 format=3]
+
+[sub_resource type="Gradient" id="Gradient_radial"]
+offsets = PackedFloat32Array(0, 0.24, 0.64, 1)
+colors = PackedColorArray(0.82, 0.93, 1, 0.8, 0.76, 0.90, 1, 0.5, 0.65, 0.82, 1, 0.1, 0.6, 0.8, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="Texture_soft"]
+gradient = SubResource("Gradient_radial")
+width = 32
+height = 32
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="Material_mote"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.72, 0.88, 1, 0.65)
+albedo_texture = SubResource("Texture_soft")
+billboard_mode = 1
+no_depth_test = false
+
+[sub_resource type="QuadMesh" id="Mesh_mote"]
+material = SubResource("Material_mote")
+size = Vector2(0.012, 0.012)
+
+[sub_resource type="Gradient" id="Gradient_life"]
+offsets = PackedFloat32Array(0, 0.18, 0.65, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0.55, 1, 1, 1, 0.4, 1, 1, 1, 0)
+
+[node name="MemoryMotes" type="CPUParticles3D"]
+position = Vector3(0, 0.48, 0)
+amount = 18
+lifetime = 8.0
+preprocess = 6.0
+randomness = 0.7
+local_coords = true
+mesh = SubResource("Mesh_mote")
+emission_shape = 3
+emission_box_extents = Vector3(0.23, 0.40, 0.19)
+direction = Vector3(0, 1, 0)
+spread = 35.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 0.012
+initial_velocity_max = 0.025
+scale_amount_min = 0.45
+scale_amount_max = 1.15
+color_ramp = SubResource("Gradient_life")

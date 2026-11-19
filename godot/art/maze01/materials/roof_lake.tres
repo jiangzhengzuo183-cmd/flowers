@@ -1,0 +1,8 @@
+[gd_resource type="StandardMaterial3D" format=3]
+[resource]
+resource_name = "Unified lake glaze 64A9A8"
+cull_mode = 2
+albedo_color = Color(0.392157, 0.662745, 0.658824, 1)
+metallic = 0.0
+roughness = 0.39
+metallic_specular = 0.31

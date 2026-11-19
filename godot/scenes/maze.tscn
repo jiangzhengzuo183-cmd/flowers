@@ -10,10 +10,15 @@
 background_mode = 1
 background_color = Color(0.894, 0.902, 0.89, 1)
 ambient_light_source = 2
-ambient_light_color = Color(0.93, 0.94, 0.91, 1)
-ambient_light_energy = 0.45
+ambient_light_color = Color(0.94, 0.95, 1, 1)
+ambient_light_energy = 0.5
 reflected_light_source = 1
-tonemap_mode = 0
+tonemap_mode = 4
+tonemap_agx_white = 6.0
+adjustment_enabled = true
+adjustment_brightness = 1.02
+adjustment_contrast = 0.96
+adjustment_saturation = 0.96
 
 [node name="MazeScene" type="VBoxContainer"]
 layout_mode = 3
@@ -94,7 +99,7 @@ unique_name_in_owner = true
 script = ExtResource("5_follow")
 
 [node name="Camera3D" type="Camera3D" parent="ViewportContainer/Viewport/World/FollowRig"]
-fov = 55.0
+fov = 48.0
 near = 0.1
 far = 200.0
 
@@ -103,11 +108,18 @@ unique_name_in_owner = true
 environment = SubResource("Environment")
 
 [node name="Sun" type="DirectionalLight3D" parent="ViewportContainer/Viewport/World"]
-rotation_degrees = Vector3(-58, -35, 0)
-light_color = Color(1, 0.98, 0.92, 1)
+rotation_degrees = Vector3(-42, -35, 0)
+light_color = Color(1, 0.97, 0.94, 1)
 light_energy = 0.65
 shadow_enabled = true
+shadow_opacity = 0.4
 directional_shadow_max_distance = 220.0
+
+[node name="SoftFill" type="DirectionalLight3D" parent="ViewportContainer/Viewport/World"]
+rotation_degrees = Vector3(-30, 135, 0)
+light_color = Color(0.97, 0.98, 1, 1)
+light_energy = 0.45
+shadow_enabled = false
 
 [node name="GeneratedMaze" type="Node3D" parent="ViewportContainer/Viewport/World"]
 unique_name_in_owner = true

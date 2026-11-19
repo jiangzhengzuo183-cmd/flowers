@@ -5,6 +5,9 @@ var loaded_ok := false
 var selected_route := "none"
 var walk_mode := false
 var maze_data: Dictionary
+var game_hud: Node
+@export_group("Shared HUD")
+@export var hud_configuration: Resource = preload("res://modules/game_hud/default_configuration.tres")
 
 func _ready() -> void:
 	var loaded := MazeLoader.load_map()
@@ -35,8 +38,13 @@ func _ready() -> void:
 	loaded_ok = true
 	select_route("none")
 	set_walk_mode(true)
+	_install_game_hud.call_deferred()
 
 func _handle_camera_input(event: InputEvent) -> void:
+	if get_meta(&"maze_intro_active",false):return
+	if walk_mode and is_instance_valid(game_hud) and event is InputEventMouseMotion:
+		# Formal play receives mouse motion once through the captured-input adapter.
+		return
 	if walk_mode:
 		%FollowRig.handle_input(event)
 	else:
@@ -72,8 +80,8 @@ func set_walk_mode(enabled: bool) -> void:
 	%GeneratedMaze.set_walk_cutaway(enabled)
 	%WalkButton.text = "全图查看" if enabled else "亲自走迷宫"
 	%RestartWalk.visible = enabled
-	%Legend.text = "WASD / 方向键移动 · 拖动观察 · 滚轮可拉远看全图 · 俯视全貌可一键查看" if enabled else "左键旋转，松开对齐 · 滚轮缩放 · 右键平移"
-	%Status.text = "绿色临时人物可步行；行走模式采用矮墙显示，原地图与墙体碰撞保持不变。" if enabled else "全图查看模式；点击“亲自走迷宫”进入步行体验。"
+	%Legend.text = "WASD / 方向键走路 · Shift 开/关冲刺 · 空格跳跃 · 拖动观察 · 滚轮缩放" if enabled else "左键旋转，松开对齐 · 滚轮缩放 · 右键平移"
+	%Status.text = "查理已进入迷宫：WASD 移动、Shift 开/关冲刺、空格跳跃。" if enabled else "全图查看模式；点击“亲自走迷宫”进入步行体验。"
 	get_viewport().gui_release_focus()
 
 func select_route(id: String) -> void:
@@ -90,3 +98,12 @@ func set_soft_palette(enabled: bool) -> void:
 	environment.background_color = Color("a9a6ca") if enabled else Color("e4e6e3")
 	%WorldEnvironment.environment = environment
 	%PaletteButton.text = "返回灰盒" if enabled else "柔和配色"
+
+func _install_game_hud() -> void:
+	if not loaded_ok or is_instance_valid(game_hud):
+		return
+	if scene_file_path not in ["res://scenes/levels/maze_01_greybox.tscn", "res://scenes/levels/Maze02.tscn", "res://scenes/levels/Maze03.tscn"]:
+		return
+	game_hud = preload("res://modules/game_hud/runtime.gd").new()
+	add_child(game_hud)
+	game_hud.install(self)

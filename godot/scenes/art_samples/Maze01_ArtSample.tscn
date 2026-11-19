@@ -1,0 +1,13 @@
+[gd_scene load_steps=5 format=3]
+[ext_resource type="PackedScene" path="res://scenes/maze_runs/Maze01_Base.tscn" id="1_base"]
+[ext_resource type="Script" path="res://scripts/art_samples/sample_scene.gd" id="2_scene"]
+[ext_resource type="Script" path="res://scripts/art_samples/sample_generator.gd" id="3_generator"]
+[ext_resource type="Resource" path="res://data/art_samples/sample_run.tres" id="4_config"]
+
+[node name="Maze01ArtSample" instance=ExtResource("1_base")]
+script = ExtResource("2_scene")
+dream_art_enabled = false
+run_config = ExtResource("4_config")
+
+[node name="GeneratedMaze" parent="ViewportContainer/Viewport/World" index="5"]
+script = ExtResource("3_generator")

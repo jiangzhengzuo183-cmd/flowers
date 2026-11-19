@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="maze02_ghost_event.gd" id="1"]
+[ext_resource type="PackedScene" path="GhostActor.tscn" id="2"]
+
+[node name="Maze02GhostEvent" type="Node3D"]
+visible = false
+process_mode = 4
+script = ExtResource("1")
+
+[node name="Ghost_Church" parent="." instance=ExtResource("2")]
+position = Vector3(25.4, 0, 23.45)
+rotation = Vector3(0, -2.5, 0)
+guides_to_atlas = true
+
+[node name="Ghost_BridgeUnderpass" parent="." instance=ExtResource("2")]
+position = Vector3(39.75, 0, 15.65)
+rotation = Vector3(0, -1.5707963, 0)
+

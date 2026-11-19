@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+[ext_resource type="Script" path="res://modules/stamina/stamina_settings.gd" id="1"]
+[resource]
+script = ExtResource("1")
+maximum = 100.0
+sprint_cost_per_second = 18.0
+recovery_per_second = 14.0
+recovery_delay = 0.9
+exhausted_restart = 20.0
+zone_recovery_per_second = 35.0
+zone_recovery_delay = 0.15
+cake_restore = 45.0
+barrier_restore = 30.0

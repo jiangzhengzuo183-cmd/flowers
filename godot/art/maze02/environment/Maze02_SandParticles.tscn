@@ -1,0 +1,12 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://art/maze02/environment/maze02_sand.gd" id="1_sand"]
+[ext_resource type="Shader" path="res://art/maze02/environment/maze02_sand.gdshader" id="2_shader"]
+
+[sub_resource type="ShaderMaterial" id="Sand"]
+shader = ExtResource("2_shader")
+
+[node name="Maze02SandParticles" type="MultiMeshInstance3D"]
+cast_shadow = 0
+script = ExtResource("1_sand")
+sand_material = SubResource("Sand")

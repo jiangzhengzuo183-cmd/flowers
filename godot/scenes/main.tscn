@@ -55,6 +55,7 @@ text = "FLOWERS FOR ALGERNON / INTERACTIVE STORY"
 
 [node name="StoryButton" type="Button" parent="Margin/Layout/Header"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 size_flags_vertical = 4
 toggle_mode = true
@@ -65,7 +66,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 4
 toggle_mode = true
-text = "02 / 迷宫"
+text = "迷宫试玩"
 
 [node name="Separator" type="HSeparator" parent="Margin/Layout"]
 layout_mode = 2

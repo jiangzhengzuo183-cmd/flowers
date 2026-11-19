@@ -1,0 +1,44 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://bah2mc2sfu8kl"
+path.s3tc="res://.godot/imported/retro_monitor_复古显示器3d模型_basecolor.jpg-358151c8407b38db5089c7ead3651ece.s3tc.ctex"
+metadata={
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
+}
+generator_parameters={
+"md5": "7c0bbac7b4cceab48c17efdc30771446"
+}
+
+[deps]
+
+source_file="res://modules/tv_fx/assets/retro_monitor_复古显示器3d模型_basecolor.jpg"
+dest_files=["res://.godot/imported/retro_monitor_复古显示器3d模型_basecolor.jpg-358151c8407b38db5089c7ead3651ece.s3tc.ctex"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/uastc_level=0
+compress/rdo_quality_loss=0.0
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/channel_remap/red=0
+process/channel_remap/green=1
+process/channel_remap/blue=2
+process/channel_remap/alpha=3
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0

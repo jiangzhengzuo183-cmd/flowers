@@ -1,0 +1,37 @@
+[gd_resource type="Environment" format=3 uid="uid://hidpvli3pge0"]
+
+[ext_resource type="Shader" uid="uid://fy20gbqbxdbk" path="res://art/maze02/environment/dream_sky.gdshader" id="1_sky"]
+
+[sub_resource type="ShaderMaterial" id="DreamSky"]
+shader = ExtResource("1_sky")
+shader_parameter/zenith = Color(0.91, 0.519, 0.252, 1)
+shader_parameter/middle = Color(0.989, 0.769, 0.461, 1)
+shader_parameter/horizon = Color(1, 0.918, 0.713, 1)
+shader_parameter/nadir = Color(0.77, 0.73, 0.62, 1)
+shader_parameter/cloud_color = Color(1, 0.979, 0.928, 1)
+shader_parameter/sky_details = true
+
+[sub_resource type="Sky" id="Sky"]
+sky_material = SubResource("DreamSky")
+radiance_size = 2
+
+[resource]
+resource_name = "Maze 02 Memory Distortion"
+background_mode = 2
+sky = SubResource("Sky")
+ambient_light_source = 2
+ambient_light_color = Color(1, 0.985, 0.95, 1)
+ambient_light_sky_contribution = 0.34
+ambient_light_energy = 0.55
+reflected_light_source = 2
+ssao_enabled = true
+ssao_radius = 0.48
+ssao_intensity = 0.13
+fog_enabled = true
+fog_light_color = Color(0.94, 0.869, 0.674, 1)
+fog_density = 0.0092
+fog_sky_affect = 0.0
+adjustment_enabled = true
+adjustment_brightness = 0.985
+adjustment_contrast = 0.97
+adjustment_saturation = 0.95

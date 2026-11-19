@@ -1,0 +1,53 @@
+{
+  "source": "Untitled.blend",
+  "blender": "5.2.3 LTS",
+  "original_vertices": 68799,
+  "original_triangles": 93767,
+  "welded_vertices": 46912,
+  "game_vertices": 24392,
+  "game_triangles": 48756,
+  "bones": 24,
+  "binding": "anatomical regions, atlas clothing mask, 3 smoothing passes, 4 influences max",
+  "cloth_vertices_corrected": 5560,
+  "texture": [
+    2048,
+    2048
+  ],
+  "animations": {
+    "Idle": {
+      "frames": [
+        1.0,
+        91.0
+      ],
+      "seconds": 3.0,
+      "loop": true
+    },
+    "Walk": {
+      "frames": [
+        1.0,
+        31.0
+      ],
+      "seconds": 1.0,
+      "loop": true
+    },
+    "Run": {
+      "frames": [
+        1.0,
+        21.0
+      ],
+      "seconds": 0.6666666666666666,
+      "loop": true
+    },
+    "Jump": {
+      "frames": [
+        1.0,
+        43.0
+      ],
+      "seconds": 1.4,
+      "loop": false
+    }
+  },
+  "unweighted_vertices": 0,
+  "max_influences": 4,
+  "max_weight_sum_error": 4.377216100692749e-08
+}

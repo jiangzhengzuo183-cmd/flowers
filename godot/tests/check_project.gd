@@ -32,7 +32,15 @@ func _run() -> void:
 	var game: Control = load("res://scenes/main.tscn").instantiate()
 	root.add_child(game)
 	await process_frame
-	check(game.active_id == "story", "默认进入剧情")
+	check(game.active_id == "maze", "启动必须直接进入迷宫")
+	check(not game.get_node("%StoryButton").visible, "当前试玩界面不显示故事入口")
+	check(game.active_scene.loaded_ok and game.active_scene.walk_mode, "启动后地图与人物操作必须就绪")
+	check(game.active_scene.scene_file_path=="res://scenes/levels/maze_01_greybox.tscn", "原工程默认入口必须加载新版灰模")
+	check(game.active_scene.get_node("%GeneratedMaze").has_node("LevelArchitecture/SunkenCorridor"), "默认关卡必须包含已同步的下沉石廊")
+	# The narrative module is retained for future team integration, but is no
+	# longer part of the visible tryout entry flow.
+	game.show_scene("story")
+	await process_frame
 	var story: Control = game.active_scene
 	story.advance()
 	check(story.index == 1, "剧情必须能推进")
@@ -43,7 +51,13 @@ func _run() -> void:
 	story.advance()
 	await process_frame
 	check(game.active_id == "maze", "剧情结束必须进入迷宫")
-	var maze_scene: Control = game.active_scene
+	check(game.active_scene.scene_file_path=="res://scenes/levels/maze_01_greybox.tscn", "剧情返回后仍进入新版灰模")
+	# Keep the unchanged base scene under its original 378-wall assertions;
+	# the greybox has separate route, gate, floor and camera regression checks.
+	var maze_scene: Control = load("res://scenes/maze.tscn").instantiate()
+	root.add_child(maze_scene)
+	maze_scene.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	await process_frame
 	check(maze_scene.loaded_ok, "迷宫场景必须成功加载")
 	var generated: Node3D = maze_scene.get_node("%GeneratedMaze")
 	check(generated.wall_count == 378, "生成的墙数必须与数据一致")
@@ -122,13 +136,14 @@ func _run() -> void:
 	check(is_equal_approx(follow.distance, 150.0), "跟随镜头应能拉远至地图尺度")
 	maze_scene.show_top_view()
 	maze_scene.set_walk_mode(true)
-	check(is_equal_approx(follow.distance, 6.0), "重置必须恢复适合步行的距离")
+	check(is_equal_approx(follow.distance, 2.8), "重置必须恢复近距离跟随视角")
 	for i in range(3):
 		game.show_scene("story")
 		await process_frame
 		game.show_scene("maze")
 		await process_frame
 		check(game.get_node("%SceneHost").get_child_count() == 1, "场景切换后不能留下重复场景")
+	maze_scene.queue_free()
 	game.queue_free()
 	await process_frame
 	print("GODOT CHECK: %s | 19x19, 378 walls, 361 reachable, routes 60/92 | story, markers, collisions, route visibility, camera, scene lifecycle" % ("PASS" if failures == 0 else "FAIL"))
