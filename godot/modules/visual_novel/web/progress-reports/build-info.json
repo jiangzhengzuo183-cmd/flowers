@@ -1,0 +1,12 @@
+{
+  "entries": 21,
+  "spreads": 15,
+  "variants": 29,
+  "signatures": {
+    "reader.js": "2cbfe731b1025ba00498caf949731f04af8a5a7e36aef70c527d9d4083438446",
+    "book-binding.js": "ac186451de7f6aa05c2e2422c9dd9497aa8b1be85c33b0ddfada9881eaf49e57",
+    "style.css": "2776808dba94a1cb7d40b5a9c74fe5372827f1e311e90ace98833f1ab64050e7",
+    "assets/desk-wood.png": "03c3770d0ff6fb4c31e02b97aa7d508526c7ca6d93c48df0fe5d83ff55c5b7b4",
+    "assets/report.ttf": "7688783adaa949cb3ecc276ccdae43aacc43efe348883ea80f46fb0f1e54a74e"
+  }
+}

@@ -1,0 +1,288 @@
+extends RefCounted
+## Generated from untouched source images by tools/import-main-menu-assets.ps1.
+const DATA := {
+  "background_size": [
+    8000,
+    4500
+  ],
+  "title_size": [
+    1672,
+    941
+  ],
+  "title_reference_origin": [
+    1845,
+    72
+  ],
+  "title_reference_scale": 2.432,
+  "title_ink_rect": [
+    60,
+    124,
+    1552,
+    648
+  ],
+  "letters": [
+    {
+      "index": 0,
+      "row": 0,
+      "letter": "F",
+      "file": "letters/letter_00.png",
+      "rect": [
+        49,
+        54,
+        250,
+        262
+      ]
+    },
+    {
+      "index": 1,
+      "row": 0,
+      "letter": "L",
+      "file": "letters/letter_01.png",
+      "rect": [
+        299,
+        50,
+        183,
+        275
+      ]
+    },
+    {
+      "index": 2,
+      "row": 0,
+      "letter": "O",
+      "file": "letters/letter_02.png",
+      "rect": [
+        482,
+        9,
+        221,
+        324
+      ]
+    },
+    {
+      "index": 3,
+      "row": 0,
+      "letter": "W",
+      "file": "letters/letter_03.png",
+      "rect": [
+        703,
+        39,
+        276,
+        294
+      ]
+    },
+    {
+      "index": 4,
+      "row": 0,
+      "letter": "E",
+      "file": "letters/letter_04.png",
+      "rect": [
+        979,
+        9,
+        193,
+        324
+      ]
+    },
+    {
+      "index": 5,
+      "row": 0,
+      "letter": "R",
+      "file": "letters/letter_05.png",
+      "rect": [
+        1175,
+        86,
+        197,
+        245
+      ]
+    },
+    {
+      "index": 6,
+      "row": 0,
+      "letter": "S",
+      "file": "letters/letter_06.png",
+      "rect": [
+        1372,
+        13,
+        270,
+        318
+      ]
+    },
+    {
+      "index": 7,
+      "row": 1,
+      "letter": "F",
+      "file": "letters/letter_07.png",
+      "rect": [
+        39,
+        333,
+        693,
+        226
+      ]
+    },
+    {
+      "index": 8,
+      "row": 1,
+      "letter": "O",
+      "file": "letters/letter_08.png",
+      "rect": [
+        732,
+        333,
+        203,
+        226
+      ]
+    },
+    {
+      "index": 9,
+      "row": 1,
+      "letter": "R",
+      "file": "letters/letter_09.png",
+      "rect": [
+        935,
+        333,
+        717,
+        226
+      ]
+    },
+    {
+      "index": 10,
+      "row": 2,
+      "letter": "A",
+      "file": "letters/letter_10.png",
+      "rect": [
+        39,
+        559,
+        211,
+        382
+      ]
+    },
+    {
+      "index": 11,
+      "row": 2,
+      "letter": "L",
+      "file": "letters/letter_11.png",
+      "rect": [
+        250,
+        559,
+        186,
+        382
+      ]
+    },
+    {
+      "index": 12,
+      "row": 2,
+      "letter": "G",
+      "file": "letters/letter_12.png",
+      "rect": [
+        436,
+        559,
+        211,
+        382
+      ]
+    },
+    {
+      "index": 13,
+      "row": 2,
+      "letter": "E",
+      "file": "letters/letter_13.png",
+      "rect": [
+        647,
+        559,
+        184,
+        382
+      ]
+    },
+    {
+      "index": 14,
+      "row": 2,
+      "letter": "R",
+      "file": "letters/letter_14.png",
+      "rect": [
+        831,
+        559,
+        186,
+        382
+      ]
+    },
+    {
+      "index": 15,
+      "row": 2,
+      "letter": "N",
+      "file": "letters/letter_15.png",
+      "rect": [
+        1017,
+        559,
+        197,
+        348
+      ]
+    },
+    {
+      "index": 16,
+      "row": 2,
+      "letter": "O",
+      "file": "letters/letter_16.png",
+      "rect": [
+        1214,
+        559,
+        222,
+        382
+      ]
+    },
+    {
+      "index": 17,
+      "row": 2,
+      "letter": "N",
+      "file": "letters/letter_17.png",
+      "rect": [
+        1436,
+        569,
+        190,
+        299
+      ]
+    }
+  ],
+  "menus": [
+    {
+      "label": "开始游戏",
+      "file": "menu_0.png",
+      "rect": [
+        3529,
+        2290,
+        796,
+        185
+      ]
+    },
+    {
+      "label": "制作名单",
+      "file": "menu_1.png",
+      "rect": [
+        3532,
+        2716,
+        792,
+        185
+      ]
+    },
+    {
+      "label": "回到桌面",
+      "file": "menu_2.png",
+      "rect": [
+        3535,
+        3194,
+        790,
+        172
+      ]
+    }
+  ],
+  "mouse_rect": [
+    321,
+    159,
+    433,
+    1173
+  ],
+  "mouse_nose": [
+    191,
+    78
+  ],
+  "mouse_body": [
+    181,
+    582.5
+  ],
+  "title_reassembly_mismatches": 0
+}

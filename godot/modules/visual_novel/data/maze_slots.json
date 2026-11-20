@@ -1,0 +1,5 @@
+{
+  "1": { "id": "maze_01", "label": "第一次迷宫", "story_scene": "d2-maze", "scene_path": "" },
+  "2": { "id": "maze_02", "label": "第二次迷宫", "story_scene": "p3-maze", "scene_path": "" },
+  "3": { "id": "maze_03", "label": "第三次迷宫", "story_scene": "p4-maze", "scene_path": "" }
+}

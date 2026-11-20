@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="献给阿尔吉侬的花束"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://modules/main_menu/MainMenu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 boot_splash/bg_color=Color(0.953, 0.941, 0.91, 1)
 boot_splash/show_image=false
