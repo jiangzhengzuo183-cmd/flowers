@@ -421,7 +421,9 @@ func advance() -> void:
 	elif flow.phase == "objects":
 		object_buttons.bread.grab_focus()
 	elif flow.phase == "complete":
-		day01_view.report_button.grab_focus()
+		# The new report book opens automatically; the legacy end-screen button may not exist.
+		if is_instance_valid(day01_view.report_button) and day01_view.report_button.is_visible_in_tree():
+			day01_view.report_button.grab_focus()
 	elif flow.phase == "school":
 		day01_view.alice_hotspot.grab_focus()
 

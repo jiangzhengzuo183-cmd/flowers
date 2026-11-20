@@ -105,6 +105,7 @@ func _ready() -> void:
 		audio = audio_script.new()
 		audio.name = "ExperienceAudio"
 		get_tree().root.add_child.call_deferred(audio)
+	if audio.has_method("register_story"): audio.register_story.call_deferred(host)
 	get_tree().root.focus_entered.connect(_focus.bind(true))
 	get_tree().root.focus_exited.connect(_focus.bind(false))
 	var root_window := get_tree().root
