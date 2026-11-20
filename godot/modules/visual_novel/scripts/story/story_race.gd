@@ -11,6 +11,8 @@ var _previous_size: Vector2i
 var _previous_aspect: Window.ContentScaleAspect
 var _previous_mouse := Input.MOUSE_MODE_VISIBLE
 var _return_button: Button
+var _maze_canvas: CanvasLayer
+var _maze_host: Control
 func _ready() -> void:
 	# Claim audio before async loading; do not rely solely on scene-path detection.
 	var story_audio := get_tree().root.get_node_or_null("ExperienceAudio")
@@ -20,6 +22,16 @@ func _ready() -> void:
 	_previous_mouse = Input.mouse_mode
 	name = "StoryMazeBridge"
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# The chapter stage is fixed at 1600x900. A separate canvas lets 3D and HUD use the full viewport.
+	_maze_canvas = CanvasLayer.new()
+	_maze_canvas.name = "FullscreenMazeCanvas"
+	_maze_canvas.layer = 1
+	add_child(_maze_canvas)
+	_maze_host = Control.new()
+	_maze_host.name = "FullscreenMazeHost"
+	_maze_host.mouse_filter = Control.MOUSE_FILTER_STOP
+	_maze_canvas.add_child(_maze_host)
+	_maze_host.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	call_deferred("restart_active_maze")
 func restart_active_maze() -> void:
 	var loader := preload("res://modules/loading/scene_loader.gd")
@@ -30,10 +42,10 @@ func restart_active_maze() -> void:
 		await loader.finish(screen)
 		return
 	if is_instance_valid(maze):
-		remove_child(maze)
+		_maze_host.remove_child(maze)
 		maze.queue_free()
 	maze = packed.instantiate()
-	add_child(maze)
+	_maze_host.add_child(maze)
 	maze.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_bind.call_deferred()
 	await loader.finish(screen)

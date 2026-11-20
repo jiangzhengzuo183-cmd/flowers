@@ -13,3 +13,9 @@
 复现到第一天“我想试一试。”结束时，bakery_chapter.advance 仍访问已经取消的 day01_view.report_button.grab_focus()，产生空对象调用。现在仅对有效且可见的旧按钮设置焦点；新版报告书仍按原流程自动打开，不修改剧情和报告内容。另外补回新版UI运行时对剧情音频宿主的登记，保持迷宫音频隔离。
 
 实际原生回归：check_paper_transition.gd 逐句播放四条纸面独白，等待真实报告展开与合上动画，再进入 continuation_chapter；check_day01_complete.gd 从第一天开篇，遍历三个人物、三个物件、夜校与爱丽丝对话、纸面独白和报告，进入 d2-outside。修复前日志含空对象 grab_focus 错误，修复后两条路径没有 SCRIPT ERROR 或 ERROR。新增 check_paper_transition.ps1 检查引擎日志，防止游戏退出码为0时漏掉脚本报错。
+
+## 剧情内迷宫画面留白修复
+
+新版剧情的 stage 固定为 1600×900。此前将迷宫直接放在该容器内，导致 3D 画面受其尺寸限制，而 CanvasLayer 中的 HUD 已使用 1920×1080 或 1920×1200 游戏画布，因此出现米白边框与错位。story_race 现在以独立 CanvasLayer 和全画布 Control 承载迷宫，保留章节桥接、加载界面、音频归属及返回接口，不改变相机、建筑和玩法。退出时释放显示层并恢复剧情画布。
+
+原生运行 check_embedded_maze_layout.gd，使用真实 continuation_chapter → maze_gateway → story_race 路径，分别验证三个迷宫在 16:9 和 16:10 下的容器尺寸、HUD 对齐、渲染分辨率、加载结束和返回剧情；同时验证 Maze03 竞速模式和实际重新开始。48 项检查全部通过，日志无 SCRIPT ERROR 或 ERROR。综合退出仍有既有 ObjectDB 资源提示。截图 embedded-maze01-fullscreen.png 为正常可操作视角；embedded-maze03-fullscreen.png 为重启后入场俯视画面，均位于 docs/screenshots/main_menu。
