@@ -1,0 +1,23 @@
+#binding-scene{position:absolute;z-index:8;pointer-events:none;overflow:visible}
+.binding-camera{position:absolute;left:0;top:0;width:1080px;height:670px;transform-origin:0 0;perspective:2600px;perspective-origin:534px 335px}
+.binding-pose{position:absolute;inset:0;transform-origin:0 0;transform-style:preserve-3d}
+.binding-right{position:absolute;inset:0;clip-path:inset(0 0 0 49.444444%);filter:drop-shadow(0 9px 11px #12221955)}
+.binding-right>svg{display:block;width:1080px;height:670px}
+.binding-old-stack{position:absolute;left:0;top:0;width:530px;height:650px;transform-origin:0 0;pointer-events:none}
+.binding-board{position:absolute;left:534px;top:0;width:534px;height:670px;transform-origin:0 50%;transform-style:preserve-3d}
+.binding-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform-style:preserve-3d}
+.binding-face>svg{display:block;width:534px;height:670px}
+.binding-front{transform:translateZ(2px)}
+.binding-back{transform:rotateY(180deg) translateZ(2px)}
+.binding-front text{font-family:ReportHand;font-synthesis:none}
+.binding-cover-title{position:absolute;left:0;top:0;width:530px;height:650px;transform-origin:0 0}
+.binding-cover-title svg{display:block;width:100%;height:100%}
+.binding-face>svg,.binding-cover-title,.binding-cloth-light,.binding-paper-light{backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.binding-cloth-light,.binding-paper-light{position:absolute;inset:15px 9px 20px 0;background:linear-gradient(90deg,#53402255,#b8984322 30%,transparent 75%);border-radius:0 18px 18px 0;pointer-events:none;transform:translateZ(.1px)}
+.binding-paper-light{inset:18px 0 21px 15px;border-radius:18px 0 0 18px;background:linear-gradient(90deg,transparent 35%,#55422455)}
+.binding-board-edge{position:absolute;left:0;top:15px;width:4px;height:635px;background:#a58031;transform:rotateY(90deg) translateX(-2px);transform-origin:0 50%;opacity:.65}
+.binding-shade{position:absolute;left:534px;top:20px;width:515px;height:620px;transform-origin:0 50%;background:#43351d;border-radius:0 18px 18px 0;pointer-events:none}
+#stage.is-binding .tools,#stage.is-binding #reading-controls{visibility:hidden}
+#stage.is-binding #closed{pointer-events:none}
+#stage.is-binding #cover-open{visibility:hidden}
+#stage.is-binding #reopen:disabled{opacity:1}

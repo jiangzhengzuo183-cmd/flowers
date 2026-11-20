@@ -2,10 +2,14 @@ extends Control
 ## Shared production UI, linear reading timer, transition and isolated rehearsal.
 const Layout := preload("res://scripts/story/ui_layout.gd")
 const CONFIG := "res://data/experience.json"
+const Preferences := preload("res://scripts/story/story_preferences.gd")
+const PaperIcon := preload("res://scripts/story/paper_icon_button.gd")
+var preferences: RefCounted = Preferences.shared()
+var settings_panel: Control
+var previous_design_size := Vector2i(1600,900)
 var host: Control
 var settings: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(CONFIG))
 var hud: HBoxContainer
-var auto_button: Button
 var automatic := false
 var speed := 1
 var age := 0.0
@@ -40,56 +44,34 @@ var paper_monologue := false
 func _ready() -> void:
 	z_index=60
 	automatic=Engine.get_meta("experience_auto",false)
-	speed=Engine.get_meta("experience_speed",1)
+	speed=preferences.values.text_speed
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	hud = HBoxContainer.new()
-	hud.position = Vector2(1600-Layout.SAFE-240,Layout.SAFE)
-	hud.size = Vector2(240,40)
+	hud.name = "PaperToolbar"
+	hud.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	hud.add_theme_constant_override("separation",10)
 	add_child(hud)
-	auto_button = small("",func() -> void: automatic = not automatic; Engine.set_meta("experience_auto",automatic); age=0; _update_auto_icon())
-	hud.add_child(auto_button)
-	auto_button.custom_minimum_size = Vector2(40,40)
-	for entry: Array in [["对话记录",host._show_history],["进步报告",reports],["设置",menu],["重新开始",host._confirm_restart]]:
-		var action := small("",entry[1])
+	var entries := [["对话记录",host._show_history,"dialogue",Vector2(96,88),-2.5],["进步报告",reports,"book",Vector2(100,88),2.5],["设置",menu,"settings",Vector2(76,76),-2.0]]
+	for entry: Array in entries:
+		var action := PaperIcon.new()
+		action.name = str(entry[2]).to_pascal_case()+"Button"
 		action.tooltip_text = entry[0]
 		action.accessibility_name = entry[0]
+		action.artwork = Layout.asset_icon(load("res://assets/ui-paper/"+entry[2]+".png"))
+		action.artwork_size = entry[3]
+		action.hover_angle = entry[4]
 		hud.add_child(action)
-	var icons: Array[Texture2D] = [preload("res://assets/ui-v1/auto-play.svg"),preload("res://assets/experience/history.svg"),Layout.asset_icon(preload("res://assets/ui-v1/reports.png")),Layout.asset_icon(preload("res://assets/ui-v1/settings.png")),Layout.asset_icon(preload("res://assets/ui-v1/back-restart.png"),1)]
-	for i in range(hud.get_child_count()):
-		var button: Button = hud.get_child(i)
-		for state: String in ["normal","hover","pressed","disabled"]:
-			var blank := StyleBoxEmpty.new()
-			blank.content_margin_left = 5
-			blank.content_margin_right = 5
-			button.add_theme_stylebox_override(state,blank)
-		var focus := StyleBoxFlat.new()
-		focus.bg_color = Color.TRANSPARENT
-		focus.border_color = Color("f1cf7e")
-		focus.set_border_width_all(1)
-		focus.set_corner_radius_all(7)
-		button.add_theme_stylebox_override("focus",focus)
-		button.custom_minimum_size = Vector2(40,40)
-		var glyph := TextureRect.new()
-		glyph.name = "Glyph"
-		glyph.texture = icons[i]
-		glyph.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		glyph.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		glyph.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		glyph.size = Vector2(30,30)
-		glyph.position = Vector2((button.custom_minimum_size.x-30)/2,5)
-		var material := ShaderMaterial.new()
-		material.shader = preload("res://scripts/story/gold_icon.gdshader")
-		glyph.material = material
-		button.add_child(glyph)
-	_update_auto_icon()
+		action.pressed.connect(entry[1])
 	# Keep legacy labels as data sources; the reusable HUD owns presentation.
 	host.location.get_parent().modulate.a = 0.0
 	host.task.modulate.a = 0.0
 	host.task.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	task_panel = preload("res://scripts/story/task_hud.gd").new()
 	host.stage.add_child(task_panel)
+	settings_panel = preload("res://scripts/story/paper_settings.gd").new()
+	add_child(settings_panel)
+	settings_panel.closed.connect(func() -> void: age=0)
 	monologue_paper = host.day01_view._texture(preload("res://assets/ui-v1/monologue-paper.png"),host.stage,Rect2(0,0,1600,900))
 	monologue_paper.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	host.stage.move_child(monologue_paper,host.narrator.get_index())
@@ -125,12 +107,56 @@ func _ready() -> void:
 		get_tree().root.add_child.call_deferred(audio)
 	get_tree().root.focus_entered.connect(_focus.bind(true))
 	get_tree().root.focus_exited.connect(_focus.bind(false))
+	var root_window := get_tree().root
+	previous_design_size = root_window.get_meta("vn_previous_design",root_window.content_scale_size)
+	root_window.set_meta("vn_previous_design",previous_design_size)
+	root_window.set_meta("vn_layout_owner",get_instance_id())
+	preferences.changed.connect(_preferences_changed)
+	_apply_aspect()
+	if not OS.has_feature("web") and DisplayServer.get_name() != "headless": preferences.apply_window_mode()
+	resized.connect(_align_toolbar)
+	hud.resized.connect(_align_toolbar)
 
-func _update_auto_icon() -> void:
-	var glyph: TextureRect = auto_button.get_node("Glyph")
-	glyph.texture = preload("res://assets/ui-v1/auto-pause.svg") if automatic else preload("res://assets/ui-v1/auto-play.svg")
-	auto_button.tooltip_text = "停止自动播放" if automatic else "自动播放"
-	auto_button.accessibility_name = auto_button.tooltip_text
+func set_automatic(value: bool) -> void:
+	automatic = value
+	Engine.set_meta("experience_auto",value)
+	age = 0
+
+func _preferences_changed(option: String, _value: Variant) -> void:
+	if option == "text_speed":
+		speed = preferences.values.text_speed
+		Engine.set_meta("experience_speed",speed)
+		age = 0
+	if option == "aspect": _apply_aspect()
+
+func _apply_aspect() -> void:
+	# The story remains 1600x900. A 16:10 display frame adds space above/below.
+	# Only the VN owns this override; other modules receive the original setting.
+	get_tree().root.content_scale_size = Vector2i(1600,1000) if preferences.values.aspect == 2 else previous_design_size
+	host.stage.set_anchors_preset(Control.PRESET_CENTER)
+	host.stage.offset_left = -800
+	host.stage.offset_right = 800
+	host.stage.offset_top = -450
+	host.stage.offset_bottom = 450
+	_align_toolbar.call_deferred()
+
+func _align_toolbar() -> void:
+	if not is_instance_valid(task_panel): return
+	var dimensions := hud.get_combined_minimum_size()
+	hud.size = dimensions
+	hud.offset_right = -Layout.SAFE
+	hud.offset_left = -Layout.SAFE-dimensions.x
+	var center_y := task_panel.get_global_rect().get_center().y-global_position.y
+	hud.offset_top = center_y-dimensions.y/2
+	hud.offset_bottom = center_y+dimensions.y/2
+	if is_instance_valid(mouse_next): mouse_next.position.y = 805+host.stage.position.y
+
+func _exit_tree() -> void:
+	if preferences.changed.is_connected(_preferences_changed): preferences.changed.disconnect(_preferences_changed)
+	if get_tree().root.get_meta("vn_layout_owner",0) == get_instance_id():
+		get_tree().root.content_scale_size = previous_design_size
+		get_tree().root.remove_meta("vn_layout_owner")
+		get_tree().root.remove_meta("vn_previous_design")
 
 func _sync_monologue(active: bool) -> void:
 	monologue_paper.visible = active
@@ -195,7 +221,7 @@ func _process(dt: float) -> void:
 	if not is_instance_valid(host.dialogue_text): return
 	if not reading(): age=0
 	else:
-		letters=minf(text.length(),letters+dt*settings.reading.characters_per_second)
+		letters=minf(text.length(),letters+dt*settings.reading.characters_per_second*preferences.text_rate())
 		if letters>=text.length(): age+=dt
 		var wait_time: float = maxf(settings.reading.minimum_seconds,text.length()/settings.reading.characters_per_read_second)*settings.reading.speeds[speed]
 		if automatic and age>=wait_time:
@@ -285,6 +311,7 @@ func _process(dt: float) -> void:
 			group={"lab":"lab","office":"lab","bar":"night","school":"night","cafeteria":"night","home":"night","home-night":"night","hospital":"hospital"}.get(m.scene().bg,"bakery") if m.phase!="complete" else "night"
 		audio.choose(group)
 	_sync_task_hud(black)
+	_align_toolbar()
 	if OS.has_feature("web") and "--experience-qa" in OS.get_cmdline_user_args():
 		var state := {"scene":scene_id(),"phase":m.phase,"index":m.index,"busy":busy,"letters":letters,"length":text.length(),"history":m.history.size(),"automatic":automatic,"hud":hud.is_visible_in_tree(),"task_visible":task_panel.is_visible_in_tree(),"task_collapsed":task_panel.collapsed,"task_done":task_panel.done,"task_text":task_panel.objective.text,"task_size":[task_panel.size.x,task_panel.size.y],"actors":host.day01_view.dialogue_cast.current}
 		state["paper_monologue"] = paper_monologue
@@ -295,12 +322,32 @@ func _process(dt: float) -> void:
 		state["reading_mode"] = task_panel.reading_mode
 		state["dialogue_rect"] = [host.dialogue_panel.position.x,host.dialogue_panel.position.y,host.dialogue_panel.size.x,host.dialogue_panel.size.y]
 		state["body_rect"] = [host.dialogue_text.position.x,host.dialogue_text.position.y,host.dialogue_text.size.x,host.dialogue_text.size.y]
-		state["settings_visible"] = is_instance_valid(window) and window.visible
+		state["settings_visible"] = settings_panel.visible or (is_instance_valid(window) and window.visible)
+		state["toolbar"] = {"scale":hud.scale.x,"right":hud.position.x+hud.size.x,"center_y":hud.get_global_rect().get_center().y,"actions":hud.get_children().map(func(button: Button) -> String: return button.accessibility_name),"icons":hud.get_children().map(func(button: Button) -> Dictionary: return {"rect":[button.get_global_rect().position.x,button.get_global_rect().position.y,button.size.x,button.size.y],"scale":button.glyph.scale.x,"angle":button.glyph.rotation_degrees})}
+		state["left_center_y"] = task_panel.get_global_rect().get_center().y
+		state["preferences"] = preferences.values
+		state["design_size"] = [get_tree().root.content_scale_size.x,get_tree().root.content_scale_size.y]
+		state["buses"] = {"master":AudioServer.get_bus_volume_db(0),"music":AudioServer.get_bus_volume_db(AudioServer.get_bus_index("VNMusic")),"effects":AudioServer.get_bus_volume_db(AudioServer.get_bus_index("VNEffects"))}
+		if settings_panel.visible:
+			var rows: Dictionary = {}
+			for id: String in settings_panel.controls:
+				var rect: Rect2 = settings_panel.controls[id].get_global_rect()
+				rows[id] = [rect.position.x,rect.position.y,rect.size.x,rect.size.y]
+				if settings_panel.controls[id] is OptionButton:
+					var choice: PopupMenu = settings_panel.controls[id].get_popup()
+					if choice.visible: state["choice_popup"] = {"id":id,"rect":[choice.position.x,choice.position.y,choice.size.x,choice.size.y],"count":choice.item_count}
+			var bounds: Rect2 = settings_panel.panel.get_global_rect()
+			state["paper_settings"] = {"rect":[bounds.position.x,bounds.position.y,bounds.size.x,bounds.size.y],"controls":rows,"status":settings_panel.status.text}
 		if is_instance_valid(window): state["settings_rect"] = [window.position.x,window.position.y,window.size.x,window.size.y]
 		if host.get("narrative")!=null:
 			state["ink_observed"]=m.ink_observed
 			state["reports"]=m.unlocked_reports
 			state["active_item"]=m.active_item
+			state["report_visible"] = is_instance_valid(host.designed_page)
+			if is_instance_valid(host.designed_page):
+				state["report_id"] = host.designed_page.report_id
+				state["report_artwork"] = host.designed_page.artwork_path
+			state["report_menu_visible"] = host.end_screen.visible
 		if is_instance_valid(host.get("ink_game")):
 			state.merge({"card":host.ink_game.selected,"flow":host.ink_game.field.energy,"moving":host.ink_game.moving,"zoom":host.ink_game.zoom,"hovered":host.ink_game.hovered,"card_y":host.ink_game.cards.map(func(card: Control) -> float: return card.position.y)})
 		JavaScriptBridge.get_interface("window").flowerExperienceQA=JSON.stringify(state)
@@ -452,43 +499,16 @@ func popup(title: String) -> VBoxContainer:
 	return content
 
 func menu() -> void:
-	var box := popup("设置")
-	box.custom_minimum_size = Vector2(440,0)
-	box.add_theme_constant_override("separation",16)
-	for entry: Array in [["总音量","master"],["音乐","music"],["音效","effects"]]:
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation",16)
-		box.add_child(row)
-		var label: Label = host._label(entry[0],17)
-		label.custom_minimum_size = Vector2(72,34)
-		row.add_child(label)
-		var slider := HSlider.new()
-		slider.min_value = 0
-		slider.max_value = 1
-		slider.step = 0.01
-		slider.value = audio.options.get(entry[1],0.7)
-		slider.custom_minimum_size = Vector2(260,34)
-		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(slider)
-		var percent: Label = host._label("%d%%" % roundi(slider.value*100),15)
-		percent.custom_minimum_size.x = 48
-		row.add_child(percent)
-		slider.value_changed.connect(func(v: float) -> void: audio.set_option(entry[1],v);percent.text="%d%%" % roundi(v*100))
-	var speeds := OptionButton.new()
-	for name: String in ["阅读速度 · 慢","阅读速度 · 标准","阅读速度 · 快"]: speeds.add_item(name)
-	speeds.select(speed)
-	speeds.item_selected.connect(func(i: int) -> void: speed=i;Engine.set_meta("experience_speed",speed);age=0)
-	box.add_child(speeds)
-	box.add_child(small("静音 / 恢复",func() -> void: audio.set_option("mute",not audio.options.mute)))
-	box.add_child(small("操作帮助",func() -> void: window.hide();host._show_help()))
-	if settings.development: box.add_child(small("剧情调试",debug_menu))
-	window.ok_button_text = "返回游戏"
-	window.get_ok_button().icon = Layout.asset_icon(preload("res://assets/ui-v1/back-restart.png"),0)
-	window.get_ok_button().expand_icon = true
-	window.get_ok_button().add_theme_constant_override("icon_max_width",22)
-	window.popup_centered.call_deferred()
+	settings_panel.open()
 
 func reports() -> void:
+	if host.day01_view.has_modal(): return
+	if host.open_report_book("",true,func(status: String) -> void:
+		age=0
+		if status == "error": _native_reports()): return
+	_native_reports()
+
+func _native_reports() -> void:
 	var box:=popup("已解锁进步报告")
 	var scroll:=ScrollContainer.new()
 	scroll.custom_minimum_size=Vector2(550,280)
@@ -511,7 +531,7 @@ func reports() -> void:
 			var report:Dictionary=model().data.reports[id]
 			list.add_child(small(report.title+" · "+report.date,func() -> void:
 				window.hide()
-				if id in ["report2-0304","report2-0306-maze","report2-0306-decision","report2-0308"]:
+				if id == "report2-0304" or host.report_artwork.has(id):
 					host.open_designed_report(id,true)
 					return
 				host.day01_view.report_text.text=report.title+"\n"+report.date+"\n\n"+report.text

@@ -82,8 +82,10 @@
         args.push('--experience-qa');
         const scene = new URL(location.href).searchParams.get('scene');
         if (scene && /^[a-z0-9-]+$/.test(scene)) args.push('--preview-scene=' + scene);
+        const report = new URL(location.href).searchParams.get('report');
+        if (report && /^[a-z0-9-]+$/.test(report)) args.push('--preview-report=' + report);
       }
-      engine.startGame({
+      import('./ink-host.js').then(() => engine.startGame({
         args,
         onProgress(current, total) {
           if (current > 0 && total > 0) {
@@ -97,7 +99,7 @@
             percent.textContent = '准备中';
           }
         },
-      }).then(() => status.remove(), fail);
+      })).then(() => status.remove(), fail);
     }());
   </script>
 </body>

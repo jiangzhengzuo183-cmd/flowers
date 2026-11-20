@@ -33,7 +33,7 @@ func run()->void:
 	check(day.flow.active_person=="alice" and day.flow.queue.size()==16,"直接接入爱丽丝16句对话，无点击步骤")
 	for i in range(8):day.advance()
 	check(day.day01_view.dialogue_cast.portraits.charlie_left.texture.resource_path.ends_with("charlie-empty.png"),"交接后保持查理无本子")
-	check(day.runtime.hud.get_rect().end.x==1536,"右上导航遵守64px右边距")
+	check(is_equal_approx(day.runtime.hud.position.x+day.runtime.hud.size.x*day.runtime.hud.scale.x,1600-64.0/1.2),"放大后的右上导航保持安全边距")
 	story.queue_free();await frames()
 	chapter=Chapter.new();chapter.theme=load("res://ui/game_theme.tres");root.add_child(chapter);await frames()
 	for idx in range(chapter.narrative.data.scenes.size()):
@@ -51,9 +51,9 @@ func run()->void:
 			m.advance()
 	chapter.narrative.enter_scene(10);await ready_view();await shot("middle-bakery")
 	chapter.narrative.enter_scene(11);await ready_view()
-	check(chapter.backdrop.texture!=null and chapter.room_machine.visible,"住处与独立机器图层已接入")
+	check(chapter.backdrop.texture.resource_path.ends_with("room-tv-day.png"),"白天住处使用含电视机的新整图")
 	await shot("home-day")
-	chapter.narrative.enter_scene(12);await ready_view();check(chapter.backdrop.texture.resource_path.ends_with("home-night.png"),"机器夜景使用新素材")
+	chapter.narrative.enter_scene(12);await ready_view();check(chapter.backdrop.texture.resource_path.ends_with("room-tv-night.jpg"),"机器夜景使用新素材")
 	await shot("home-night")
 	chapter.narrative.enter_scene(8);await ready_view();check(chapter.backdrop.texture.resource_path.ends_with("cafeteria.png"),"新食堂背景接入")
 	chapter.open_designed_report("report2-0308",true);await frames();await shot("report-march8")
@@ -69,16 +69,26 @@ func run()->void:
 		var m:RefCounted=chapter.narrative
 		match m.phase:
 			"reading":chapter.advance()
+			"ink_observation":
+				await process_frame
+				if is_instance_valid(chapter.ink_game):chapter.ink_game.finish()
 			"explore":
 				if m.scene().id not in visited:
 					visited.append(m.scene().id)
 					for item:Dictionary in m.scene().items:
 						if item.get("available_after_maze",false):continue
 						chapter.start_object(item.id)
-						if m.phase=="ink_observation":chapter.ink_game.finish();await process_frame
+						if m.phase=="ink_observation":
+							await frames()
+							if is_instance_valid(chapter.ink_game):chapter.ink_game.finish()
+							await process_frame
 						if m.phase=="volume":m.set_volume(0.2);chapter.utility_window.hide();chapter._close_utility()
 						if m.phase=="words":chapter.utility_window.hide();chapter._close_utility()
+						if item.get("kind","")=="archive":await frames()
 						if is_instance_valid(chapter.runtime.window):chapter.runtime.window.hide()
+						if is_instance_valid(chapter.designed_page):
+							chapter.designed_page.request_continue()
+							await frames()
 						while m.phase=="reading":chapter.advance()
 						m.close_item()
 				chapter.continue_main()

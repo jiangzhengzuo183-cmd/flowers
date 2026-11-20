@@ -19,14 +19,9 @@ var completion_until := 0
 
 func _ready() -> void:
 	position = Vector2.ONE * Layout.SAFE
-	scale = Vector2.ONE * 1.12
+	scale = Vector2.ONE * 1.25
 	# Ignore transparent export padding, retaining the original artwork.
-	paper = AtlasTexture.new()
-	paper.atlas = preload("res://assets/ui-v1/task-paper.png")
-	paper.region = Rect2(25,160,2010,475)
-	paper_accent = AtlasTexture.new()
-	paper_accent.atlas = paper.atlas
-	paper_accent.region = Rect2(1830,40,215,145)
+	paper = Layout.asset_icon(preload("res://assets/ui-v1/task-paper-v2.png"))
 	size = Vector2(300,75)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	button = Button.new()
@@ -44,7 +39,7 @@ func _ready() -> void:
 	focus.set_border_width_all(1)
 	focus.set_corner_radius_all(4)
 	button.add_theme_stylebox_override("focus",focus)
-	place = _label(14)
+	place = _label(15)
 	place.position = Vector2(32,9)
 	place.size = Vector2(170,22)
 	place.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -53,7 +48,7 @@ func _ready() -> void:
 	status.position = Vector2(199,8)
 	status.size = Vector2(85,22)
 	status.add_theme_color_override("font_color",Color("8a785e"))
-	objective = _label(16)
+	objective = _label(17)
 	objective.position = Vector2(32,40)
 	objective.size = Vector2(252,28)
 	objective.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -102,18 +97,21 @@ func sync(location: String, id: String, text: String, marker: String, count: int
 	_layout()
 
 func _layout() -> void:
-	var compact := collapsed or reading_mode
+	var location_only := reading_mode or objective.text.is_empty()
+	var compact := collapsed or location_only
 	objective.visible = not compact
 	# Expand for long translated goals without clipping or single-character columns.
-	var rows := maxi(1,ceili(objective.get_theme_font("font").get_string_size(objective.text,HORIZONTAL_ALIGNMENT_LEFT,-1,16).x / 252.0))
+	var rows := maxi(1,ceili(objective.get_theme_font("font").get_string_size(objective.text,HORIZONTAL_ALIGNMENT_LEFT,-1,17).x / 252.0))
 	size.x = 266.6667 if compact else 300.0
 	size.y = 40 if compact else maxf(75,49+rows*23)
-	status.visible = not reading_mode
-	place.size.x = 215 if reading_mode else (size.x-130)
+	status.visible = not location_only
+	place.size.x = 215 if location_only else (size.x-130)
 	status.position.x = size.x-101
 	objective.size.y = maxf(28,rows*21)
 	button.size = size
-	button.accessibility_name = place.text + "，" + status.text + "，" + objective.text
+	if button.disabled != objective.text.is_empty(): button.disabled = objective.text.is_empty()
+	button.tooltip_text = "" if objective.text.is_empty() else "展开 / 收起当前任务"
+	button.accessibility_name = place.text if location_only else place.text + "，" + status.text + "，" + objective.text
 	queue_redraw()
 
 func _draw() -> void:
@@ -123,7 +121,7 @@ func _draw() -> void:
 	draw_arc(Vector2(18,17),4.2,PI,TAU,16,INK,1.2,true)
 	draw_polyline(PackedVector2Array([Vector2(13.8,17),Vector2(18,25),Vector2(22.2,17)]),INK,1.2,true)
 	draw_circle(Vector2(18,17),1.3,INK,true)
-	if not collapsed and not reading_mode:
+	if not collapsed and not reading_mode and not objective.text.is_empty():
 		draw_line(Vector2(15,35),Vector2(285,35),Color("ddd1b9"),0.8,true)
 		if done:
 			draw_polyline(PackedVector2Array([Vector2(14,51),Vector2(17,54),Vector2(23,47)]),Color("91866e"),1.8,true)

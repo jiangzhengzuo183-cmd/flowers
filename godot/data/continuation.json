@@ -147,33 +147,7 @@
           "她告诉我们，你一直非常努力。"
         ]
       ],
-      "items": [
-        {
-          "id": "nemur",
-          "label": "尼姆教授",
-          "lines": [
-            [
-              "尼姆教授",
-              "我们以前只在动物身上做过这种实验，还不知道用在人身上会怎样。"
-            ],
-            [
-              "查理",
-              "我知道了。我还是想试。"
-            ]
-          ],
-          "kind": "person",
-          "actors": [
-            "nemur",
-            "charlie_right"
-          ],
-          "rect": [
-            1080,
-            420,
-            200,
-            390
-          ]
-        }
-      ],
+      "items": [],
       "outro": [
         [
           "斯特劳斯医生",
@@ -924,7 +898,7 @@
       "id": "p3-volume",
       "part": "DAY 03–15",
       "title": "08 / 音量旋钮",
-      "bg": "school",
+      "bg": "home",
       "intro": [
         [
           "查理",
@@ -1052,9 +1026,9 @@
       "bar": "bar.png",
       "bakery": "res://assets/bakery/interior.png",
       "school": "res://assets/bakery/school-empty.png",
-      "home": "home-day.png",
+      "home": "room-tv-day.png",
       "cafeteria": "cafeteria.png",
-      "home-night": "home-night.png"
+      "home-night": "room-tv-night.jpg"
     },
     "items": {
       "rabbit": "rabbit.png",

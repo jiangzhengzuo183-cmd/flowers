@@ -16,3 +16,5 @@ for (const file of ['story-video.js', 'media/charlie-dance.mp4']) {
   }
 }
 console.log('Story video packaged: ' + fileURLToPath(new URL('exports/web/media/charlie-dance.mp4', root)));
+// Keep the approved ink module beside every Web export, including project subpaths.
+await import('./package-ink-web.mjs');

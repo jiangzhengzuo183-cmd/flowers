@@ -7,6 +7,9 @@ signal continue_chapter
 const Flow := preload("res://scripts/story/bakery_flow.gd")
 const Day01View := preload("res://scripts/story/day01_scene_view.gd")
 const NOTE_PATH := "user://bakery-notebook.txt"
+const ReportBook := preload("res://scripts/story/report_book.gd")
+const ReportCatalog := preload("res://scripts/story/report_book_catalog.gd")
+var report_book: Control
 const DAY := preload("res://assets/bakery/interior.png")
 const NIGHT := preload("res://assets/bakery/interior-night.png")
 const OUTSIDE := preload("res://assets/bakery/exterior.png")
@@ -68,6 +71,43 @@ func _label(value: String, font_size: int = 16) -> Label:
 	label.text = value
 	label.add_theme_font_size_override("font_size", font_size)
 	return label
+
+func open_report_book(id: String, review: bool, on_finished: Callable) -> bool:
+	if is_instance_valid(report_book): return true
+	var book := ReportBook.new()
+	book.name = "ProgressReportBook"
+	book.request = ReportCatalog.request(self,id,review)
+	book.z_index = 150
+	report_book = book
+	book.finished.connect(func(status: String) -> void:
+		if report_book != book: return
+		report_book = null
+		book.queue_free()
+		on_finished.call(status))
+	add_child(book)
+	return true
+
+func show_report_text_fallback(id: String, on_finished: Callable) -> void:
+	# A failed web asset must not fall back to a composite containing future dates.
+	var source: Dictionary
+	if id == "report1": source = {"title":flow.data.report_title,"date":flow.data.report_date,"text":flow.data.report}
+	else: source = get("narrative").data.reports[id]
+	var popup := AcceptDialog.new()
+	_style_dialog(popup)
+	popup.title = str(source.title)+" · "+str(source.date)
+	popup.ok_button_text = "继续"
+	popup.exclusive = true
+	var text := RichTextLabel.new()
+	text.custom_minimum_size = Vector2(800,520)
+	text.add_theme_font_override("normal_font",preload("res://assets/fonts/YeLiHangJiuLinKaTong.ttf"))
+	text.add_theme_font_size_override("normal_font_size",26)
+	text.add_theme_color_override("default_color",Color("493f30"))
+	text.text = str(source.text).replace("\\n","\n")
+	popup.add_child(text)
+	add_child(popup)
+	popup.confirmed.connect(func() -> void: popup.hide();popup.queue_free();on_finished.call("completed"))
+	popup.canceled.connect(func() -> void: popup.popup_centered.call_deferred())
+	popup.popup_centered_ratio(0.85)
 
 func _button(value: String, callback: Callable) -> Button:
 	var button := Button.new()

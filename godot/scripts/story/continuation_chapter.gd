@@ -1,7 +1,7 @@
 extends "res://scripts/story/bakery_chapter.gd"
 ## 延续原纸张UI与双人控制器；后续状态独立，缺少背景保持空白。
 const ContinuationFlow := preload("res://scripts/story/continuation_flow.gd")
-const Race := preload("res://scripts/story/story_race.gd")
+const Race := preload("res://scripts/story/maze_gateway.gd")
 const Hotspot := preload("res://scripts/story/scene_hotspot.gd")
 const NativeInk := preload("res://scripts/story/ink_observation.gd")
 var ink_game: Control
@@ -15,15 +15,15 @@ var end_screen: PanelContainer
 var end_label: Label
 var chapter_button: Button
 var race: Control
+var maze_scenes: Dictionary = {}
+signal maze_requested(round_number: int, context: Dictionary)
 var utility_window: AcceptDialog
 var utility_content: VBoxContainer
 var machine_audio: AudioStreamPlayer
 var lab_audio: AudioStreamPlayer
 var loaded_scene := -1
 var designed_page: Control
-var room_machine: TextureRect
-var lab_professor: TextureRect
-var professor_shadow: Panel
+var report_artwork: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/report_artwork.json"))
 var story_video: Node
 
 func _ready() -> void:
@@ -41,25 +41,11 @@ func _ready() -> void:
 	stage.add_child(item_layer)
 	item_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	item_image = day01_view._texture(null,stage,Rect2(620,240,360,330))
-	room_machine=day01_view._texture(_asset("television-front-v1.png"),stage,Rect2(1225,250,300,285))
-	room_machine.hide()
 	detail_return=_button("返回探索",func() -> void:narrative.close_item();_refresh())
 	stage.add_child(detail_return)
 	detail_return.position=Vector2(1270,810)
 
 	_build_extension_cast()
-	professor_shadow = Panel.new()
-	var shadow := StyleBoxFlat.new()
-	shadow.bg_color = Color(0.14,0.11,0.07,0.16)
-	shadow.set_corner_radius_all(8)
-	professor_shadow.add_theme_stylebox_override("panel",shadow)
-	professor_shadow.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	stage.add_child(professor_shadow)
-	professor_shadow.position = Vector2(1125,788)
-	professor_shadow.size = Vector2(110,13)
-	professor_shadow.hide()
-	lab_professor = day01_view._texture(_asset("nemur.png"),stage,Rect2(1060,360,240,510))
-	lab_professor.hide()
 	_build_end_screen()
 	utility_window = AcceptDialog.new()
 	_style_dialog(utility_window)
@@ -73,8 +59,10 @@ func _ready() -> void:
 	utility_window.confirmed.connect(_close_utility)
 	utility_window.canceled.connect(_close_utility)
 	machine_audio = AudioStreamPlayer.new()
+	machine_audio.bus = "VNEffects"
 	add_child(machine_audio)
 	lab_audio = AudioStreamPlayer.new()
+	lab_audio.bus = "VNMusic"
 	add_child(lab_audio)
 	if ResourceLoader.exists("res://assets/continuation/machine-lesson.ogg"):
 		machine_audio.stream = load("res://assets/continuation/machine-lesson.ogg")
@@ -90,6 +78,9 @@ func _ready() -> void:
 			if argument.begins_with("--preview-scene="):
 				for number in range(narrative.data.scenes.size()):
 					if narrative.data.scenes[number].id == argument.trim_prefix("--preview-scene="): narrative.enter_scene(number); break
+			if argument.begins_with("--preview-report="):
+				var requested_report := argument.trim_prefix("--preview-report=")
+				if report_artwork.has(requested_report) or requested_report == "report2-0304": open_designed_report.call_deferred(requested_report,false)
 	_refresh()
 
 func _asset(value: String) -> Texture2D:
@@ -122,28 +113,27 @@ func _build_extension_cast() -> void:
 
 func _build_end_screen() -> void:
 	end_screen = PanelContainer.new()
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color("101a20")
-	style.content_margin_left = 260
-	style.content_margin_right = 260
-	style.content_margin_top = 200
-	style.content_margin_bottom = 180
-	end_screen.add_theme_stylebox_override("panel",style)
-	stage.add_child(end_screen)
 	end_screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var stack := VBoxContainer.new()
-	stack.add_theme_constant_override("separation",30)
-	stack.alignment = BoxContainer.ALIGNMENT_CENTER
-	end_screen.add_child(stack)
-	end_label = _label("",34)
+	var surface := StyleBoxFlat.new()
+	surface.bg_color = Color("211f1a")
+	end_screen.add_theme_stylebox_override("panel",surface)
+	var content := VBoxContainer.new()
+	content.alignment = BoxContainer.ALIGNMENT_CENTER
+	content.add_theme_constant_override("separation",24)
+	end_screen.add_child(content)
+	end_label = _label("第一章结束",42)
 	end_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	end_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	end_label.add_theme_color_override("font_color",Color("fff4df"))
-	stack.add_child(end_label)
-	stack.add_child(_button("阅读进步报告",_show_extension_report))
-	chapter_button = _button("继续",_continue_chapter)
-	stack.add_child(chapter_button)
-	stack.add_child(_button("从头阅读",_confirm_restart))
+	end_label.add_theme_color_override("font_color",Color("f5e9d4"))
+	content.add_child(end_label)
+	var dates := _label("3月3日—4月28日",24)
+	dates.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	dates.add_theme_color_override("font_color",Color("d7c7a9"))
+	content.add_child(dates)
+	var review := _button("翻阅已解锁的进步报告",func() -> void:runtime.reports())
+	review.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	content.add_child(review)
+	end_screen.hide()
+	stage.add_child(end_screen)
 
 func _active_item() -> Dictionary:
 	if narrative.phase == "complete": return {}
@@ -159,29 +149,29 @@ func _refresh() -> void:
 		runtime.transition(destination,_refresh)
 		return
 	var complete := narrative.phase == "complete"
-	end_screen.visible = complete or narrative.phase == "chapter_end"
+	end_screen.hide()
 	if complete:
-		end_label.text = "DAY 16–46 END\n从“变聪明”到“读懂人心”"
+		stage.show()
+		end_screen.show()
 		dialogue_panel.hide()
 		item_layer.hide()
 		items_box.hide()
 		continue_button.hide()
 		var empty_cast: Array[String] = []
 		day01_view.dialogue_cast.refresh_for(empty_cast,"")
-		chapter_button.hide()
 		return
 	var scene_data := narrative.scene()
 	var line := narrative.current_line()
 	var reading := narrative.phase == "reading"
 	var exploring := narrative.phase == "explore" and narrative.active_item.is_empty()
 	var item := _active_item()
-	var needs_machine: bool = scene_data.bg == "home" or scene_data.id == "p3-volume"
+	var needs_machine: bool = scene_data.bg in ["home","home-night"] or scene_data.id == "p3-volume"
 	if needs_machine and machine_audio.stream != null and runtime.audio.armed:
 		if not machine_audio.playing: machine_audio.play()
 	else: machine_audio.stop()
 	lab_audio.stop()
 	title.text = scene_data.part+" · "+scene_data.title
-	location.text = {"office-outside":"心理咨询室外 · 3月4日午休","office":"心理咨询室","lab":"实验室","hospital":"医院病房","cafeteria":"大学餐厅","home":"查理住处","bar":"酒馆","school":"实验室附近的教室","bakery":"面包店"}.get(scene_data.bg,"")
+	location.text = {"office-outside":"心理咨询室外 · 3月4日午休","office":"心理咨询室","lab":"实验室","hospital":"医院病房","cafeteria":"大学餐厅","home":"查理住处 · 日","home-night":"查理住处 · 夜","bar":"酒馆","school":"实验室附近的教室","bakery":"面包店"}.get(scene_data.bg,"")
 	var visible_bg: String = item.get("bg",scene_data.bg) if reading else scene_data.bg
 	if reading and item.has("bg"):
 		location.text = {"memory":"记忆碎片","cafeteria":"大学餐厅"}.get(visible_bg,location.text)
@@ -205,10 +195,6 @@ func _refresh() -> void:
 	# One list of compact actions; separate ink buttons would overlap people.
 	items_box.hide()
 	item_layer.visible = exploring
-	lab_professor.visible = exploring and scene_data.id == "d2-interview"
-	professor_shadow.visible = lab_professor.visible
-	# The sprite and its existing hotspot form one clickable character.
-	if lab_professor.visible: stage.move_child(item_layer,stage.get_child_count()-1)
 	if scene_data.has("after_maze") and not narrative.maze_results.has(str(int(scene_data.maze))): item_layer.hide()
 	task.visible = exploring
 	task.text = "点击人物或物件探索；点击右下角继续。" if not scene_data.get("missing_text",false) else ""
@@ -245,22 +231,21 @@ func _refresh() -> void:
 	item_image.texture = _asset(narrative.data.assets.items.get(item.get("asset",""),item.get("asset","")+".png")) if item.has("asset") else null
 	if scene_data.get("ink",false): item_image.texture = null
 	item_image.visible = item_image.texture != null and not end_screen.visible and narrative.phase != "maze"
-	room_machine.visible=visible_bg in ["home","home-night"] and not end_screen.visible and narrative.phase!="maze"
-	if room_machine.visible and item.get("asset","")=="television":item_image.hide()
+	if visible_bg in ["home","home-night"] and item.get("asset","") in ["television","volume"]: item_image.hide()
 	if narrative.phase == "chapter_end":
 		if shown_report != scene_data.report:
 			shown_report = scene_data.report
 			_show_extension_report.call_deferred()
-		var report: Dictionary = narrative.data.reports[scene_data.report]
-		end_label.text = "DAY 02 END\n跑在我前面的阿尔吉侬\n下一章：手术之后" if scene_data.report == "report2" else "CHAPTER 01 · PART 03 END\n慢慢移动的时针" if scene_data.report == "report8" else report.title+"\n"+report.date
-		chapter_button.text = "进入 DAY 03–15  ≫" if scene_data.report == "report2" else "继续  ≫"
-		chapter_button.visible = true
 	if narrative.phase == "maze" and not is_instance_valid(race):
 		race = Race.new()
 		race.round_number = int(scene_data.maze)
+		race.story_scene = scene_data.id
+		race.scene_override = maze_scenes.get(int(scene_data.maze))
+		race.requested.connect(func(number: int, context: Dictionary) -> void: maze_requested.emit(number,context))
+		race.finished.connect(_race_finished)
+		race.cancelled.connect(_maze_cancelled)
 		stage.add_child(race)
 		race.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		race.finished.connect(_race_finished)
 	if OS.has_feature("web") and "--ink-qa" in OS.get_cmdline_user_args():
 		JavaScriptBridge.get_interface("window").flowerInkQA = JSON.stringify({"scene":scene_data.id,"phase":narrative.phase,"index":narrative.index,"history":narrative.history.size(),"completed":narrative.completed,"ink_observed":narrative.ink_observed,"ink_result":narrative.ink_result})
 	if narrative.phase == "ink_observation" and not is_instance_valid(ink_game): _open_ink.call_deferred()
@@ -307,7 +292,8 @@ func _rebuild_items() -> void:
 		var r: Array = item.get("rect",[])
 		# Ink is an explicit action, even if its data contains a card rectangle.
 		if item.id == "ink": r=[]
-		if item.id=="television" and narrative.scene().bg in ["home","home-night"]:r=[1225,250,300,285]
+		if item.id=="television" and narrative.scene().bg in ["home","home-night"]:r=[1290,285,205,270]
+		if item.id == "volume" and narrative.scene().bg in ["home","home-night"]: r=[1390,387,55,110]
 		if narrative.scene().bg == "hospital":
 			r = {"cake":[905,475,110,85],"magazine":[1065,505,165,85]}.get(item.id,r)
 		if r.is_empty():
@@ -398,7 +384,16 @@ func _ink_completed(result: Dictionary) -> void:
 	next_button.grab_focus()
 
 func _race_finished(result: Dictionary) -> void:
+	if narrative.phase != "maze": return
 	narrative.complete_maze(result)
+	_refresh()
+
+func register_maze_scene(number: int, scene: PackedScene) -> void:
+	assert(number in [1,2,3],"Maze slot must be 1, 2 or 3")
+	maze_scenes[number] = scene
+
+func _maze_cancelled() -> void:
+	narrative.cancel_maze()
 	_refresh()
 
 func _continue_chapter() -> void:
@@ -409,30 +404,39 @@ func _continue_chapter() -> void:
 func _show_extension_report() -> void:
 	if narrative.phase not in ["chapter_end","complete"]: return
 	var id: String = narrative.last_report if narrative.phase == "complete" else narrative.scene().report
-	var report: Dictionary = narrative.data.reports[id]
-	if id in ["report2-0304","report2-0306-maze","report2-0306-decision","report2-0308"]:
-		open_designed_report(id,false)
-		return
-	day01_view.report_window.title = report.title
-	day01_view.report_text.text = report.title+"\n"+report.date+"\n\n"+report.text
-	day01_view.report_text.scroll_to_line(0)
-	day01_view.report_window.popup_centered_ratio(0.84)
+	open_designed_report(id,false)
 
 func open_designed_report(id:String,review:bool) -> void:
-	if is_instance_valid(designed_page):return
+	if is_instance_valid(designed_page) or is_instance_valid(report_book):return
+	if open_report_book(id,review,func(status: String) -> void: _book_finished(id,review,status)): return
+	_open_native_designed_report(id,review)
+
+func _book_finished(id: String, review: bool, status: String) -> void:
+	if status == "error":
+		show_report_text_fallback(id,func(result: String) -> void: _book_finished(id,review,result))
+		return
+	if status == "completed" and not review and narrative.phase == "chapter_end" and narrative.scene().report == id: narrative.continue_chapter()
+	_refresh()
+
+func _open_native_designed_report(id: String, review: bool) -> void:
 	designed_page=load("res://scripts/story/designed_report.gd").new()
 	designed_page.report_id=id
+	designed_page.artwork_path="res://assets/report-final/"+report_artwork[id] if report_artwork.has(id) else ""
 	designed_page.z_index=110
 	add_child(designed_page)
 	designed_page.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	designed_page.open()
 	stage.hide();runtime.hide()
 	designed_page.continued.connect(func() -> void:
+		if not review and narrative.phase=="chapter_end": narrative.continue_chapter()
+		if not review and narrative.phase=="complete":
+			designed_page.continue_button.text = "已读完本章"
+			designed_page.continue_button.disabled = true
+			return
 		var finished_page:Control=designed_page
 		designed_page=null
 		finished_page.queue_free()
 		stage.show();runtime.show()
-		if not review and narrative.phase=="chapter_end":narrative.continue_chapter()
 		_refresh())
 
 func _dialogue_pair(specified:Array[String],who:String) -> Array[String]:
@@ -472,5 +476,5 @@ func _process(_delta: float) -> void:
 	if is_instance_valid(race): race.paused = day01_view.has_modal()
 	if is_instance_valid(lab_audio): lab_audio.stream_paused = history_window.visible
 	if is_instance_valid(machine_audio) and runtime.audio != null:
-		machine_audio.volume_db=linear_to_db(maxf(0.0001,narrative.volume*runtime.audio.options.master*runtime.audio.options.effects))
+		machine_audio.volume_db=linear_to_db(maxf(0.0001,narrative.volume))
 		machine_audio.stream_paused=history_window.visible or runtime.audio.options.mute

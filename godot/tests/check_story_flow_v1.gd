@@ -21,7 +21,7 @@ func run() -> void:
 	check(flow.phase == "explore","测试后恢复原探索，不重复自动打开")
 	check(flow.ink_observed,"墨迹测试结果保存")
 	flow.enter_scene(2)
-	check(flow.scene().items.size() == 1 and flow.scene().items[0].id == "nemur","实验室仅保留尼姆教授互动")
+	check(flow.scene().items.is_empty(),"实验室移除角落尼姆及所有旧物件入口")
 	flow.enter_scene(4)
 	check(flow.scene().items.is_empty(),"删除动机记录纸页面")
 	flow.enter_scene(13)

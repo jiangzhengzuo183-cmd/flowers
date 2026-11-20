@@ -150,6 +150,9 @@ func complete_maze(result: Dictionary) -> bool:
 	if phase == "finish_scene": finish_scene()
 	return true
 
+func cancel_maze() -> void:
+	if phase == "maze": phase = "explore"
+
 func finish_scene() -> void:
 	if scene().has("report"):
 		last_report = scene().report

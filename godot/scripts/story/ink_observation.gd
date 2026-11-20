@@ -4,6 +4,11 @@ signal completed(result: Dictionary)
 const Field := preload("res://scripts/story/ink_field.gd")
 const SHADER := preload("res://scripts/story/ink_flow.gdshader")
 const ROOT := "res://web/ink-observation/assets/"
+const WebInk := preload("res://scripts/story/ink_observation_bridge.gd")
+var web_ink: RefCounted
+var web_active := false
+var previous_paused := false
+var previous_rendering := true
 var frame: Control
 var cards: Array[Control] = []
 var inks: Array[TextureRect] = []
@@ -36,17 +41,62 @@ func texture(image: Texture2D, parent: Control, rect: Rect2) -> TextureRect:
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	if OS.has_feature("web") and JavaScriptBridge.get_interface("FlowerInk") != null:
+		_open_web()
+		return
+	_build_native()
+
+func _open_web() -> void:
+	web_active = true
+	field = Field.new(settings.ink)
+	set_process(false)
+	set_process_input(false)
+	previous_paused = get_tree().paused
+	get_tree().paused = true
+	if RenderingServer.has_method("is_render_loop_enabled"):
+		previous_rendering = RenderingServer.call("is_render_loop_enabled")
+	if RenderingServer.has_method("set_render_loop_enabled"):
+		RenderingServer.call("set_render_loop_enabled",false)
+	web_ink = WebInk.new()
+	web_ink.completed.connect(_web_completed)
+	web_ink.failed.connect(_web_failed)
+	web_ink.open()
+
+func _restore_web() -> void:
+	if not web_active: return
+	web_active = false
+	get_tree().paused = previous_paused
+	if RenderingServer.has_method("set_render_loop_enabled"):
+		RenderingServer.call("set_render_loop_enabled",previous_rendering)
+
+func _web_completed(result: Dictionary) -> void:
+	_restore_web()
+	done = true
+	completed.emit(result)
+	queue_free()
+
+func _web_failed(message: String) -> void:
+	_restore_web()
+	push_warning(message)
+	web_ink = null
+	_build_native.call_deferred()
+	set_process(true)
+	set_process_input(true)
+
+func _build_native() -> void:
 	frame = Control.new()
 	frame.size = Vector2(1600,900)
 	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(frame)
 	texture(load(ROOT+"wood.png"),frame,Rect2(0,0,1600,900))
-	var title := Label.new()
-	title.text="墨迹测试"
-	title.position=Vector2(64,30)
-	title.add_theme_font_size_override("font_size",38)
-	title.add_theme_color_override("font_color",Color("fff3df"))
-	frame.add_child(title)
+	var hint := Label.new()
+	hint.text = "点击卡片靠近观察；移动鼠标触碰墨迹；按 Esc 或点击空白处放回。"
+	hint.position = Vector2(64,822)
+	hint.size = Vector2(1100,48)
+	hint.add_theme_font_size_override("font_size",18)
+	hint.add_theme_color_override("font_color",Color("fff3df"))
+	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	frame.add_child(hint)
 	field = Field.new(settings.ink)
 	var positions := [Vector2(0.79,0.65),Vector2(0.39,0.64),Vector2(0.65,0.25),Vector2(0.22,0.26)]
 	for i in range(4):
@@ -190,6 +240,8 @@ func finish() -> void:
 	queue_free()
 
 func _exit_tree() -> void:
+	if web_ink: web_ink.cancel()
+	_restore_web()
 	if tween: tween.kill()
 	for motion: Tween in hover_tweens.values(): motion.kill()
 	for ink: TextureRect in inks: ink.material = null

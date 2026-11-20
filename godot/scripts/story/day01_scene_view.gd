@@ -131,30 +131,7 @@ func _build_end() -> void:
 	end_overlay = Control.new()
 	host.stage.add_child(end_overlay)
 	end_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var black := ColorRect.new()
-	black.color = Color("090b0e")
-	end_overlay.add_child(black)
-	black.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var stack := VBoxContainer.new()
-	stack.position = Vector2(300,170)
-	stack.size = Vector2(1000,440)
-	stack.alignment = BoxContainer.ALIGNMENT_CENTER
-	stack.add_theme_constant_override("separation", 24)
-	end_overlay.add_child(stack)
-	for entry: Array in [["CHAPTER 01",18],["DAY 01",28],["面包店的灯",58],["一个新的机会，正在等待着他。",22],["END OF DAY 01",16]]:
-		var label: Label = host._label(entry[0], entry[1])
-		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		label.add_theme_color_override("font_color", Color("f5e7c9"))
-		stack.add_child(label)
-	var actions := HBoxContainer.new()
-	end_overlay.add_child(actions)
-	actions.position = Vector2(350,680)
-	actions.size = Vector2(900,60)
-	actions.alignment = BoxContainer.ALIGNMENT_CENTER
-	report_button = host._button("继续 · 阅读进步抱告—1  ≫", show_report)
-	actions.add_child(report_button)
-	actions.add_child(host._button("从头体验", host._confirm_restart))
-	host.maze_button.reparent(actions)
+	end_overlay.hide()
 	report_window = AcceptDialog.new()
 	host._style_dialog(report_window)
 	report_window.title = "进步抱告—1 · 3月3日"
@@ -392,7 +369,8 @@ func _hide_hint(immediate: bool = false) -> void:
 
 func _position_hint() -> void:
 	var actor_rect := hover_target.get_global_rect()
-	var desired: Vector2 = actor_rect.position - host.stage.global_position + Vector2(actor_rect.size.x * 0.55 + 10,-hover_panel.size.y-12)
+	var actor_local: Vector2 = host.stage.get_global_transform().affine_inverse() * actor_rect.position
+	var desired: Vector2 = actor_local + Vector2(hover_target.size.x * 0.55 + 10,-hover_panel.size.y-12)
 	hover_panel.position = Vector2(clampf(desired.x,Layout.SAFE,host.stage.size.x-hover_panel.size.x-Layout.SAFE),clampf(desired.y,Layout.SAFE,host.stage.size.y-hover_panel.size.y-Layout.SAFE))
 	if is_instance_valid(host.runtime) and host.runtime.task_panel.visible:
 		var task_rect := Rect2(host.runtime.task_panel.position,host.runtime.task_panel.size*host.runtime.task_panel.scale)
@@ -408,6 +386,8 @@ func _sync_hover() -> void:
 		_position_hint()
 
 func has_modal() -> bool:
+	if is_instance_valid(host.get("report_book")): return true
+	if is_instance_valid(host.get("runtime")) and is_instance_valid(host.runtime.get("settings_panel")) and host.runtime.settings_panel.visible: return true
 	if is_instance_valid(host.get("designed_page")):return true
 	for child: Node in host.get_children():
 		if child is Window and child.visible:
@@ -437,7 +417,9 @@ func refresh() -> void:
 	var state: RefCounted = host.flow
 	if state.phase == "report":
 		host.stage.hide()
-		if not report_page.visible: report_page.open()
+		if not report_page.visible:
+			if host.open_report_book("report1",false,_web_report_finished): return
+			report_page.open()
 		return
 	report_page.hide()
 	host.stage.show()
@@ -520,14 +502,11 @@ func refresh() -> void:
 		if previous_section != "home": walk_time = 0.0
 	walker.hide()
 	host.dialogue_panel.visible = not choosing_people and not choosing_teacher and not lesson and not complete
-	end_overlay.visible = complete
+	end_overlay.hide()
 	host.title.get_parent().visible = not complete
 	host.location.get_parent().visible = not complete
 	if complete: host.task.visible = false
-	if complete and previous_section != "complete":
-		end_overlay.modulate.a = 0.0
-		end_tween = host.create_tween()
-		end_tween.tween_property(end_overlay,"modulate:a",1.0,0.9)
+	if complete and not state.report_opened: show_report.call_deferred()
 	if state.section == "classroom" and previous_section != "classroom":
 		establishing = true
 		host.get_tree().create_timer(0.9).timeout.connect(_end_establishing)
@@ -564,6 +543,11 @@ func _finish_report() -> void:
 	if has_modal() or not host.flow.finish_report(): return
 	report_page.hide()
 	host.continue_chapter.emit()
+
+func _web_report_finished(status: String) -> void:
+	if status == "error":
+		host.show_report_text_fallback("report1",_web_report_finished)
+	elif status == "completed": _finish_report()
 
 func _build_objects() -> void:
 	detail_image = _texture(null,host.stage,Rect2(650,150,300,460))

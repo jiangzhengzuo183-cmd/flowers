@@ -1,5 +1,7 @@
 extends Node
 ## Persists across story scenes; only preferences are saved, never rehearsal progress.
+const Preferences := preload("res://scripts/story/story_preferences.gd")
+var preferences: RefCounted = Preferences.shared()
 var options := {"master":0.7,"music":0.35,"effects":0.7,"mute":false}
 var players: Array[AudioStreamPlayer] = []
 var current := -1
@@ -16,15 +18,15 @@ var story_paused := false
 var tuning: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/experience.json"))
 
 func _ready() -> void:
-	var preferences:=ConfigFile.new()
-	if preferences.load("user://experience-audio.cfg")==OK:
-		for key:String in options: options[key]=preferences.get_value("audio",key,options[key])
+	options = preferences.values
 	for i in range(2):
 		var p:=AudioStreamPlayer.new()
+		p.bus = Preferences.MUSIC_BUS
 		p.volume_db=-80
 		add_child(p)
 		players.append(p)
 	footsteps=AudioStreamPlayer.new()
+	footsteps.bus = Preferences.EFFECTS_BUS
 	add_child(footsteps)
 
 func arm() -> void:
@@ -34,16 +36,11 @@ func arm() -> void:
 	choose(requested)
 
 func set_option(key:String,value:Variant) -> void:
-	options[key]=value
-	var preferences:=ConfigFile.new()
-	for id:String in options:preferences.set_value("audio",id,options[id])
-	preferences.save("user://experience-audio.cfg")
-	var desired:=requested
-	group=""
-	choose(desired)
+	preferences.set_value(key,value)
 
 func gain() -> float:
-	return -80.0 if options.mute else linear_to_db(maxf(0.0001,options.master*options.music))
+	# User gain is applied exactly once by Master -> VNMusic.
+	return 0.0
 
 func choose(id:String) -> void:
 	requested=id
@@ -86,8 +83,9 @@ func effect(file:String,db:float=-10) -> void:
 	var path:="res://assets/audio/"+file
 	if not ResourceLoader.exists(path):return
 	var player:=AudioStreamPlayer.new()
+	player.bus = Preferences.EFFECTS_BUS
 	player.stream=load(path)
-	player.volume_db=db+linear_to_db(maxf(0.0001,options.master*options.effects))
+	player.volume_db=db
 	add_child(player)
 	player.finished.connect(player.queue_free)
 	player.play()

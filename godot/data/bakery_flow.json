@@ -1,6 +1,6 @@
 {
   "hud_goals": {
-    "people": { "text": "与面包店内的人物交谈", "status": "01 / 探索" },
+    "people": { "text": "", "status": "" },
     "objects": { "text": "查看面包架、订单与笔记本", "status": "02 / 探索" },
     "school": { "text": "与爱丽丝老师交谈并完成学习", "status": "03 / 学习" },
     "reading": { "text": "继续阅读当前故事", "status": "01 / 探索" }
