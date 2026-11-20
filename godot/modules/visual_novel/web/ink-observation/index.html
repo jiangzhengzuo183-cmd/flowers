@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>墨迹卡片观察</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js" defer></script>
+  <script src="flow.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="stage" id="stage" aria-label="墨迹卡片观察桌面">
+    <div class="wood" aria-hidden="true"></div>
+    <header><h1>墨迹测试</h1></header>
+    <div class="cards" id="cards" aria-label="四张墨迹卡片"></div>
+    <div class="shade" aria-hidden="true"></div>
+    <footer id="desk-footer">
+      <p class="desk-prompt">点击卡片，拿近看看</p>
+      <button class="secondary" id="tell" hidden>告诉伯特：我只看见墨水</button>
+    </footer>
+    <section class="response" id="response" aria-labelledby="response-text" hidden>
+      <p id="response-text">我再怎么看，也还是墨水。</p>
+      <div><button id="continue">继续观察</button><button class="secondary" id="restart">重新开始</button></div>
+    </section>
+    <span class="sr-only" id="announcement" aria-live="polite"></span>
+  </main>
+</body>
+</html>

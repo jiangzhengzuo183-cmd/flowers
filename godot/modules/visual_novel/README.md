@@ -1,10 +1,12 @@
 # 正式视觉小说接入
 
-源：`jiangzhengzuo183-cmd/flowers` 的 `feature/chapter1-interaction`，提交 `b00e20c0221ae8cf48d30a48908e0f3802caffcc`。完整文件清单见 `source_manifest.json`。
+源：`jiangzhengzuo183-cmd/flowers` 的 `feature/chapter1-interaction`，提交 `80fed5e`。完整文件清单见 `source_manifest.json`。
 
 为了保留目前已完成的三个迷宫，同时接入朋友正式视觉小说，将需要的剧情、报告、墨迹、背景、人物和音频放在本模块独立命名空间。二进制美术和音频原样保留；脚本文本只重定向内部 `res://` 引用。没有合并朋友分支中的工程设置、主入口、旧迷宫或全局主题，没有覆盖本项目旧剧情资源。
 
 `VisualNovel.tscn` 是本模块正式入口，保留剧情原设计画布 1600×900、16:9；退出恢复原画布。DAY01 → DAY02 → DAY03–15 → DAY16–46 的章节顺序、原台词、报告和墨迹逻辑继续由原作者脚本管理。
+
+新版UI与原生进步报告已于本轮替换。加载界面和剧情／迷宫音频隔离保留。实际运行记录见 docs/VISUAL_NOVEL_UPDATE_20261120.md。
 
 唯一玩法接入适配为 `scripts/story/story_race.gd`：根据原 `round_number` 调用现有 Maze01、Maze02、Maze03；现有相机入场、321GO、HUD、体力、道具、55.5 秒阿尔吉侬与圣堂均由原迷宫管理。结算出现后选择继续剧情，才将真实时间回传给原章节。开发走查通过 `development_finish()` 明确回传 `seconds=null, score_valid=false`。退出未完成的迷宫返回主菜单，不伪造章节成绩。
 

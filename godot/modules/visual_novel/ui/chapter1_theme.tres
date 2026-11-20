@@ -1,6 +1,6 @@
 [gd_resource type="Theme" load_steps=8 format=3]
 
-[ext_resource type="FontFile" path="res://assets/fonts/SourceHanSansSC-Regular.otf" id="1_font"]
+[ext_resource type="FontFile" path="res://modules/visual_novel/assets/fonts/SourceHanSansSC-Regular.otf" id="1_font"]
 
 [sub_resource type="StyleBoxFlat" id="ButtonNormal"]
 bg_color = Color(0.969, 0.831, 0.529, 1)

@@ -388,7 +388,9 @@
         }
       ],
       "outro": [],
-      "report": "report12"
+      "report": "report12",
+      "auto_ink": true,
+      "auto_ink_after_item": "nemur"
     },
     {
       "id": "p4-research",

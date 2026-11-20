@@ -4,7 +4,7 @@ extends Control
 signal continued
 const DESIGN_SIZE := Vector2(1920,1080)
 const HAND := preload("res://modules/visual_novel/assets/fonts/YeLiHangJiuLinKaTong.ttf")
-const SANS := preload("res://assets/fonts/SourceHanSansSC-Regular.otf")
+const SANS := preload("res://modules/visual_novel/assets/fonts/SourceHanSansSC-Regular.otf")
 const PAPER := preload("res://modules/visual_novel/assets/report/report1-paper.png")
 const LAYOUT_PATH := "res://modules/visual_novel/data/report1_layout.json"
 var frame: Control

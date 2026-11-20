@@ -245,7 +245,7 @@ func _activate(index: int) -> void:
 		tween.tween_property(fade,"modulate:a",1.0,0.30)
 		tween.tween_callback(func():
 			if start_requested.get_connections().is_empty():
-				var error := get_tree().change_scene_to_file(game_entry)
+				var error := await preload("res://modules/loading/scene_loader.gd").change_scene(get_tree(), game_entry)
 				if error != OK: _entry_failed(error)
 			else: start_requested.emit()
 		)

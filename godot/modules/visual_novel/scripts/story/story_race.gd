@@ -12,6 +12,9 @@ var _previous_aspect: Window.ContentScaleAspect
 var _previous_mouse := Input.MOUSE_MODE_VISIBLE
 var _return_button: Button
 func _ready() -> void:
+	# Claim audio before async loading; do not rely solely on scene-path detection.
+	var story_audio := get_tree().root.get_node_or_null("ExperienceAudio")
+	if story_audio != null: story_audio.register_maze(self)
 	_previous_size = get_window().content_scale_size
 	_previous_aspect = get_window().content_scale_aspect
 	_previous_mouse = Input.mouse_mode
@@ -19,13 +22,21 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	call_deferred("restart_active_maze")
 func restart_active_maze() -> void:
+	var loader := preload("res://modules/loading/scene_loader.gd")
+	var screen := loader.begin(get_tree(), self)
+	if screen == null: return
+	var packed := await loader.fetch(screen, LEVELS[clampi(round_number-1,0,2)])
+	if packed == null:
+		await loader.finish(screen)
+		return
 	if is_instance_valid(maze):
 		remove_child(maze)
 		maze.queue_free()
-	maze = load(LEVELS[clampi(round_number-1,0,2)]).instantiate()
+	maze = packed.instantiate()
 	add_child(maze)
 	maze.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_bind.call_deferred()
+	await loader.finish(screen)
 func _bind() -> void:
 	runtime = maze.game_hud
 	if not is_instance_valid(runtime):
@@ -39,7 +50,7 @@ func _bind() -> void:
 	_return_button.pressed.connect(_finish)
 func show_scene(_id: String) -> void:
 	# Cancelling an unfinished trial returns to the menu without fabricating a chapter result.
-	get_tree().change_scene_to_file("res://modules/main_menu/MainMenu.tscn")
+	preload("res://modules/loading/scene_loader.gd").change_scene(get_tree(), "res://modules/main_menu/MainMenu.tscn")
 func _process(_delta: float) -> void:
 	if not is_instance_valid(runtime): return
 	if is_instance_valid(_return_button) and _return_button.visible:
@@ -49,7 +60,7 @@ func _finish() -> void:
 	var race: Node = runtime.race
 	var in_race: bool = is_instance_valid(race) and race.current_mode == "Race"
 	var seconds: float = race.charlie_time if in_race else runtime.clock.elapsed
-	_complete({"seconds":seconds,"mouse_finished":in_race and race.mouse_time>=0.0,"player_finished":true,"withdrawn":false,"development_skip":false,"score_valid":true})
+	_complete({"outcome":race.result.get("outcome","") if in_race else "completed","charlie_time":seconds,"mouse_time":race.mouse_time if in_race else -1.0,"round_number":round_number,"seconds":seconds,"mouse_finished":in_race and race.mouse_time>=0.0,"player_finished":true,"withdrawn":false,"development_skip":false,"score_valid":true})
 func _complete(result: Dictionary) -> void:
 	finished_once = true
 	if is_instance_valid(runtime): runtime.actor.controls_enabled = false

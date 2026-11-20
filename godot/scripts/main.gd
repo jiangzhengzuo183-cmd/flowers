@@ -1,7 +1,10 @@
 extends Control
 
-const STORY_SCENE := preload("res://scenes/story.tscn")
-const MAZE_SCENE := preload("res://scenes/levels/maze_01_greybox.tscn")
+const Loader := preload("res://modules/loading/scene_loader.gd")
+var _loading := false
+
+const STORY_SCENE := "res://scenes/story.tscn"
+const MAZE_SCENE := "res://scenes/levels/maze_01_greybox.tscn"
 const MazeSelector := preload("res://scripts/levels/maze_select.gd")
 const MAZE_MENU_PATH := "res://scenes/levels/MazeSelect.tscn"
 var active_scene: Control
@@ -16,32 +19,34 @@ func _ready() -> void:
 	show_scene(_maze_entry)
 
 func show_scene(id: String) -> void:
+	if _loading: return
 	if id == active_id:
 		_sync_navigation()
 		return
-	if is_instance_valid(active_scene):
-		%SceneHost.remove_child(active_scene)
-		active_scene.queue_free()
-	active_id = id
+	var path: String = STORY_SCENE if id == "story" else MAZE_SCENE
 	match id:
-		"story":
-			active_scene = STORY_SCENE.instantiate()
-		"maze_select":
-			var selector := (load(MAZE_MENU_PATH) as PackedScene).instantiate() as MazeSelector
-			selector.open_in_host = true
-			selector.maze_chosen.connect(_open_selected_maze)
-			active_scene = selector
-		"maze03":
-			active_scene = (load(MazeSelector.MAZES[2]) as PackedScene).instantiate()
-		"maze02":
-			active_scene = (load(MazeSelector.MAZES[1]) as PackedScene).instantiate()
-		_:
-			active_scene = MAZE_SCENE.instantiate()
-	%SceneHost.add_child(active_scene)
-	active_scene.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	if id == "story":
-		active_scene.enter_maze.connect(show_scene.bind("maze"))
-	_sync_navigation()
+		"maze_select": path = MAZE_MENU_PATH
+		"maze02": path = MazeSelector.MAZES[1]
+		"maze03": path = MazeSelector.MAZES[2]
+	var screen := Loader.begin(get_tree(), self)
+	if screen == null: return
+	_loading = true
+	var packed := await Loader.fetch(screen, path)
+	if packed != null:
+		if is_instance_valid(active_scene):
+			%SceneHost.remove_child(active_scene)
+			active_scene.queue_free()
+		active_id = id
+		active_scene = packed.instantiate()
+		if id == "maze_select":
+			active_scene.open_in_host = true
+			active_scene.maze_chosen.connect(_open_selected_maze)
+		%SceneHost.add_child(active_scene)
+		active_scene.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		if id == "story": active_scene.enter_maze.connect(show_scene.bind("maze"))
+		_sync_navigation()
+	await Loader.finish(screen)
+	_loading = false
 
 func _open_selected_maze(index: int) -> void:
 	show_scene(["maze", "maze02", "maze03"][index])

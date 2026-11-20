@@ -113,7 +113,8 @@
         "charlie_right"
       ],
       "ink": true,
-      "report": "report2-0304"
+      "report": "report2-0304",
+      "auto_ink": true
     },
     {
       "id": "d2-interview",
@@ -146,84 +147,7 @@
           "她告诉我们，你一直非常努力。"
         ]
       ],
-      "items": [
-        {
-          "id": "nemur",
-          "label": "尼姆教授",
-          "lines": [
-            [
-              "尼姆教授",
-              "我们以前只在动物身上做过这种实验，还不知道用在人身上会怎样。"
-            ],
-            [
-              "查理",
-              "我知道了。我还是想试。"
-            ]
-          ],
-          "kind": "person",
-          "actors": [
-            "nemur",
-            "charlie_right"
-          ]
-        },
-        {
-          "id": "record",
-          "label": "记录纸",
-          "lines": [
-            [
-              "查理（内心独白）",
-              "他们写下好多字。我希望有一天自己也能看懂。"
-            ]
-          ],
-          "asset": "record"
-        },
-        {
-          "id": "maze-wall",
-          "label": "墙上的迷宫图",
-          "lines": [
-            [
-              "查理（内心独白）",
-              "这里写着起点，那里写着终点。"
-            ],
-            [
-              "查理（内心独白）",
-              "可是中间的路转来转去，我看一会儿就分不清了。"
-            ]
-          ],
-          "asset": "maze-wall"
-        },
-        {
-          "id": "mouse",
-          "label": "笼子里的阿尔吉侬",
-          "lines": [
-            [
-              "查理",
-              "它一直在看这边。它叫什么名字？"
-            ],
-            [
-              "伯特",
-              "阿尔吉侬。它很会走迷宫。"
-            ],
-            [
-              "查理",
-              "老鼠也能记住路吗？"
-            ],
-            [
-              "伯特",
-              "你可以看它走一次。"
-            ],
-            [
-              "查理（内心独白）",
-              "我想看看它怎么找到终点。"
-            ]
-          ],
-          "asset": "mouse",
-          "actors": [
-            "bert",
-            "charlie_right"
-          ]
-        }
-      ],
+      "items": [],
       "outro": [
         [
           "斯特劳斯医生",
@@ -315,27 +239,7 @@
           "即使如此，我们也必须把风险告诉他。"
         ]
       ],
-      "items": [
-        {
-          "id": "motivation",
-          "label": "写着“动机”的记录纸",
-          "lines": [
-            [
-              "查理（内心独白）",
-              "他们说我有很强的“动机”。"
-            ],
-            [
-              "查理（内心独白）",
-              "阿尔吉侬跑迷宫是为了拿奶酪。"
-            ],
-            [
-              "查理（内心独白）",
-              "可我这里并没吃过奶酪呀。"
-            ]
-          ],
-          "asset": "motivation"
-        }
-      ],
+      "items": [],
       "outro": [
         [
           "尼姆教授",
@@ -928,7 +832,12 @@
       "actors": [
         "charlie_right"
       ],
-      "report": "report7"
+      "report": "report7",
+      "video": {
+        "after_line": 2,
+        "src": "media/charlie-dance.mp4",
+        "title": "酒馆 · 查理的舞步"
+      }
     },
     {
       "id": "p3-book",
@@ -989,7 +898,7 @@
       "id": "p3-volume",
       "part": "DAY 03–15",
       "title": "08 / 音量旋钮",
-      "bg": "school",
+      "bg": "home",
       "intro": [
         [
           "查理",
@@ -1117,9 +1026,9 @@
       "bar": "bar.png",
       "bakery": "res://modules/visual_novel/assets/bakery/interior.png",
       "school": "res://modules/visual_novel/assets/bakery/school-empty.png",
-      "home": "home-day.png",
+      "home": "room-tv-day.png",
       "cafeteria": "cafeteria.png",
-      "home-night": "home-night.png"
+      "home-night": "room-tv-night.jpg"
     },
     "items": {
       "rabbit": "rabbit.png",

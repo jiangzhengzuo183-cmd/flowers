@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://modules/visual_novel/scripts/story/story_scene.gd" id="1_story"]
-[ext_resource type="Texture2D" path="res://assets/notebook.svg" id="2_art"]
+[ext_resource type="Texture2D" path="res://modules/visual_novel/assets/notebook.svg" id="2_art"]
 
 [node name="StoryScene" type="HBoxContainer"]
 layout_mode = 3

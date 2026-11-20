@@ -27,13 +27,21 @@ func open_maze(index: int) -> void:
 	if open_in_host:
 		maze_chosen.emit(index)
 		return
+	var loader := preload("res://modules/loading/scene_loader.gd")
+	var screen := loader.begin(get_tree(), self)
+	if screen == null: return
+	var packed := await loader.fetch(screen, MAZES[index])
+	if packed == null:
+		await loader.finish(screen)
+		return
 	_release_level()
-	active_level = (load(MAZES[index]) as PackedScene).instantiate()
+	active_level = packed.instantiate()
 	%Picker.hide()
 	%Back.show()
 	%LevelHost.show()
 	%LevelHost.add_child(active_level)
 	active_level.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	await loader.finish(screen)
 
 func show_selection() -> void:
 	_release_level()
