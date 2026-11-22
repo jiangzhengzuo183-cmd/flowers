@@ -15,3 +15,5 @@
 `tools/import-visual-novel.cjs` 记录首次导入方式，存在目标文件时主动停止，防止覆盖后续修改。后续同步朋友新提交时，应对照源提交和本模块适配逐项合入；不要直接再次运行来覆盖。
 
 剧情内迷宫通过桥接器的独立 CanvasLayer 铺满当前游戏画布，不继承剧情固定 1600×900 舞台的尺寸；3D 与 HUD 保持一致。返回剧情时恢复原画布，并释放迷宫显示层。真实章节路径的三迷宫、两种比例及重新开始回归见 `tests/main_menu/check_embedded_maze_layout.gd`。
+
+Windows 分发通过 native_story_video.gd 播放原有剧情视频的本地 Theora 转码，不再跳过；Web 仍使用原 MP4。完整打包与成品验证见 docs/WINDOWS_DESKTOP_20261123.md。
