@@ -1,0 +1,7 @@
+{
+  "development": true,
+  "reading": {"characters_per_second": 32, "minimum_seconds": 2.6, "characters_per_read_second": 7.5, "speeds": [1.45, 1.0, 0.72]},
+  "transition_seconds": 1.4,
+  "music_fade_seconds": 1.8,
+  "ink": {"radius": 0.1875, "strength": 0.8, "maxDisplacement": 0.045, "recovery": 3.8, "inertia": 0.12, "speedInfluence": 0.65}
+}

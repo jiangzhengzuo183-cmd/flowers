@@ -11,11 +11,16 @@ config_version=5
 [application]
 
 config/name="献给阿尔吉侬的花束"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://modules/main_menu/MainMenu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 boot_splash/bg_color=Color(0.953, 0.941, 0.91, 1)
 boot_splash/show_image=false
-config/icon="res://assets/icon.svg"
+config/icon="res://assets/app_icon/flower_bouquet.png"
+run/main_scene.maze_desktop="res://scenes/main.tscn"
+config/name.maze_desktop="献给阿尔吉侬的花束 · 三迷宫体验"
+config/icon.maze_desktop="res://assets/app_icon/maze_flowers.png"
+config/use_custom_user_dir.maze_desktop=true
+config/custom_user_dir_name.maze_desktop="Godot/app_userdata/献给阿尔吉侬的花束-三迷宫体验"
 
 [debug]
 

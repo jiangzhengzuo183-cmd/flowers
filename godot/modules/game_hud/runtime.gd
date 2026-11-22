@@ -391,6 +391,6 @@ func _perform_exit() -> void:
             parent.show_selection()
             return
         parent = parent.get_parent()
-    get_tree().change_scene_to_file("res://scenes/levels/MazeSelect.tscn")
+    preload("res://modules/loading/scene_loader.gd").change_scene(get_tree(), "res://scenes/levels/MazeSelect.tscn")
 func _exit_tree() -> void:
     if _pause_owned: get_tree().paused = _paused_before

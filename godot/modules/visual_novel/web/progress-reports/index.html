@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#253b34"><title>献给阿尔吉侬的花束 · 进步报告</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="binding.css"></head>
+<body>
+<main id="stage" aria-label="献给阿尔吉侬的花束，进步报告阅读器">
+ <header><div class="heading"><span class="eyebrow">献给阿尔吉侬的花束</span><h1>查理的进步报告</h1></div><div class="tools"><button id="zoom-open" type="button">放大阅读</button><button id="report-close" type="button">合上笔记本</button></div></header>
+ <section id="reader" aria-label="摊开的进步报告" aria-busy="true" hidden>
+  <div id="assembly">
+   <img id="book-base" src="assets/book-base.png" alt="固定的黄色布面封壳、纸叠与投影" draggable="false">
+   <div id="paper-underlay" aria-hidden="true"></div>
+   <div id="pages-slot"><div id="book"></div></div>
+   <img id="spine" src="assets/spine.png" alt="" draggable="false">
+   <div id="corner-layer">
+    <div id="corner-prev" class="corner left" role="button" tabindex="0" aria-label="向后翻：点击或拖动左下纸角"><span>向后翻</span></div>
+    <div id="corner-next" class="corner right" role="button" tabindex="0" aria-label="向前翻：点击或拖动右下纸角"><span>向前翻</span></div>
+   </div>
+  </div>
+ </section>
+ <div id="binding-scene" aria-hidden="true" hidden></div>
+ <p id="loading" role="status">正在展开报告…</p>
+ <section id="closed" hidden><div class="cover-layout"><button id="cover-open" type="button" aria-label="点击黄色布面封面，翻开进步报告"><svg viewBox="0 0 530 650" role="img" aria-label="黄色布面笔记本封面"><image href="assets/closed-cover.png" width="530" height="650"/><text x="262" y="185" text-anchor="middle" transform="rotate(-9 262 185)" font-family="ReportHand" font-size="26" fill="#66523b">进步报告</text></svg></button><div class="cover-copy"><h2>查理的进步报告</h2><p id="cover-summary">按日期翻阅他的手写记录</p><button id="reopen" type="button">翻开笔记本</button></div></div></section>
+ <footer id="reading-controls" hidden>
+  <div class="navigation"><button id="prev" type="button">上一份</button><label class="select-label"><span class="sr-only">已解锁的报告</span><select id="report-select" aria-label="选择已解锁的报告"></select></label><button id="next" type="button">下一份</button><span id="counter" aria-live="polite"></span></div>
+  <span class="hint">点左页返回，点右页继续；纸角可拖动</span>
+  <div class="reading-actions"><label class="motion"><input id="reduced-motion" type="checkbox">减少动态</label><button id="report-continue" type="button">继续</button></div>
+ </footer>
+ <p id="status" class="sr-only" aria-live="polite"></p>
+</main>
+<dialog id="zoom-dialog" aria-labelledby="zoom-title"><div class="zoom-bar"><h2 id="zoom-title">放大阅读</h2><label>缩放 <input id="zoom-scale" type="range" min="1" max="2.2" step="0.1" value="1.2"></label><button id="zoom-close" type="button">关闭放大</button></div><div id="zoom-scroll"><div id="zoom-papers"></div></div></dialog>
+<script src="vendor/page-flip.browser.js"></script><script src="reports-data.js"></script><script src="book-binding.js"></script><script>window.REPORT_REQUIRES_HOST=true;</script><script src="story-data.js"></script><script src="story-mode.js"></script><script src="reader.js"></script>
+</body></html>
