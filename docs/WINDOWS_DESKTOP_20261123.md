@@ -21,3 +21,14 @@
 另以导出的 EXE 本身、不附加测试脚本启动，并使用运行模板支持的录帧功能检查默认入口。官方运行模板禁止外部脚本路径覆盖，所以自动接入检查由同版本引擎加载 EXE 内嵌包，真实 EXE 启动单独检查，共录制 240 帧，正常退出码 0；两者没有混为同一个测试。
 
 参考：[Windows 导出](https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_windows.html)、[内置视频格式](https://docs.godotengine.org/en/stable/tutorials/animation/playing_videos.html)。
+
+## 两个独立版本
+
+1. Windows Desktop：花束图标，默认纸面主菜单 → 完整视觉小说 → 三迷宫。ZIP 文件名保持“献给阿尔吉侬的花束-Windows-日期.zip”。
+2. Windows Mazes：新迷宫图标，默认现有 scenes/main.tscn → 原 scenes/levels/MazeSelect.tscn。按用户要求保留原入口、排版和三个按钮，没有新增选择界面。三个关卡仍为现有成品，Maze03 默认 Race；不加入剧情流程。ZIP 为“献给阿尔吉侬的花束-三迷宫体验-Windows-日期.zip”。
+
+通过 maze_desktop 自定义导出特征覆盖第二版的 main_scene、名称、图标和用户目录；源码的 F5 默认入口及完整剧情版不受影响。迷宫版排除主菜单与视觉小说的场景、脚本、数据和美术，仅保留加载画面实际共用的字体；没有复制或改写三个关卡。
+
+一键脚本默认生成两版；Edition Full / Mazes 可单独导出，另有“导出三迷宫体验版.cmd”。第二版真实内嵌包 43 项检查通过，包括原版选择页、三迷宫加载、全画布 HUD、入场输入锁定及倒计时结束放行、竞速默认模式、重开与返回原选择、鼠标和暂停状态恢复。没有脚本错误；退出仍有此前既有 ObjectDB 提示。实际 EXE 不附测试脚本启动、录制 240 帧并正常退出。
+
+视频再次核对：从最终完整剧情 EXE 中抽出实际内嵌 Theora，逐帧解码 121 帧、退出码 0，SHA256 为 45520c6d055ccd476f6566034f03f2643835179126e14427aafd7ffc9005dff8。当前包内的原生播放截图已确认无之前的破块；聊天中旧破块截图对应被替换的中间转换文件。
